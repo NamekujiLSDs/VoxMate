@@ -1,6 +1,6 @@
 {
   "name": "voxmate",
-  "displayName": "VoxMate Client",
+  "productName": "VoxMate Client",
   "version": "1.0.0",
   "description": "Official successor port to VancedVoxiomClient",
   "main": "main.js",
