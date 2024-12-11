@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoxMate Console</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <img onMouseDown="return false;" id="bg" src="../img/splash.png">
+    <div onMouseDown="return false;" id="ver">0.0.0</div>
+    <div onMouseDown="return false;" id="stat">Update</div>
+    <img onMouseDown="return false;" id="logo"></img>
+    <style>
+        body {
+            font-family: "Chakra Petch", sans-serif;
+            padding: unset;
+            margin: unset;
+            width: 800px;
+            height: 450px;
+            user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            -moz-user-select: none;
+            -khtml-user-select: none;
+            -webkit-user-drag: none;
+            -khtml-user-drag: none;
+            color: white;
+            font-weight: bolder;
+        }
+
+        #bg {
+            width: 800px;
+            height: 450px;
+        }
+
+        #ver {
+            position: fixed;
+            bottom: 5px;
+            left: 5px;
+        }
+
+        #stat {
+            position: fixed;
+            bottom: 5px;
+            right: 5px;
+        }
+
+        #logo {
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%)
+        }
+    </style>
+</body>
+
+</html>

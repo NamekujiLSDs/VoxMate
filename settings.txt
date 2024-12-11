@@ -1,0 +1,44 @@
+
+# 設定一覧
+
+- クロスヘア
+> プレビュー
+> タイプ設定
+-> URL / ローカルファイル
+> サイズ
+> 透明度
+> 色相
+
+- CSS
+>プレビューを表示
+> タイプ設定
+-> URL / ローカルファイル
+> URL入力欄
+> ローカルファイル選択ボタン
+> ローカルファイルのパス表示
+
+- リソーススワッパー
+> ON/OFF切り替え
+> デフォルトリストを有効にする
+> ユーザーリストを有効にする
+> フォルダを開く
+
+- 広告ブロッカー
+> ON/OFF切り替え
+> デフォルトリストを有効にする
+> ユーザーリストを有効にする
+> フォルダを開く
+
+- 上級設定
+> DiscordRPC
+> disable-frame-rate-limit
+> disable-gpu-vsync
+> use-angle : openGL/D3D11/D3D9/D3D11on12
+> in-process-gpu
+> enable-quic
+> enable-gpu-rasterization
+> enable-pointer-lock-options
+> enable-heavy-ad-intervention
+> ignore-gpu-blocklist
+> enable-zero-copy
+> キャッシュの削除
