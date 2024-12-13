@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+</head>
+
+<body>
+    <div id="settingWindow">
+        <div id="menuItemHolder">
+            <div id="quickSetting" class="menuItem menuSelected" onclick="window.vmc.showSetting(this.id)">
+                <div class="menuItemIcon">
+                    <span class="material-symbols-outlined">
+                        rocket_launch
+                    </span>
+                </div>
+                <div class="menuItemTitle">Quick Setting</div>
+            </div>
+            <div id="crosshairSetting" class="menuItem" onclick="window.vmc.showSetting(this.id)">
+                <div class="menuItemIcon">
+                    <span class="material-symbols-outlined">
+                        point_scan
+                    </span>
+                </div>
+                <div class="menuItemTitle">Crosshair</div>
+            </div>
+            <div id="cssSetting" class="menuItem" onclick="window.vmc.showSetting(this.id)">
+                <div class="menuItemIcon">
+                    <span class="material-symbols-outlined">
+                        code_blocks
+                    </span>
+                </div>
+                <div class="menuItemTitle">CSS</div>
+            </div>
+            <div id="swapperSetting" class="menuItem" onclick="window.vmc.showSetting(this.id)">
+                <div class="menuItemIcon">
+                    <span class="material-symbols-outlined">
+                        swap_horiz
+                    </span>
+                </div>
+                <div class="menuItemTitle">Swapper</div>
+            </div>
+            <div id="adblockSetting" class="menuItem" onclick="window.vmc.showSetting(this.id)">
+                <div class="menuItemIcon">
+                    <span class="material-symbols-outlined">
+                        security
+                    </span>
+                </div>
+                <div class="menuItemTitle">Ad Blocker</div>
+            </div>
+            <div id="advancedSetting" class="menuItem" onclick="window.vmc.showSetting(6)">
+                <div class="menuItemIcon">
+                    <span class="material-symbols-outlined">
+                        engineering
+                    </span>
+                </div>
+                <div class="menuItemTitle">Advanced</div>
+            </div>
+        </div>
+        <div id="menuBodyHolder">
+            <div id="menuBody">
+                <div id="menuBodyTitle">
+                    <span class="material-symbols-outlined">
+                        rocket_launch
+                    </span>
+                    Quick Setting
+                </div>
+
+                <div class="horizonalLine"></div>
+                <div id="menuBodyItem">
+                    Enable Custom Crosshair
+                    <input type="checkbox" name="enableCustomCrosshair" id="enableCustomCrosshair"
+                        oninput="window.vmc.saveSetting(this.checked)"
+                        `${config.get('enableCustomCrosshair')?"config.get('enableCustomCrosshair')===null?"checked":""}`>
+                </div>
+                <div class="horizonalLine"></div>
+                <div id="menuBodyItem">
+                    Enable Custom CSS
+                    <input type="checkbox" name="enableCustomCss" id="enableCustomCss"
+                        oninput="window.vmc.saveSetting(this.checked)"
+                        `${config.get('enableCustomCss')?"checked":config.get('enableCustomCss')===null?"checked":""}`>
+                </div>
+                <div class="horizonalLine"></div>
+                <div id="menuBodyItem">
+                    Enable Resource Swapper
+                    <input type="checkbox" name="enableResourceSwapper" id="enableResourceSwapper"
+                        oninput="window.vmc.saveSetting(this.checked)"
+                        `${config.get('enableResourceSwapper')?"checked":config.get('enableResourceSwapper')===null?"checked":""}`>
+                </div>
+                <div class="horizonalLine"></div>
+                <div id="menuBodyItem">
+                    Enable Ad Blocker
+                    <input type="checkbox" name="enableAdBlocker" id="enableAdBlocker"
+                        oninput="window.vmc.saveSetting(this.checked)"
+                        `${config.get('enableAdBlocker')?"checked":config.get('enableAdBlocker')===null?"checked":""}`>
+                </div>
+                <div class="horizonalLine"></div>
+                <div id="menuBodyItem">
+                    Enable Unlimited FPS
+                    <input type="checkbox" name="unlimitedFps" id="unlimitedFps"
+                        oninput="window.vmc.saveSetting(this.checked)"
+                        `${config.get('unlimitedFps')?"checked":config.get('unlimitedFps')===null?"checked":""}`>
+                </div>
+                <div class="horizonalLine"></div>
+
+                <div id="menuBodyItem">
+                    Export Game Settings
+                    <input type="button" id="menuButton" value="EXPORT" onclick="window.vmc.exportSetting()">
+                </div>
+                <div class="horizonalLine"></div>
+
+                <div id="menuBodyItem">
+                    Import Game Settings
+                    <input type="button" id="menuButton" value="IMPORT" onclick="window.vmc.exportSetting()">
+                </div>
+                <div class="horizonalLine"></div>
+
+            </div>
+
+        </div>
+    </div>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+    <link rel="stylesheet" href="style.css">
+</body>
+
+</html>

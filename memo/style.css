@@ -1,0 +1,241 @@
+body {
+    padding: unset;
+    margin: unset;
+    background: url(./241213113953.png);
+}
+
+/* サイドバー */
+#settingWindow {
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    z-index: 1;
+    background: #0006;
+    backdrop-filter: blur(6px) brightness(.4);
+    position: fixed;
+    user-select: none;
+    font-family: Manrope;
+}
+
+#menuItemHolder {
+    display: flex;
+    flex-direction: column;
+    background: #0006;
+    width: 300px;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    position: fixed;
+}
+
+.menuItem {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    border-top: 1px solid #0006;
+    border-bottom: 1px solid #0006;
+}
+
+.menuItemIcon .material-symbols-outlined {
+    font-size: 3em !important;
+    transform: scale(1);
+    transition: .2s;
+}
+
+.menuItemTitle {
+    font-weight: bolder;
+}
+
+.menuSelected {
+    border-right: 5px solid white;
+}
+
+.menuSelected .menuItemIcon {
+    /* text-shadow: 0 0 4px; */
+    animation: selected .5s infinite;
+}
+
+@keyframes selected {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.2);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.menuItem:hover {
+    background: #fff5;
+    cursor: pointer;
+}
+
+.menuItem:hover .menuItemIcon .material-symbols-outlined,
+.menuItem:hover .menuItemTitle {
+    color: white;
+    transform: scale(1.3);
+    transition: .2s;
+}
+
+#quickSetting {
+    color: #ff5733;
+}
+
+#crosshairSetting {
+    color: #33ccff;
+}
+
+#cssSetting {
+    color: #ff33ff;
+}
+
+#swapperSetting {
+    color: #33ff57;
+}
+
+#adblockSetting {
+    color: #ff3333;
+}
+
+#advancedSetting {
+    color: #ffd633;
+}
+
+#quickSetting:hover {
+    text-shadow: 0 0 4px #ff5733;
+}
+
+#crosshairSetting:hover {
+    text-shadow: 0 0 4px #33ccff;
+}
+
+#cssSetting:hover {
+    text-shadow: 0 0 4px #ff33ff;
+}
+
+#swapperSetting:hover {
+    text-shadow: 0 0 4px #33ff57;
+}
+
+#adblockSetting:hover {
+    text-shadow: 0 0 4px #ff3333;
+}
+
+#advancedSetting:hover {
+    text-shadow: 0 0 4px #ffd633;
+}
+
+/* チェックボックスをスイッチにする */
+input[type="checkbox"] {
+    appearance: none;
+    width: 44px;
+    height: 24px;
+    background: gray;
+    border-radius: 4px;
+    position: relative;
+    cursor: pointer;
+}
+
+input[type="checkbox"]::before {
+    content: "";
+    height: 20px;
+    width: 20px;
+    border-radius: 4px;
+    background: #fff;
+    position: absolute;
+    left: 2px;
+    top: 2px;
+    transition: .2s;
+}
+
+input[type="checkbox"]:checked::before {
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 22px;
+    transition: .2s;
+    border-radius: 4px;
+    position: absolute;
+}
+
+input[type="checkbox"]:checked {
+    background-color: #3d5
+}
+
+/* メニュー本体 */
+#menuBodyHolder {
+    display: block;
+    left: 300px;
+    position: fixed;
+    top: 0%;
+    bottom: 0;
+    right: 0;
+    color: lightgray;
+}
+
+#menuBody {
+    display: block;
+    position: absolute;
+    width: 80%;
+    height: 80%;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: #252525;
+    border-radius: 10px;
+    padding: 20px;
+    border: 4px #222 solid;
+    box-shadow: 4px 4px 5px black;
+    max-width: 1000px;
+    max-height: 800px;
+    overflow-y: scroll;
+
+}
+
+#menuBodyTitle {
+    font-size: 30px;
+    margin-left: auto;
+    margin-right: auto;
+    margin: 20px;
+    font-weight: bold;
+}
+
+#menuBodyItem {
+    padding: 10px;
+    margin: 20px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 20px;
+    margin-left: 50px;
+    margin-right: 50px;
+}
+
+.horizonalLine {
+    height: 2px;
+    width: calc(100% - 50px);
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    background: #fff2
+}
+
+#menuButton {
+    appearance: none;
+    border: 2px solid #fff3;
+    background: transparent;
+    padding: 10px;
+    cursor: pointer;
+    color: lightgray;
+    font-weight: bolder !important;
+}
+
+#menuButton:hover {
+    background: #fff3;
+}
