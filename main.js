@@ -1,8 +1,8 @@
-const { BrowserWindow, dialog, session, protocol, app, Menu, webContents, shell, ipcMain } = require("electron")
-const path = require("path")
+const { BrowserWindow, dialog, session, protocol, app, Menu, webContents, shell, ipcMain } = require('electron')
+const path = require('path')
 const store = require('electron-store')
 const config = new store()
-const shortcut = require("electron-localshortcut")
+const shortcut = require('electron-localshortcut')
 const { autoUpdater } = require('electron-updater')
 const fs = require('fs')
 const log = require('electron-log')
@@ -119,7 +119,7 @@ const createGame = () => {
         fullscreen: config.get('fullscreen') !== null ? config.get('fullscreen') : config.get('fullscreen') || true,
         webPreferences: {
             preload: path.join(__dirname, './assets/js/game-preload.js'),
-            contextIsolation: false
+            contextIsolation: true
         }
     })
     //フォーカスはずし用のウィンドウを作成
@@ -155,22 +155,22 @@ const createGame = () => {
     })
     // ゲームウィンドウが破壊される前にサイズなどを保存
     gameWindow.on('close', () => {
-        !gameWindow.isDestroyed() ? storeWindowPos() : ""
+        !gameWindow.isDestroyed() ? storeWindowPos() : ''
     })
 }
 //ウィンドウの位置やサイズを保存する
 const storeWindowPos = () => {
     let { x, y, width, height } = gameWindow.getBounds()
     console.log({ x, y, width, height })
-    gameWindow.isFullScreen() ? '' : config.set("windowHeight", height || 1080);
-    gameWindow.isFullScreen() ? '' : config.set("windowWidth", width || 1920);
-    gameWindow.isFullScreen() ? '' : config.set("windowHeight", height || 1080); config.set("windowX", x || 0)
-    gameWindow.isFullScreen() ? '' : config.set("windowY", y || 0)
-    config.set("fullscreen", gameWindow.isFullScreen())
+    gameWindow.isFullScreen() ? '' : config.set('windowHeight', height || 1080);
+    gameWindow.isFullScreen() ? '' : config.set('windowWidth', width || 1920);
+    gameWindow.isFullScreen() ? '' : config.set('windowHeight', height || 1080); config.set('windowX', x || 0)
+    gameWindow.isFullScreen() ? '' : config.set('windowY', y || 0)
+    config.set('fullscreen', gameWindow.isFullScreen())
 }
 //設定用DOMを送信する
 ipcMain.handle('settingDom', async () => {
-    let dom = await "dadada"
+    let dom = await 'dadada'
     return await dom
 })
 //アプリの準備ができたらスプラッシュを起動
