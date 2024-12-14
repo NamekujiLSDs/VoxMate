@@ -170,7 +170,7 @@ exports.clientTools = class {
                     <div id="crosshairPreviewTitle">Crosshair Preview</div>
                     <div id="previewBody">
                         <img id="crosshairPreviewImage"
-                            src="${config.get('crosshairType', 'url') === 'url' ? config.get('crosshairUrl', 'https://namekujilsds.github.io/CROSSHAIR/img/Cross-lime.png') : config.get('"vmc://" + crosshairPath', 'vmc://' + path.join(__dirname, '../img/Cross-lime.png'))}">
+                            src="${config.get('crosshairType', 'url') === 'url' ? config.get('crosshairUrl', 'https://namekujilsds.github.io/CROSSHAIR/img/Cross-lime.png') : 'vmc://' + config.get('crosshairPath', path.join(__dirname, '../img/Cross-lime.png'))}">
                     </div>
                 </div>
                 <div id="menuBodyItem">
@@ -511,5 +511,6 @@ exports.clientTools = class {
         console.log(config.get('enableZerocopy'))
         console.log(config.get('angleBackend'))
     }
+
     exportSetting(v) { }
 }

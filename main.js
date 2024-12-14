@@ -199,6 +199,18 @@ ipcMain.on('saveSettingValue', (e, n, v) => {
     config.set(n, v)
 })
 
+// 設定を個別で取得する
+ipcMain.handle('getSetting', async (e, value) => {
+    return await config.get(value)
+})
+//path.join + main.jsからの相対パスを返す
+ipcMain.handle('dirName', (e, v) => {
+    return path.join(__dirname, v)
+})
+//ローカルファイルを開いて、pathをreturnする
+ipcMain.handle('openFile', (e, v) => {
+    dialog
+})
 //Chromium flagの設定
 vmcTool.flagSwitch()
 
