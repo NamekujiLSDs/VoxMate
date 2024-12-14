@@ -6,6 +6,10 @@ const shortcut = require('electron-localshortcut')
 const { autoUpdater } = require('electron-updater')
 const fs = require('fs')
 const log = require('electron-log')
+const clientTool = require('./assets/js/setting')
+const { request } = require('http')
+const { settings } = require('cluster')
+const vmcTool = new clientTool.clientTools()
 
 //Skip checkForUpdates
 Object.defineProperty(app, 'isPackaged', {
@@ -13,6 +17,9 @@ Object.defineProperty(app, 'isPackaged', {
         return true;
     }
 });
+
+//nミリ秒待つ関数
+const sleep = (time) => new Promise((resolve) => setTimeout(resolve, time));//timeはミリ秒
 
 //ウィンドウの原型を作る
 let splashWindow, gameWindow, dummyWindow
@@ -22,6 +29,7 @@ console.log(appVersion)
 app.on('ready', () => {
     protocol.registerFileProtocol('vmc', (request, callback) =>
         callback(decodeURI(request.url.toString().replace(/^vmc:\//, '')))
+        // console.log(request.url)
     )
 })
 protocol.registerSchemesAsPrivileged([
@@ -33,9 +41,6 @@ protocol.registerSchemesAsPrivileged([
         }
     }
 ])
-//N秒待つ関数
-const sleep = (time) => new Promise((resolve) => setTimeout(resolve, time));
-
 //スプラッシュウィンドウの作成
 const createSplash = () => {
     splashWindow = new BrowserWindow({
@@ -104,12 +109,12 @@ const createSplash = () => {
     }
     //アップデーターが動くよ
     splashWindow.webContents.on('did-finish-load', () => {
-        console.log()
         splashWindow.webContents.send('ver', appVersion)
         splashWindow.show()
         update()
     })
 }
+
 //ゲームウィンドウの作成
 const createGame = () => {
     gameWindow = new BrowserWindow({
@@ -140,9 +145,15 @@ const createGame = () => {
         await dummyWindow.show();
         await dummyWindow.focus();
         await dummyWindow.hide();
+        await sleep(100);
+        await gameWindow.focus()
     })
-    shortcut.register(gameWindow, 'F1', () => {
-        gameWindow.webContents.send('openSetting')
+    shortcut.register(gameWindow, 'F1', async () => {
+        await dummyWindow.show();
+        await dummyWindow.focus();
+        await dummyWindow.hide();
+        await gameWindow.focus()
+        await gameWindow.webContents.send('openSetting')
     })
     shortcut.register(gameWindow, 'F11', () => {
         gameWindow.isFullScreen() ? gameWindow.setFullScreen(false) : gameWindow.setFullScreen(true)
@@ -155,9 +166,11 @@ const createGame = () => {
     })
     // ゲームウィンドウが破壊される前にサイズなどを保存
     gameWindow.on('close', () => {
-        !gameWindow.isDestroyed() ? storeWindowPos() : ''
+        !gameWindow.isDestroyed() ? storeWindowPos() : '';
+        dummyWindow.destroy();
     })
 }
+
 //ウィンドウの位置やサイズを保存する
 const storeWindowPos = () => {
     let { x, y, width, height } = gameWindow.getBounds()
@@ -168,16 +181,33 @@ const storeWindowPos = () => {
     gameWindow.isFullScreen() ? '' : config.set('windowY', y || 0)
     config.set('fullscreen', gameWindow.isFullScreen())
 }
+
 //設定用DOMを送信する
 ipcMain.handle('settingDom', async () => {
-    let dom = await 'dadada'
+    let dom = await vmcTool.settingWindow()
     return await dom
 })
+
+//設定のタブを変更する
+ipcMain.handle('settingTabChange', async (e, name) => {
+    let dom = await vmcTool.settingDom(name)
+    return await dom
+})
+
+//設定の値を保存する
+ipcMain.on('saveSettingValue', (e, n, v) => {
+    config.set(n, v)
+})
+
+//Chromium flagの設定
+vmcTool.flagSwitch()
+
 //アプリの準備ができたらスプラッシュを起動
 app.on('ready', () => {
     createSplash()
 })
 
+//アプリを閉じるときの挙動を設定
 app.on('quit', () => {
     gameWindow.destroy()
     dummyWindow.destroy()

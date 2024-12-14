@@ -4,29 +4,87 @@ body {
     background: url(./241213113953.png);
 }
 
-/* サイドバー */
 #settingWindow {
     left: 0;
     top: 0;
     height: 100%;
     width: 100%;
     z-index: 1;
-    background: #0006;
-    backdrop-filter: blur(6px) brightness(.4);
+    background: #0008;
+    backdrop-filter: brightness(.4);
     position: fixed;
     user-select: none;
     font-family: Manrope;
+    transform: translateY(0);
+    transition: .2s;
+    display: flex;
+    flex-direction: row;
+    z-index: 1;
 }
+
+#settingWindow *::-webkit-scrollbar-track {
+    background-color: #fff4;
+    border-radius: 10px;
+}
+
+#settingWindow *::-webkit-scrollbar {
+    appearance: none;
+    width: 5px;
+}
+
+#settingWindow *::-webkit-scrollbar-thumb {
+    background-color: #0005;
+    border-radius: 10px;
+    ;
+}
+
+/* 設定非表示アニメーション */
+.settingHidden #menuItemHolder {
+    transform: translateX(-100%);
+    transition: .2s;
+}
+
+.settingHidden #menuBodyHolder {
+    transform: translateX(100%);
+    transition: .2s;
+}
+
+#settingWindow.settingHidden {
+    visibility: hidden;
+    background: transparent;
+    transition: .2s;
+    backdrop-filter: brightness(1);
+}
+
+/* クリックするとメニュー隠すやつ */
+#menuHider {
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    position: fixed;
+    background-color: #0007;
+    z-index: 2;
+}
+
+/* サイドバー */
 
 #menuItemHolder {
     display: flex;
     flex-direction: column;
     background: #0006;
-    width: 300px;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    position: fixed;
+    min-width: 150px;
+    width: 30%;
+    max-width: 200px;
+    transform: translateX(0);
+    transition: .2s;
+    z-index: 3;
+}
+
+.menuSplitter {
+    height: 10px;
+    background: #0009;
+    width: 100%;
 }
 
 .menuItem {
@@ -35,8 +93,9 @@ body {
     height: 100%;
     align-items: center;
     justify-content: center;
-    border-top: 1px solid #0006;
-    border-bottom: 1px solid #0006;
+    /* border-top: 1px solid #0006; */
+    /* border-bottom: 1px solid #0006; */
+    border-right: 5px transparent solid;
 }
 
 .menuItemIcon .material-symbols-outlined {
@@ -54,7 +113,6 @@ body {
 }
 
 .menuSelected .menuItemIcon {
-    /* text-shadow: 0 0 4px; */
     animation: selected .5s infinite;
 }
 
@@ -137,10 +195,11 @@ input[type="checkbox"] {
     appearance: none;
     width: 44px;
     height: 24px;
-    background: gray;
+    background-color: #888;
     border-radius: 4px;
     position: relative;
     cursor: pointer;
+    transition: .2s;
 }
 
 input[type="checkbox"]::before {
@@ -166,18 +225,20 @@ input[type="checkbox"]:checked::before {
 }
 
 input[type="checkbox"]:checked {
-    background-color: #3d5
+    background-color: #3d5;
+    transition: .2s;
 }
 
+
 /* メニュー本体 */
+
 #menuBodyHolder {
-    display: block;
-    left: 300px;
-    position: fixed;
-    top: 0%;
-    bottom: 0;
-    right: 0;
+    position: relative;
+    width: 100%;
     color: lightgray;
+    transform: translateX(0%);
+    transition: .2s;
+    z-index: 3;
 }
 
 #menuBody {
@@ -196,7 +257,7 @@ input[type="checkbox"]:checked {
     max-width: 1000px;
     max-height: 800px;
     overflow-y: scroll;
-
+    z-index: 3;
 }
 
 #menuBodyTitle {
@@ -209,7 +270,7 @@ input[type="checkbox"]:checked {
 
 #menuBodyItem {
     padding: 10px;
-    margin: 20px;
+    margin: 10px;
     display: flex;
     justify-content: space-between;
     font-size: 20px;
@@ -230,7 +291,7 @@ input[type="checkbox"]:checked {
     appearance: none;
     border: 2px solid #fff3;
     background: transparent;
-    padding: 10px;
+    padding: 5px;
     cursor: pointer;
     color: lightgray;
     font-weight: bolder !important;
@@ -238,4 +299,54 @@ input[type="checkbox"]:checked {
 
 #menuButton:hover {
     background: #fff3;
+}
+
+/* クロスヘアプレビューの設定 */
+#crosshairPreview {
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#crosshairPreviewTitle {
+    height: 20px;
+}
+
+#previewBody {
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 90%;
+    border: #fff2 4px solid;
+}
+
+#crosshairPreviewImage {
+    max-height: 150px;
+}
+
+#nowPath {
+    font-size: 10px;
+    display: flex;
+    flex-direction: inherit;
+}
+
+.sizeInput {
+    width: 50px;
+}
+
+#warn {
+    font-size: 12px;
+    margin-left: 10px;
+    margin-right: auto;
+    color: rgb(255, 216, 144);
+}
+
+.requireRestart {
+    color: #f55;
+    margin-top: 5px !important;
+    margin-bottom: 5px !important;
+    padding: unset !important;
 }
