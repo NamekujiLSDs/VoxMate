@@ -4,7 +4,7 @@ const { contextBridge, ipcRenderer, ipcMain } = require('electron')
 contextBridge.exposeInMainWorld('vmc', {
     //設定を閉じる
     closeSetting: () => {
-        document.getElementById('settingWindow').classList.toggle('settingHidden')
+        document.getElementById('settingWindow').classList.toggle('settingShow')
     },
     //設定画面の切り替え
     showSetting: async (v) => {
@@ -23,60 +23,137 @@ contextBridge.exposeInMainWorld('vmc', {
         switch (id) {
             case "enableCustomCrosshair":
                 value ? document.getElementById('crosshair').classList.remove('hidden') : document.getElementById('crosshair').classList.add('hidden');
+                break;
             case "crosshairType":
-                console.log(id, value)
                 if (value === 'url') {
                     let crosshairUrl = await ipcRenderer.invoke('getSetting', 'crosshairUrl') || 'https://namekujilsds.github.io/CROSSHAIR/img/Cross-lime.png';
-                    await document.getElementById('crosshairPreviewImage').setAttribute('src', crosshairUrl);
-                    // await document.getElementById('crosshair').setAttribute('src', crosshairUrl);
-                    await console.log(crosshairUrl);
-                    await console.log("url")
+                    document.getElementById('crosshairPreviewImage').setAttribute('src', crosshairUrl);
+                    document.getElementById('crosshair').setAttribute('src', crosshairUrl);
                 } else if (value === 'local') {
-                    let crosshairPath = await ipcRenderer.invoke('getSetting', 'crosshairPath') || await 'vmc://' + await ipcRenderer.invoke('dirName', './assets/img/Cross-lime.png');
-                    await document.getElementById('crosshairPreviewImage').setAttribute('src', crosshairPath);
-                    // await document.getElementById('crosshair').setAttribute('src', crosshairPath);
-                    await console.log(crosshairPath);
-                    await console.log("local");
+                    let crosshairPath = await ipcRenderer.invoke('getSetting', 'crosshairPath') || await ipcRenderer.invoke('dirName', './assets/img/Cross-lime.png');
+                    document.getElementById('crosshairPreviewImage').setAttribute('src', 'vmc://' + crosshairPath);
+                    document.getElementById('crosshair').setAttribute('src', crosshairPath);
                 };
+                break;
             case "crosshairUrl":
                 let nowType = await ipcRenderer.invoke('getSetting', 'crosshairType');
                 if (nowType === 'url') {
-                    await document.getElementById('crosshairPreviewImage').setAttribute('src', value);
-                    // await document.getElementById('crosshair').setAttribute('src', value);
-                }
-            case "openLocalCrosshair":
-                let path = ipcRenderer.invoke.openFile('localCrosshair');
-            case "crosshairWidthNum": ;
-            case "crosshairWidth": ;
-            case "crosshairHeightNum": ;
-            case "crosshairHeight": ;
-            case "crosshairOpacityNum": ;
-            case "crosshairOpacity": ;
-            case "crosshairRenderType": ;
+                    document.getElementById('crosshairPreviewImage').setAttribute('src', value);
+                    document.getElementById('crosshair').setAttribute('src', value);
+                };
+                break;
+            case "crosshairWidthNum":
+                document.getElementById('crosshairWidth').value = value
+                ipcRenderer.send('saveSettingValue', 'crosshairWidthNum', value)
+                ipcRenderer.send('saveSettingValue', 'crosshairWidth', value)
+                refreshCrosshairCss()
+                break;
+            case "crosshairWidth":
+                document.getElementById('crosshairWidthNum').value = value
+                ipcRenderer.send('saveSettingValue', 'crosshairWidthNum', value)
+                ipcRenderer.send('saveSettingValue', 'crosshairWidth', value)
+                refreshCrosshairCss()
+                break;
+            case "crosshairHeightNum":
+                document.getElementById('crosshairHeight').value = value
+                ipcRenderer.send('saveSettingValue', 'crosshairHeightNum', value)
+                ipcRenderer.send('saveSettingValue', 'crosshairHeight', value)
+                refreshCrosshairCss()
+                break;
+            case "crosshairHeight":
+                document.getElementById('crosshairHeightNum').value = value
+                ipcRenderer.send('saveSettingValue', 'crosshairHeightNum', value)
+                ipcRenderer.send('saveSettingValue', 'crosshairHeight', value)
+                refreshCrosshairCss()
+                break;
+            case "crosshairOpacityNum":
+                document.getElementById('crosshaiOpacity').value = value
+                ipcRenderer.send('saveSettingValue', 'crosshairOpacityNum', value)
+                ipcRenderer.send('saveSettingValue', 'crosshairOpacity', value)
+                refreshCrosshairCss()
+                break;
+            case "crosshairOpacity":
+                document.getElementById('crosshairOpacityNum').value = value
+                ipcRenderer.send('saveSettingValue', 'crosshairOpacityNum', value)
+                ipcRenderer.send('saveSettingValue', 'crosshairOpacity', value)
+                refreshCrosshairCss()
+                break;
+            case "crosshairRenderType":
+                refreshCrosshairCss()
+                break;
         }
+    },
+    crosshairSizeSet: () => {
+        let crosshair = document.getElementById('crosshair');
+        let w = crosshair.naturalWidth;
+        let h = crosshair.naturalHeight
+        document.getElementById('crosshairWidth').value = w
+        document.getElementById('crosshairWidthNum').value = w
+        document.getElementById('crosshairHeight').value = h
+        document.getElementById('crosshairHeightNum').value = h
+        ipcRenderer.send('saveSettingValue', 'crosshairWidth', w)
+        ipcRenderer.send('saveSettingValue', 'crosshairWidthNum', w)
+        ipcRenderer.send('saveSettingValue', 'crosshairHeight', h)
+        ipcRenderer.send('saveSettingValue', 'crosshairHeightNum', h);
+        refreshCrosshairCss()
+    },
+    openLocal: (name) => {
+        ipcRenderer.send('openFile', name)
     }
 })
 
+//crosshairのcssを設定する
+const refreshCrosshairCss = async () => {
+    let w = await ipcRenderer.invoke('getSetting', 'crosshairWidth') || 20;
+    let h = await ipcRenderer.invoke('getSetting', 'crosshairHeight') || 20;
+    let o = await ipcRenderer.invoke('getSetting', 'crosshairOpacity') || 1;
+    let r = await ipcRenderer.invoke('getSetting', 'crosshairRenderType') || 'pixelated';
+    let css = `
+    #crosshair {
+    position:fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width:${w}px ;
+    height:${h}px ;
+    opacity: ${o};
+    image-rendering: ${r};
+}`;
+    document.getElementById('crosshairCss').innerText = css
+}
+
 //設定を開く
-ipcRenderer.on('openSetting', () => {
-    document.getElementById("settingWindow").classList.toggle("settingHidden")
+ipcRenderer.on('openSetting', async () => {
+    if (!document.getElementById('settingWindow')) {
+        let settingDom = await ipcRenderer.invoke('settingDom')
+        let settingTabDom = await ipcRenderer.invoke('settingTabChange', "onload")
+        await document.getElementById("app").insertAdjacentHTML("afterbegin", settingDom);
+        document.getElementById("menuBody").innerHTML = await settingTabDom;
+    } else {
+        document.getElementById("settingWindow").classList.toggle("settingShow")
+    }
 })
+
 //ページをリロード
 ipcRenderer.on('reload', () => {
     location.reload()
 })
-//ESCを処理
-//ページをリロード
-ipcRenderer.on('escape', () => {
-    document.exitPointerLock()
+
+//ローカルファイルのパスを受け取り
+ipcRenderer.on('localPath', async (e, id, val) => {
+    switch (id) {
+        case 'crosshairPath':
+            let type = await ipcRenderer.invoke('getSetting', 'crosshairType');
+            type === 'local' ? document.getElementById('crosshairPreviewImage').setAttribute('src', 'vmc://' + val) : '';
+            type === 'local' ? document.getElementById('crosshair').setAttribute('src', 'vmc://' + val) : '';
+    }
 })
 
-//ページがロードされた際にipcMainからいろいろ引っ張る
+// ページがロードされた際にipcMainからいろいろ引っ張る
 document.addEventListener('DOMContentLoaded', async () => {
-    let settingDom = await ipcRenderer.invoke('settingDom')
-    let settingTabDom = await ipcRenderer.invoke('settingTabChange', "onload")
-    await console.log(settingDom)
-    await console.log(settingTabDom)
-    await document.getElementById("app").insertAdjacentHTML("afterbegin", settingDom);
-    document.getElementById("menuBody").innerHTML = await settingTabDom;
+    let settingStyle = await ipcRenderer.invoke('loadSettingStylesheets')
+    document.body.insertAdjacentHTML('afterbegin', settingStyle)
+    let crosshair = await ipcRenderer.invoke('crosshairDom')
+    document.getElementById('app').insertAdjacentHTML('afterbegin', crosshair)
+    refreshCrosshairCss()
 })

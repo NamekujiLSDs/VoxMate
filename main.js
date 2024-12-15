@@ -29,7 +29,6 @@ console.log(appVersion)
 app.on('ready', () => {
     protocol.registerFileProtocol('vmc', (request, callback) =>
         callback(decodeURI(request.url.toString().replace(/^vmc:\//, '')))
-        // console.log(request.url)
     )
 })
 protocol.registerSchemesAsPrivileged([
@@ -174,7 +173,6 @@ const createGame = () => {
 //ウィンドウの位置やサイズを保存する
 const storeWindowPos = () => {
     let { x, y, width, height } = gameWindow.getBounds()
-    console.log({ x, y, width, height })
     gameWindow.isFullScreen() ? '' : config.set('windowHeight', height || 1080);
     gameWindow.isFullScreen() ? '' : config.set('windowWidth', width || 1920);
     gameWindow.isFullScreen() ? '' : config.set('windowHeight', height || 1080); config.set('windowX', x || 0)
@@ -186,6 +184,10 @@ const storeWindowPos = () => {
 ipcMain.handle('settingDom', async () => {
     let dom = await vmcTool.settingWindow()
     return await dom
+})
+//設定用CSSを送信する
+ipcMain.handle('loadSettingStylesheets', () => {
+    return vmcTool.loadSettingStylesheets()
 })
 
 //設定のタブを変更する
@@ -208,8 +210,50 @@ ipcMain.handle('dirName', (e, v) => {
     return path.join(__dirname, v)
 })
 //ローカルファイルを開いて、pathをreturnする
-ipcMain.handle('openFile', (e, v) => {
-    dialog
+ipcMain.on('openFile', (e, v) => {
+    switch (v) {
+        case 'crosshairPath':
+            dialog.showOpenDialog(
+                gameWindow,
+                {
+                    properties: ['openFile'],
+                    filters: [{
+                        name: 'crosshair image',
+                        extensions: ['png', 'apng', 'gif']
+                    }
+                    ]
+                }
+            ).then(result => {
+                if (!result.canceled) {
+                    gameWindow.webContents.send('localPath', v, result.filePaths[0])
+                    config.set(v, result.filePaths[0])
+                }
+            })
+            break
+        case 'cssPath':
+            dialog.showOpenDialog(
+                gameWindow,
+                {
+                    properties: ['openFile'],
+                    filters: [{
+                        name: 'cascade style sheet',
+                        extensions: ['css']
+                    }
+                    ]
+                }
+            ).then(result => {
+                if (!result.canceled) {
+                    gameWindow.webContents.send('localPath', v, result.filePaths[0])
+                    config.set(v, result.filePaths[0])
+                }
+            })
+            break;
+    }
+
+})
+//crosshair dom
+ipcMain.handle('crosshairDom', () => {
+    return vmcTool.crosshairDom()
 })
 //Chromium flagの設定
 vmcTool.flagSwitch()
