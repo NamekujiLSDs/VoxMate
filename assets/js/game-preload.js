@@ -32,7 +32,7 @@ contextBridge.exposeInMainWorld('vmc', {
                 } else if (value === 'local') {
                     let crosshairPath = await ipcRenderer.invoke('getSetting', 'crosshairPath') || await ipcRenderer.invoke('dirName', './assets/img/Cross-lime.png');
                     document.getElementById('crosshairPreviewImage').setAttribute('src', 'vmc://' + crosshairPath);
-                    document.getElementById('crosshair').setAttribute('src', crosshairPath);
+                    document.getElementById('crosshair').setAttribute('src', 'vmc://' + crosshairPath);
                 };
                 break;
             case "crosshairUrl":
