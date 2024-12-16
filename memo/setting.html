@@ -8,15 +8,9 @@
 </head>
 
 <body>
-
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
-    <link rel="stylesheet" href="../assets/css/settings.css">
     <div id="settingWindow">
         <div id="menuItemHolder">
-            <div id="quickSetting"
-                class="menuItem ${config.get('lastOpen','quickSetting') === 'quickSetting'?'menuSelected':''}"
-                onclick="window.vmc.showSetting(this.id)">
+            <div id="quickSetting" class="menuItem menuSelected" onclick="window.vmc.showSetting(this.id)">
                 <div class="menuItemIcon">
                     <span class="material-symbols-outlined">
                         rocket_launch
@@ -24,10 +18,7 @@
                 </div>
                 <div class="menuItemTitle">Quick Setting</div>
             </div>
-            <div class="menuSplitter"></div>
-            <div id="crosshairSetting"
-                class="menuItem ${config.get('lastOpen','quickSetting') === 'crosshairSetting'?'menuSelected':''}"
-                onclick="window.vmc.showSetting(this.id);window.vmc.saveSetting('lastOpen',this.id)">
+            <div id="crosshairSetting" class="menuItem" onclick="window.vmc.showSetting(this.id)">
                 <div class="menuItemIcon">
                     <span class="material-symbols-outlined">
                         point_scan
@@ -35,10 +26,7 @@
                 </div>
                 <div class="menuItemTitle">Crosshair</div>
             </div>
-            <div class="menuSplitter"></div>
-            <div id="cssSetting"
-                class="menuItem ${config.get('lastOpen','quickSetting') === 'cssSetting'?'menuSelected':''}"
-                onclick="window.vmc.showSetting(this.id);window.vmc.saveSetting('lastOpen',this.id)">
+            <div id="cssSetting" class="menuItem" onclick="window.vmc.showSetting(this.id)">
                 <div class="menuItemIcon">
                     <span class="material-symbols-outlined">
                         code_blocks
@@ -46,10 +34,7 @@
                 </div>
                 <div class="menuItemTitle">CSS</div>
             </div>
-            <div class="menuSplitter"></div>
-            <div id="swapperSetting"
-                class="menuItem ${config.get('lastOpen','quickSetting') === 'swapperSetting'?'menuSelected':''}"
-                onclick="window.vmc.showSetting(this.id);window.vmc.saveSetting('lastOpen',this.id)">
+            <div id="swapperSetting" class="menuItem" onclick="window.vmc.showSetting(this.id)">
                 <div class="menuItemIcon">
                     <span class="material-symbols-outlined">
                         swap_horiz
@@ -57,10 +42,7 @@
                 </div>
                 <div class="menuItemTitle">Swapper</div>
             </div>
-            <div class="menuSplitter"></div>
-            <div id="adblockSetting"
-                class="menuItem ${config.get('lastOpen','quickSetting') === 'adblockSetting'?'menuSelected':''}"
-                onclick="window.vmc.showSetting(this.id);window.vmc.saveSetting('lastOpen',this.id)">
+            <div id="adblockSetting" class="menuItem" onclick="window.vmc.showSetting(this.id)">
                 <div class="menuItemIcon">
                     <span class="material-symbols-outlined">
                         security
@@ -68,10 +50,7 @@
                 </div>
                 <div class="menuItemTitle">Ad Blocker</div>
             </div>
-            <div class="menuSplitter"></div>
-            <div id="advancedSetting"
-                class="menuItem ${config.get('lastOpen','quickSetting') === 'advancedSetting'?'menuSelected':''}"
-                onclick="window.vmc.showSetting(this.id);window.vmc.saveSetting('lastOpen',this.id)">
+            <div id="advancedSetting" class="menuItem" onclick="window.vmc.showSetting(6)">
                 <div class="menuItemIcon">
                     <span class="material-symbols-outlined">
                         engineering
@@ -80,14 +59,16 @@
                 <div class="menuItemTitle">Advanced</div>
             </div>
         </div>
-        <div id="menuBodyHolder" class="menuHidden">
+        <div id="menuBodyHolder">
             <div id="menuBody">
+
             </div>
+
         </div>
     </div>
-    </div>
-    </div>
-
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+    <link rel="stylesheet" href="style.css">
 </body>
 
 </html>

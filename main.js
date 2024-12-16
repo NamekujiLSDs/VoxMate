@@ -118,9 +118,9 @@ const createSplash = () => {
 const createGame = () => {
     gameWindow = new BrowserWindow({
         show: false,
-        width: config.get('windowWidth') || 800,
-        height: config.get('windowHeight') || 600,
-        fullscreen: config.get('fullscreen') !== null ? config.get('fullscreen') : config.get('fullscreen') || true,
+        width: config.get('windowWidth', 1536),
+        height: config.get('windowHeight', 864),
+        fullscreen: config.get('fullscreen', true),
         webPreferences: {
             preload: path.join(__dirname, './assets/js/game-preload.js'),
             contextIsolation: true
@@ -137,6 +137,7 @@ const createGame = () => {
     gameWindow.webContents.on('did-finish-load', () => {
         splashWindow.destroy();
         gameWindow.show();
+        config.get('maxsize') ? gameWindow.maximize() : '';
     })
     //ショートカットキーの生成
     shortcut.register(gameWindow, 'Esc', async () => {
@@ -175,9 +176,10 @@ const storeWindowPos = () => {
     let { x, y, width, height } = gameWindow.getBounds()
     gameWindow.isFullScreen() ? '' : config.set('windowHeight', height || 1080);
     gameWindow.isFullScreen() ? '' : config.set('windowWidth', width || 1920);
-    gameWindow.isFullScreen() ? '' : config.set('windowHeight', height || 1080); config.set('windowX', x || 0)
-    gameWindow.isFullScreen() ? '' : config.set('windowY', y || 0)
+    gameWindow.isFullScreen() ? '' : config.set('windowHeight', height || 1080); config.set('windowX', x || 0);
+    gameWindow.isFullScreen() ? '' : config.set('windowY', y || 0);
     config.set('fullscreen', gameWindow.isFullScreen())
+    config.set('maxsize', gameWindow.isMaximized())
 }
 
 //設定用DOMを送信する
@@ -185,6 +187,7 @@ ipcMain.handle('settingDom', async () => {
     let dom = await vmcTool.settingWindow()
     return await dom
 })
+
 //設定用CSSを送信する
 ipcMain.handle('loadSettingStylesheets', () => {
     return vmcTool.loadSettingStylesheets()
@@ -205,10 +208,12 @@ ipcMain.on('saveSettingValue', (e, n, v) => {
 ipcMain.handle('getSetting', async (e, value) => {
     return await config.get(value)
 })
+
 //path.join + main.jsからの相対パスを返す
 ipcMain.handle('dirName', (e, v) => {
     return path.join(__dirname, v)
 })
+
 //ローカルファイルを開いて、pathをreturnする
 ipcMain.on('openFile', (e, v) => {
     switch (v) {
@@ -237,13 +242,13 @@ ipcMain.on('openFile', (e, v) => {
                     properties: ['openFile'],
                     filters: [{
                         name: 'cascade style sheet',
-                        extensions: ['css']
+                        extensions: ['css'],
                     }
                     ]
                 }
             ).then(result => {
                 if (!result.canceled) {
-                    gameWindow.webContents.send('localPath', v, result.filePaths[0])
+                    gameWindow.webContents.send('localPath', v, result.filePaths[0], path.basename(result.filePaths[0]))
                     config.set(v, result.filePaths[0])
                 }
             })
@@ -251,10 +256,21 @@ ipcMain.on('openFile', (e, v) => {
     }
 
 })
+
 //crosshair dom
 ipcMain.handle('crosshairDom', () => {
     return vmcTool.crosshairDom()
 })
+
+//custom css dom
+ipcMain.handle('cssDom', () => {
+    let cssDom = vmcTool.CustomCssDom()
+    console.log(cssDom)
+    console.log(cssDom[0])
+    console.log(cssDom[1])
+    return cssDom
+})
+
 //Chromium flagの設定
 vmcTool.flagSwitch()
 

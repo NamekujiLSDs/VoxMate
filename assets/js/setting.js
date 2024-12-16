@@ -124,7 +124,7 @@ exports.clientTools = class {
             <div id="menuBodyItem">
                 Enable Custom CSS
                 <input type="checkbox" name="enableCustomCss" id="enableCustomCss"
-                    oninput="window.vmc.saveSetting(this.id,this.checked);window.vmc.customCssChange(this.id,this.value)"
+                    oninput="window.vmc.saveSetting(this.id,this.checked);window.vmc.customCssChange(this.id,this.checked)"
                     ${config.get('enableCustomCss', true) ? "checked" : ""}>
             </div>
             <div class="horizonalLine"></div>
@@ -277,7 +277,7 @@ exports.clientTools = class {
                         <div id="menuBodyItem">
                             Enable Custom CSS
                             <input type="checkbox" name="enableCustomCss" id="enableCustomCss"
-                                oninput="window.vmc.saveSetting(this.id ,this.checked);window.vmc.customCssChange(this.id,this.value)"
+                                oninput="window.vmc.saveSetting(this.id ,this.checked);window.vmc.customCssChange(this.id,this.checked)"
                                 ${config.get('enableCustomCss', true) ? "checked" : ""}>
                         </div>
                         <div class="horizonalLine"></div>
@@ -302,8 +302,13 @@ exports.clientTools = class {
                         <div class="horizonalLine"></div>
                         <div id="menuBodyItem">
                             Local CSS File
-                            <input type="button" name="openLocaCss" id="menuButton" value="OPEN"
+                            <div id="fileNameDisplay">
+                                <div id="cssName" class="filename">
+                                    Current : ${config.get('cssPath', "").length > 0 ? path.basename(config.get('cssPath')) : "NONE"}
+                                </div>
+                                    <input type="button" name="openLocaCss" id="menuButton" value="OPEN"
                                 onclick="window.vmc.openLocal('cssPath')">
+                            </div>
                         </div>
                         <div class="horizonalLine"></div>`;
             case "swapperSetting":
@@ -533,5 +538,25 @@ exports.clientTools = class {
         return `<img src="${crosshairurl}" id="crosshair">
         <style id='crosshairCss'></style>`
     }
+    CustomCssDom() {
+        let enable = config.get('enableCustomCss')
+        let type = config.get('cssType')
+        let link, fineName
+        switch (type) {
+            case 'local':
+                link = 'vmc://' + config.get('cssPath');
+                break;
+            case 'url':
+                link = config.get('cssUrl')
+                break;
+        }
+        let dom = enable ? `<link rel="stylesheet" id="customCss" href="${link}">` : '<link rel="stylesheet" id="customCss" href="">';
+        console.log(dom)
+        fineName = config.get('cssPath', "").length > 0 ? path.basename(config.get('cssPath')) : "NONE"
+        return [dom, fineName]
+    }
     exportSetting(v) { }
+
+    test() {
+    }
 }

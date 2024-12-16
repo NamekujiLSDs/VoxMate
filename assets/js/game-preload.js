@@ -97,6 +97,48 @@ contextBridge.exposeInMainWorld('vmc', {
         ipcRenderer.send('saveSettingValue', 'crosshairHeightNum', h);
         refreshCrosshairCss()
     },
+    customCssChange: async (id, value) => {
+        let enable = await ipcRenderer.invoke('getSetting', 'enableCustomCss') || true;
+        let cssType = await ipcRenderer.invoke('getSetting', 'cssType') || "url";
+
+        switch (id) {
+            case 'enableCustomCss':
+                switch (value) {
+                    case true:
+                        switch (cssType) {
+                            case 'url':
+                                let cssUrl = await ipcRenderer.invoke('getSetting', 'cssUrl');
+                                console.log(cssUrl)
+                                document.getElementById('customCss').href = cssUrl;
+                                break
+                            case 'local':
+                                let cssPath = await ipcRenderer.invoke('getSetting', 'cssPath');
+                                document.getElementById('customCss').href = "vmc://" + cssPath;
+                                break
+                        }
+                        break
+                    case false:
+                        document.getElementById('customCss').href = "";
+                        break;
+                }
+                break;
+            case 'cssType':
+                console.log(id)
+                switch (value) {
+                    case 'url':
+                        let cssUrl = await ipcRenderer.invoke('getSetting', 'cssUrl');
+                        enable ? document.getElementById('customCss').href = cssUrl : "";
+                        break
+                    case 'local':
+                        let cssPath = await ipcRenderer.invoke('getSetting', 'cssPath');
+                        enable ? document.getElementById('customCss').href = "vmc://" + cssPath : "";
+                        break
+                }
+                break;
+            case 'cssUrl':
+                cssType === "url" && enable ? document.getElementById("customCss").href = value : "";
+        }
+    },
     openLocal: (name) => {
         ipcRenderer.send('openFile', name)
     }
@@ -140,12 +182,20 @@ ipcRenderer.on('reload', () => {
 })
 
 //ローカルファイルのパスを受け取り
-ipcRenderer.on('localPath', async (e, id, val) => {
+ipcRenderer.on('localPath', async (e, id, val, fileName) => {
+    let type
+    console.log(val)
     switch (id) {
         case 'crosshairPath':
-            let type = await ipcRenderer.invoke('getSetting', 'crosshairType');
+            type = await ipcRenderer.invoke('getSetting', 'crosshairType');
             type === 'local' ? document.getElementById('crosshairPreviewImage').setAttribute('src', 'vmc://' + val) : '';
             type === 'local' ? document.getElementById('crosshair').setAttribute('src', 'vmc://' + val) : '';
+            break;
+        case 'cssPath':
+            type = await ipcRenderer.invoke('getSetting', 'cssType');
+            type === 'local' ? document.getElementById('customCss').href = 'vmc://' + val : "";
+            document.getElementById('cssName').innerText = fileName
+            break;
     }
 })
 
@@ -156,4 +206,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     let crosshair = await ipcRenderer.invoke('crosshairDom')
     document.getElementById('app').insertAdjacentHTML('afterbegin', crosshair)
     refreshCrosshairCss()
+    let cssDom = await ipcRenderer.invoke('cssDom')
+    document.body.insertAdjacentHTML('afterbegin', cssDom[0])
 })

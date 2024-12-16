@@ -1,3 +1,18 @@
+:root {
+    --col-1: #c4e195;
+    --col-2: #baa2b1;
+    --col-3: #ffa1a9;
+    --col-4: #a587f8;
+    --col-5: #f8e480;
+    --col-6: #80ddab;
+    --col-shadow-1: #6c952a;
+    --col-shadow-2: #6e5163;
+    --col-shadow-3: #bf0010;
+    --col-shadow-4: #380bb5;
+    --col-shadow-5: #b5990a;
+    --col-shadow-6: #28975b;
+}
+
 body {
     padding: unset;
     margin: unset;
@@ -138,57 +153,68 @@ body {
 
 .menuItem:hover .menuItemIcon .material-symbols-outlined,
 .menuItem:hover .menuItemTitle {
-    color: white;
+    /* color: white; */
     transform: scale(1.3);
     transition: .2s;
 }
 
 #quickSetting {
-    color: #ff5733;
+    color: var(--col-1);
 }
 
 #crosshairSetting {
-    color: #33ccff;
+    color: var(--col-2);
+    ;
 }
 
 #cssSetting {
-    color: #ff33ff;
+    color: var(--col-3);
+    ;
 }
 
 #swapperSetting {
-    color: #33ff57;
+    color: var(--col-4);
+    ;
 }
 
 #adblockSetting {
-    color: #ff3333;
+    color: var(--col-5);
+    ;
 }
 
 #advancedSetting {
-    color: #ffd633;
+    color: var(--col-6);
+    ;
 }
 
 #quickSetting:hover {
-    text-shadow: 0 0 4px #ff5733;
+    text-shadow: 0 0 4px var(--col-shadow-1);
+    ;
 }
 
 #crosshairSetting:hover {
-    text-shadow: 0 0 4px #33ccff;
+    text-shadow: 0 0 4px var(--col-shadow-2);
+    ;
 }
 
 #cssSetting:hover {
-    text-shadow: 0 0 4px #ff33ff;
+    text-shadow: 0 0 4px var(--col-shadow-3);
+    ;
 }
 
 #swapperSetting:hover {
-    text-shadow: 0 0 4px #33ff57;
+    text-shadow: 0 0 4px var(--col-shadow-4);
+    ;
 }
 
 #adblockSetting:hover {
-    text-shadow: 0 0 4px #ff3333;
+    text-shadow: 0 0 4px var(--col-shadow-5);
+    ;
 }
 
 #advancedSetting:hover {
-    text-shadow: 0 0 4px #ffd633;
+    text-shadow: 0 0 4px var(--col-shadow-6);
+    ;
 }
 
 /* チェックボックスをスイッチにする */
@@ -350,6 +376,16 @@ input[type="checkbox"]:checked {
     margin-top: 5px !important;
     margin-bottom: 5px !important;
     padding: unset !important;
-    
 }
 
+div#fileNameDisplay {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.filename {
+    font-size: 12px;
+    text-align: center;
+    margin-right: 5px;
+}
