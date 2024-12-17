@@ -187,11 +187,9 @@ exports.clientTools = class {
                 Crosshair Type
                 <select name="crosshairType" id="crosshairType"
                     oninput="window.vmc.saveSetting(this.id,this.value);window.vmc.crosshairChange(this.id,this.value)">
-                    <option value="url" ${config.get('crosshairType', 'url') === 'url' ? 'selected' : ''}>URL
-                    </option>
-                    <option value="local" ${config.get('crosshairType', 'url') === 'local' ? 'selected' : ''}>Local
-                        File
-                    </option>
+                    <option value="url" ${config.get('crosshairType', 'url') === 'url' ? 'selected' : ''}>URL</option>
+                    <option value="local" ${config.get('crosshairType', 'url') === 'local' ? 'selected' : ''}>Local File</option>
+                    <option value="list" ${config.get('crosshairType', 'url') === 'list' ? 'selected' : ''}>List</option>
                 </select>
             </div>
             <div class="horizonalLine"></div>
@@ -206,6 +204,13 @@ exports.clientTools = class {
                 Local Crosshair File
                 <input type="button" name="openLocaCrosshair" id="menuButton" value="OPEN"
                     onclick="window.vmc.openLocal('crosshairPath')">
+            </div>
+            <div class="horizonalLine"></div>
+            <div id="menuBodyItem">
+                Local Crosshair List
+                <select id="localCrosshairList" name="localCrosshairList" onchange="window.vmc.saveSetting(this.id,this.value);window.vmc.crosshairChange(this.id,this.value)">
+                ${this.getCrosshairList()}
+                </select>
             </div>
             <div class="horizonalLine"></div>
             <div id="menuBodyItem">
@@ -286,11 +291,9 @@ exports.clientTools = class {
                             CSS Type
                             <select name="cssType" id="cssType"
                                 oninput="window.vmc.saveSetting(this.id,this.value);window.vmc.customCssChange(this.id,this.value)">
-                                <option value="url" ${config.get('cssType', 'url') === 'url' ? 'selected' : ''}>URL
-                                </option>
-                                <option value="local" ${config.get('cssType', 'url') === 'local' ? 'selected' : ''}>Local
-                                    File
-                                </option>
+                                <option value="url" ${config.get('cssType', 'url') === 'url' ? 'selected' : ''}>URL</option>
+                                <option value="local" ${config.get('cssType', 'url') === 'local' ? 'selected' : ''}>Local File</option>
+                                <option value="list" ${config.get('cssType', 'url') === 'list' ? 'selected' : ''}>List</option>
                             </select>
                         </div>
                         <div class="horizonalLine"></div>
@@ -311,7 +314,14 @@ exports.clientTools = class {
                                 onclick="window.vmc.openLocal('cssPath')">
                             </div>
                         </div>
-                        <div class="horizonalLine"></div>`;
+                        <div class="horizonalLine"></div>
+                        <div id="menuBodyItem">
+                            Local CSS List
+                            <select name="localCssList" id="localCssList" onchange="window.vmc.saveSetting(this.id,this.value);window.vmc.customCssChange(this.id,this.value)">
+                            ${this.getCssList()}
+                            </select>
+                            </div>
+                <div class="horizonalLine"></div>`;
             case "swapperSetting":
                 return `<div id="menuBodyTitle">
                             <span class="material-symbols-outlined">
@@ -530,7 +540,7 @@ exports.clientTools = class {
         <style id='crosshairCss'></style>`
     }
     CustomCssDom() {
-        let enable = config.get('enableCustomCss')
+        let enable = config.get('enableCustomCss', true)
         let type = config.get('cssType')
         let link, fineName
         switch (type) {
@@ -540,31 +550,85 @@ exports.clientTools = class {
             case 'url':
                 link = config.get('cssUrl')
                 break;
+            case 'list':
+                link = "vmc://" + path.join(app.getPath('documents'), "./vmc-swap/css", config.get("localCssList"))
+
+                break;
         }
         let dom = enable ? `<link rel="stylesheet" id="customCss" href="${link}">` : '<link rel="stylesheet" id="customCss" href="">';
-        console.log(dom)
         fineName = config.get('cssPath', "").length > 0 ? path.basename(config.get('cssPath')) : "NONE"
         return [dom, fineName]
     }
     createSwapFolder() {
         let documents = app.getPath('documents');
         let swapFolder = path.join(documents, './vmc-swap')
-        if (fs.existsSync(swapFolder)) {
-            console.log("folder exist")
-        } else {
+        let cssFolder = path.join(swapFolder, "./css")
+        let crosshairFolder = path.join(swapFolder, "./crosshair")
+        if (fs.existsSync(swapFolder)) { } else {
             fs.mkdirSync(swapFolder)
+        }
+        if (fs.existsSync(cssFolder)) { } else {
+            fs.mkdirSync(cssFolder)
+        }
+        if (fs.existsSync(crosshairFolder)) { } else {
+            fs.mkdirSync(crosshairFolder)
         }
     }
     isFirstTime() {
         if (config.get("isFirstTime", true)) {
+            let getTitleLogo = fs.existsSync(path.join(app.getPath("documents"), "./vmc-swap/title_logo.png"))
+            let getMenuBg = fs.existsSync(path.join(app.getPath("documents"), "./vmc-swap/menu_background.jpg"))
             let swapper = path.join(app.getPath("documents"), "./vmc-swap");
-            
+            let titleLogo = path.join(__dirname, "../img/title_logo.png");
+            getTitleLogo ? fs.copyFileSync(titleLogo, path.join(swapper, "./title_logo.png")) : "";
+            let menuBg = path.join(__dirname, "../img/menu_background.jpg");
+            getMenuBg ? fs.copyFileSync(menuBg, path.join(swapper, "./menu_background.jpg")) : "";
+            config.set("isFirstTime", false)
         } else if (config.get("isFirstTime", true)) {
             return
         }
     }
-    exportSetting(v) { }
-    importSetting(v) { }
+    exportSetting(v) {
+    }
+    importSetting(v) {
+    }
+    getCssList() {
+        let documents = app.getPath('documents');
+        let swapFolder = path.join(documents, './vmc-swap')
+        let cssFolder = path.join(swapFolder, "./css")
+        let cssList = fs.readdirSync(cssFolder, { withFileTypes: true })
+            .filter(dirent => dirent.isFile()).map(({ name }) => name)
+            .filter((file) => {
+                return path.extname(file).toLowerCase() === '.css'
+            })
+        let defVal = config.get("localCssList", "NONE")
+        let options = `<option value="NONE" ${defVal === "NONE" ? "selected" : ""}>NONE</option> \n`
+        for (let name of cssList) {
+            let opt = `<option value="${name}" ${defVal === name ? "selected" : ""}>${name}</option> \n`
+            options = options + opt
+        }
+        return options
+    }
+    getCrosshairList() {
+        let documents = app.getPath('documents');
+        let swapFolder = path.join(documents, './vmc-swap')
+        let crosshairFolder = path.join(swapFolder, "./crosshair")
+        let crosshairList = fs.readdirSync(crosshairFolder, { withFileTypes: true })
+            .filter(dirent => dirent.isFile()).map(({ name }) => name)
+            .filter((file) => {
+                console.log(path.extname(file).toLowerCase())
+                return path.extname(file).toLowerCase() === '.png'
+                    || path.extname(file).toLowerCase() === '.gif'
+                    || path.extname(file).toLowerCase() === '.apng'
+            })
+        let defVal = config.get("crosshairType", "url");
+        let options = `<option value="NONE" ${defVal === "NONE" ? "selected" : ""}>NONE</option> \n`;
+        for (let name of crosshairList) {
+            let opt = `<option value="${name}" ${defVal === name ? "selected" : ""}>${name}</option> \n`
+            options = options + opt
+        }
+        return options
+    }
     test() {
     }
 }

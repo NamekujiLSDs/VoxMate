@@ -100,7 +100,6 @@ contextBridge.exposeInMainWorld('vmc', {
     customCssChange: async (id, value) => {
         let enable = await ipcRenderer.invoke('getSetting', 'enableCustomCss') || true;
         let cssType = await ipcRenderer.invoke('getSetting', 'cssType') || "url";
-
         switch (id) {
             case 'enableCustomCss':
                 switch (value) {
@@ -113,6 +112,11 @@ contextBridge.exposeInMainWorld('vmc', {
                             case 'local':
                                 let cssPath = await ipcRenderer.invoke('getSetting', 'cssPath');
                                 document.getElementById('customCss').href = "vmc://" + cssPath;
+                                break;
+                            case 'list':
+                                let cssListPath = await ipcRenderer.invoke('getSetting', 'localCssList');
+                                cssListPath = await ipcRenderer.invoke('localCssFullPath', cssListPath)
+                                enable ? document.getElementById('customCss').href = "vmc://" + cssListPath : "";
                                 break
                         }
                         break
@@ -130,11 +134,22 @@ contextBridge.exposeInMainWorld('vmc', {
                     case 'local':
                         let cssPath = await ipcRenderer.invoke('getSetting', 'cssPath');
                         enable ? document.getElementById('customCss').href = "vmc://" + cssPath : "";
+                        break;
+                    case 'list':
+                        let cssListPath = await ipcRenderer.invoke('getSetting', 'localCssList');
+                        cssListPath = await ipcRenderer.invoke('localCssFullPath', cssListPath)
+                        enable ? document.getElementById('customCss').href = "vmc://" + cssListPath : "";
                         break
                 }
                 break;
             case 'cssUrl':
                 cssType === "url" && enable ? document.getElementById("customCss").href = value : "";
+                break
+            case 'localCssList':
+                let listPath = await ipcRenderer.invoke('getSetting', 'localCssList')
+                listPath = await ipcRenderer.invoke('localCssFullPath', listPath)
+                cssType === "list" && enable ? document.getElementById("customCss").href = "vmc://" + listPath : "";
+                break;
         }
     },
     openSwapperFolder: () => {

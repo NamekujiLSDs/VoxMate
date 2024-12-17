@@ -252,11 +252,19 @@ ipcMain.handle('getSetting', async (e, value) => {
     return await config.get(value)
 })
 
-//path.join + main.jsからの相対パスを返す
+//path.join + main.jsからのフルパスを返す
 ipcMain.handle('dirName', (e, v) => {
     return path.join(__dirname, v)
 })
 
+//swap/css + name.extのフルパスを返す
+ipcMain.handle('localCssFullPath', (e, v) => {
+    return path.join(app.getPath("documents"), "./vmc-swap/css", v)
+})
+//swap/crosshair + name.extのフルパスを返す
+ipcMain.handle('localCrosshairFullPath', (e, v) => {
+    return path.join(app.getPath("documents"), "./vmc-swap/crosshair", v)
+})
 //ローカルファイルを開いて、pathをreturnする
 ipcMain.on('openFile', (e, v) => {
     switch (v) {
