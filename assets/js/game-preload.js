@@ -108,7 +108,6 @@ contextBridge.exposeInMainWorld('vmc', {
                         switch (cssType) {
                             case 'url':
                                 let cssUrl = await ipcRenderer.invoke('getSetting', 'cssUrl');
-                                console.log(cssUrl)
                                 document.getElementById('customCss').href = cssUrl;
                                 break
                             case 'local':
@@ -123,7 +122,6 @@ contextBridge.exposeInMainWorld('vmc', {
                 }
                 break;
             case 'cssType':
-                console.log(id)
                 switch (value) {
                     case 'url':
                         let cssUrl = await ipcRenderer.invoke('getSetting', 'cssUrl');
@@ -139,8 +137,20 @@ contextBridge.exposeInMainWorld('vmc', {
                 cssType === "url" && enable ? document.getElementById("customCss").href = value : "";
         }
     },
+    openSwapperFolder: () => {
+        ipcRenderer.send("openExplorer", "swapper")
+    },
     openLocal: (name) => {
         ipcRenderer.send('openFile', name)
+    },
+    openTutorial: (val) => {
+        ipcRenderer.send("openTutorial", val)
+    },
+    clearCache: () => {
+        ipcRenderer.send('clear-cache')
+    },
+    resetAllData: () => {
+        ipcRenderer.send('clear-all-data-and-restart')
     }
 })
 
@@ -184,7 +194,6 @@ ipcRenderer.on('reload', () => {
 //ローカルファイルのパスを受け取り
 ipcRenderer.on('localPath', async (e, id, val, fileName) => {
     let type
-    console.log(val)
     switch (id) {
         case 'crosshairPath':
             type = await ipcRenderer.invoke('getSetting', 'crosshairType');

@@ -10,6 +10,10 @@ const clientTool = require('./assets/js/setting')
 const { request } = require('http')
 const { settings } = require('cluster')
 const vmcTool = new clientTool.clientTools()
+const { exec } = require('child_process')
+
+const defaultSwapList = require('./assets/json/swapper-default.json')
+const defaultBlockList = require('./assets/json/adblock-default.json').urls
 
 //Skip checkForUpdates
 Object.defineProperty(app, 'isPackaged', {
@@ -18,13 +22,12 @@ Object.defineProperty(app, 'isPackaged', {
     }
 });
 
-//nミリ秒待つ関数
-const sleep = (time) => new Promise((resolve) => setTimeout(resolve, time));//timeはミリ秒
+// [N]ms秒待つ関数
+const sleep = (time) => new Promise((resolve) => setTimeout(resolve, time));
 
 //ウィンドウの原型を作る
 let splashWindow, gameWindow, dummyWindow
 let appVersion = app.getVersion()
-console.log(appVersion)
 //カスタムプロトコルの登録
 app.on('ready', () => {
     protocol.registerFileProtocol('vmc', (request, callback) =>
@@ -169,6 +172,46 @@ const createGame = () => {
         !gameWindow.isDestroyed() ? storeWindowPos() : '';
         dummyWindow.destroy();
     })
+    //新しいwindowで開かせない
+    gameWindow.webContents.on('new-window', (e, url) => {
+        switch (url) {
+            case 'https://voxiom.io/auth/discord':
+                gameWindow.webContents.loadURL(url);
+                e.preventDefault();
+                break;
+            case 'https://voxiom.io/auth/google':
+                gameWindow.webContents.loadURL(url);
+                e.preventDefault();
+                break;
+            case 'https://voxiom.io/auth/facebook':
+                gameWindow.webContents.loadURL(url);
+                e.preventDefault();
+                break;
+            default:
+                if (url.startsWith("https://www.youtube.com/")
+                    || url.startsWith("https://www.twitch.tv/")
+                    || url.startsWith("https://discord.gg/")
+                    || url.startsWith("https://x.com/")
+                    || url.startsWith("https://twitter.com/")
+                    || url.startsWith("https://twitter.com/")
+                    || url.startsWith("https://reddit.com/")
+                    || url.startsWith("https://voxiom.io/assets/")
+                    || url.startsWith("https://cuberealm.io/")) {
+                    shell.openExternal(url)
+                    e.preventDefault()
+                    break
+                }
+        }
+    })
+
+    //ちょっと制限
+    gameWindow.webContents.on('will-navigate', (e, url) => {
+        if (url.startsWith("https://voxiom.io/assets/")) {
+            shell.openExternal(url)
+            e.preventDefault()
+        }
+    });
+
 }
 
 //ウィンドウの位置やサイズを保存する
@@ -265,17 +308,236 @@ ipcMain.handle('crosshairDom', () => {
 //custom css dom
 ipcMain.handle('cssDom', () => {
     let cssDom = vmcTool.CustomCssDom()
-    console.log(cssDom)
-    console.log(cssDom[0])
-    console.log(cssDom[1])
     return cssDom
+})
+
+//フォルダを開く
+ipcMain.on("openExplorer", () => {
+    let swapFolder = path.join(app.getPath('documents'), './vmc-swap')
+    exec(`start ${swapFolder}`, (err, stdout, stderr) => {
+        if (err) {
+            return;
+        }
+        if (stderr) {
+            return;
+        }
+    })
+})
+
+
+//チュートリアルを開く
+ipcMain.on("openTutorial", (e, val) => {
+    switch (val) {
+        case 'resourceSwapper':
+            shell.openExternal("https://namekujilsds.github.io/VMC/tutorial#swapper")
+            break;
+        case 'adBlock':
+            shell.openExternal("https://namekujilsds.github.io/VMC/tutorial#adblock")
+            break;
+    }
 })
 
 //Chromium flagの設定
 vmcTool.flagSwitch()
 
+// リソーススワッパー & Adblocker
+app.on('ready', async () => {
+    let swapperFolder = path.join(app.getPath("documents"), './vmc-swap')
+    let userSwapList
+    let userBlockList
+    let userSwapperExist = fs.existsSync(path.join(app.getPath('documents'), './vmc-swap/swapper-user.json'))
+    if (userSwapperExist) {
+        userSwapList = JSON.parse(fs.readFileSync(path.join(app.getPath('documents'), './vmc-swap/swapper-user.json')))
+    } else {
+        userSwapList = null
+    }
+    let userBlockExist = fs.existsSync(path.join(app.getPath('documents'), './vmc-swap/adblock-user.json'))
+    if (userBlockExist) {
+        userBlockList = await JSON.parse(fs.readFileSync(path.join(app.getPath('documents'), './vmc-swap/adblock-user.json')))
+        userBlockList = userBlockList.urls
+    } else {
+        userBlockList = null
+    }
+    let swapEnable = config.get("enableResourceSwapper", true)
+    let swapDef = config.get('useDefSwapList', true)
+    let swapUser = config.get('useUserSwapList', true)
+    let blockEnable = config.get('enableAdBlocker', true)
+    let blockDef = config.get('useDefAdBlockList', true)
+    let blockUser = config.get('useUserAdBlockList', true)
+
+    const urls = defaultBlockList
+
+    session.defaultSession.webRequest.onBeforeRequest((details, callback) => {
+        const url = details.url
+        const swapper = async (url) => {
+            if (swapEnable) {
+                if (swapDef && swapUser) {
+                    if (userSwapperExist !== null && userSwapperExist !== undefined && userSwapperExist) {
+                        if (userSwapList[url] !== null && userSwapList[url] !== undefined) {
+                            let fileExists = fs.existsSync(path.join(swapperFolder, userSwapList[url]))
+                            if (fileExists) {
+                                callback({ redirectURL: "vmc://" + path.join(swapperFolder, userSwapList[url]) })
+                            } else if (!fileExists) {
+                                if (defaultSwapList[url] !== null && defaultSwapList[url] !== undefined) {
+                                    let fileExists = fs.existsSync(path.join(swapperFolder, defaultSwapList[url]))
+                                    if (fileExists) {
+                                        callback({ redirectURL: "vmc://" + path.join(swapperFolder, defaultSwapList[url]) })
+                                    } else {
+                                        callback({})
+                                    }
+                                }
+                            }
+                        } else if (defaultSwapList[url] !== null && defaultSwapList[url] !== undefined) {
+                            let fileExists = fs.existsSync(path.join(swapperFolder, defaultSwapList[url]))
+                            if (fileExists) {
+                                callback({ redirectURL: "vmc://" + path.join(swapperFolder, defaultSwapList[url]) })
+                            } else {
+                                callback({})
+                            }
+                        } else {
+                            callback({})
+                        }
+                    } else if (defaultSwapList[url] !== null && defaultSwapList[url] !== undefined) {
+                        let fileExists = fs.existsSync(path.join(swapperFolder, defaultSwapList[url]))
+                        if (fileExists) {
+                            callback({ redirectURL: "vmc://" + path.join(swapperFolder, defaultSwapList[url]) })
+                        } else {
+                            callback({})
+                        }
+                    } else {
+                        callback({})
+                    }
+                } else if (swapDef) {
+                    if (defaultSwapList[url] !== null && defaultSwapList[url] !== undefined) {
+                        let fileExists = fs.existsSync(path.join(swapperFolder, defaultSwapList[url]))
+                        if (fileExists) {
+                            callback({ redirectURL: "vmc://" + path.join(swapperFolder, defaultSwapList[url]) })
+                        } else {
+                            callback({})
+                        }
+                    }
+                } else if (swapUser) {
+                    if (userSwapperExist !== null && userSwapperExist !== undefined && userSwapperExist) {
+                        if (userSwapList[url] !== null && userSwapList[url] !== undefined) {
+                            let fileExists = fs.existsSync(path.join(swapperFolder, userSwapList[url]))
+                            if (fileExists) {
+                                callback({ redirectURL: "vmc://" + path.join(swapperFolder, userSwapList[url]) })
+                            } else {
+                                callback({})
+                            }
+                        }
+                    } else {
+                        callback({})
+                    }
+                }
+            } else if (!swapEnable) {
+                callback({})
+            } else {
+                callback({})
+            }
+        }
+        if (blockEnable) {
+            if (blockDef && blockUser) {
+                if (userBlockList !== null && userBlockList !== undefined && userBlockExist) {
+                    const userShouldBlock = userBlockList.some(domain => url.includes(domain))
+                    if (userShouldBlock) {
+                        callback({ cancel: true })
+                    } else {
+                        if (defaultBlockList !== null && defaultBlockList !== undefined) {
+                            const defShouldBlock = urls.some(domain => url.includes(domain))
+                            if (defShouldBlock) {
+                                callback({ cancel: true })
+                            } else {
+                                swapper(url)
+                            }
+                        }
+                    }
+                } else if (defaultBlockList !== null && defaultBlockList !== undefined) {
+                    const defShouldBlock = urls.some(domain => url.includes(domain))
+                    if (defShouldBlock) {
+                        callback({ cancel: true })
+                    } else {
+                        swapper(url)
+                    }
+                } else {
+                    swapper(url)
+                }
+            }
+            else if (blockDef) {
+                if (defaultBlockList !== null && defaultBlockList !== undefined) {
+                    const defShouldBlock = defUrls.some(domain => url.includes(domain))
+                    if (defShouldBlock) {
+                        callback({ cancel: true })
+                    } else {
+                        swapper(url)
+                    }
+                }
+            }
+            else if (blockUser) {
+                if (userBlockList !== null && userBlockList !== undefined && userBlockExist) {
+                    const userShouldBlock = userBlockList.some(domain => url.includes(domain))
+                    if (userShouldBlock) {
+                        callback({ cancel: true })
+                    } else {
+                        swapper(url)
+                    }
+                } else {
+                    swapper(url)
+                }
+            }
+        } else {
+            swapper(url)
+        }
+
+    });
+})
+//キャッシュの削除
+ipcMain.on('clear-cache', async () => {
+    const response = await dialog.showMessageBox(gameWindow, {
+        type: 'question',
+        buttons: ['OK', 'Cancel'],
+        defaultId: 1,
+        message: `Do you really want to delete the cache?\nAfter deletion, the client will restart.`
+    });
+    if (response.response === 0) { // OKが選ばれた場合
+        // キャッシュを削除
+        session.defaultSession.clearCache().then(() => {
+            // アプリを再起動
+            app.relaunch();
+            app.quit();
+        }).catch(err => {
+        });
+    }
+});
+
+//データの全削除
+ipcMain.on('clear-all-data-and-restart', async () => {
+    const response = await dialog.showMessageBox({
+        type: 'question',
+        buttons: ['OK', 'Cancel'],
+        defaultId: 1,
+        message: 'Delete all application data.\nAre you sure?'
+    });
+    if (response.response === 0) { // OKが選ばれた場合
+        try {
+            // キャッシュを削除
+            await session.defaultSession.clearCache();
+            // ローカルストレージやIndexedDBのデータを削除
+            await session.defaultSession.clearStorageData();
+            // セッションのクッキーを削除
+            await session.defaultSession.clearAuthCache();
+            // アプリを再起動
+            app.relaunch();
+            app.quit();
+        } catch (err) {
+        }
+    }
+});
+
 //アプリの準備ができたらスプラッシュを起動
 app.on('ready', () => {
+    vmcTool.createSwapFolder()
+    vmcTool.isFirstTime()
     createSplash()
 })
 

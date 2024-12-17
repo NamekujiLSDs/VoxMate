@@ -389,3 +389,7 @@ div#fileNameDisplay {
     text-align: center;
     margin-right: 5px;
 }
+
+#settingWindow:focus {
+    outline: unset;
+}

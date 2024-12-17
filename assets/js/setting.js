@@ -3,6 +3,7 @@ const store = require('electron-store');
 const log = require('electron-log');
 const config = new store()
 const path = require('path')
+const fs = require('fs')
 
 app.on('ready', () => {
     protocol.registerFileProtocol('vmc', (request, callback) =>
@@ -513,16 +514,6 @@ exports.clientTools = class {
         app.commandLine.appendSwitch(config.get('ignoreGpuBlocklist', true) ? 'ignore-gpu-blocklist' : '');
         app.commandLine.appendSwitch(config.get('enableZerocopy', true) ? 'enable-zero-copy' : '');
         app.commandLine.appendSwitch('use-angle', config.get('angleBackend', 'default'));
-        console.log(config.get('unlimitedFps'))
-        console.log(config.get('disableGpuVsync'))
-        console.log(config.get('inProcess'))
-        console.log(config.get('enableQuic'))
-        console.log(config.get('enableGpuRasterization'))
-        console.log(config.get('enablePointerLockOptions'))
-        console.log(config.get('enableHeavyAdIntervention'))
-        console.log(config.get('ignoreGpuBlocklist'))
-        console.log(config.get('enableZerocopy'))
-        console.log(config.get('angleBackend'))
     }
     crosshairDom() {
         let crosshairurl
@@ -555,8 +546,25 @@ exports.clientTools = class {
         fineName = config.get('cssPath', "").length > 0 ? path.basename(config.get('cssPath')) : "NONE"
         return [dom, fineName]
     }
+    createSwapFolder() {
+        let documents = app.getPath('documents');
+        let swapFolder = path.join(documents, './vmc-swap')
+        if (fs.existsSync(swapFolder)) {
+            console.log("folder exist")
+        } else {
+            fs.mkdirSync(swapFolder)
+        }
+    }
+    isFirstTime() {
+        if (config.get("isFirstTime", true)) {
+            let swapper = path.join(app.getPath("documents"), "./vmc-swap");
+            
+        } else if (config.get("isFirstTime", true)) {
+            return
+        }
+    }
     exportSetting(v) { }
-
+    importSetting(v) { }
     test() {
     }
 }
