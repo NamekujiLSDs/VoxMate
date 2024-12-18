@@ -33,7 +33,17 @@ contextBridge.exposeInMainWorld('vmc', {
                     let crosshairPath = await ipcRenderer.invoke('getSetting', 'crosshairPath') || await ipcRenderer.invoke('dirName', './assets/img/Cross-lime.png');
                     document.getElementById('crosshairPreviewImage').setAttribute('src', 'vmc://' + crosshairPath);
                     document.getElementById('crosshair').setAttribute('src', 'vmc://' + crosshairPath);
+                } else if (value === 'list') {
+                    let crosshairPath = await ipcRenderer.invoke('getSetting', 'localCrosshairList');
+                    crosshairPath = await ipcRenderer.invoke('localCrosshairFullPath', crosshairPath);
+                    document.getElementById('crosshairPreviewImage').setAttribute('src', 'vmc://' + crosshairPath);
+                    document.getElementById('crosshair').setAttribute('src', 'vmc://' + crosshairPath);
                 };
+                break;
+            case 'localCrosshairList':
+                let filePath = await ipcRenderer.invoke('localCrosshairFullPath', value);
+                document.getElementById('crosshairPreviewImage').setAttribute('src', 'vmc://' + filePath);
+                document.getElementById('crosshair').setAttribute('src', 'vmc://' + filePath);
                 break;
             case "crosshairUrl":
                 let nowType = await ipcRenderer.invoke('getSetting', 'crosshairType');
