@@ -616,7 +616,6 @@ exports.clientTools = class {
         let crosshairList = fs.readdirSync(crosshairFolder, { withFileTypes: true })
             .filter(dirent => dirent.isFile()).map(({ name }) => name)
             .filter((file) => {
-                console.log(path.extname(file).toLowerCase())
                 return path.extname(file).toLowerCase() === '.png'
                     || path.extname(file).toLowerCase() === '.gif'
                     || path.extname(file).toLowerCase() === '.apng'
