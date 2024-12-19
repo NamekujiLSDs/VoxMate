@@ -163,6 +163,15 @@ exports.clientTools = class {
             </div>
             <div class="horizonalLine"></div>`;
             case "crosshairSetting":
+                let crosshairUrl
+                let urlType = config.get('crosshairType', 'url')
+                if (urlType === 'url') {
+                    crosshairUrl = config.get('crosshairUrl', 'https://namekujilsds.github.io/CROSSHAIR/img/Cross-lime.png')
+                } else if (urlType === 'local') {
+                    crosshairUrl = 'vmc://' + config.get('crosshairPath', path.join(__dirname, '../img/Cross-lime.png'))
+                } else if (urlType === 'list') {
+                    crosshairUrl = 'vmc://' + path.join(app.getPath('documents'), './vmc-swap/crosshair', config.get('localCrosshairList', ''))
+                }
                 return `<div id="menuBodyTitle">
                 <span class="material-symbols-outlined">
                     point_scan
@@ -173,7 +182,7 @@ exports.clientTools = class {
                 <div id="crosshairPreviewTitle">Crosshair Preview</div>
                 <div id="previewBody">
                     <img id="crosshairPreviewImage"
-                        src="${config.get('crosshairType', 'url') === 'url' ? config.get('crosshairUrl', 'https://namekujilsds.github.io/CROSSHAIR/img/Cross-lime.png') : 'vmc://' + config.get('crosshairPath', path.join(__dirname, '../img/Cross-lime.png'))}">
+                        src="${crosshairUrl}">
                 </div>
             </div>
             <div id="menuBodyItem">
@@ -535,6 +544,9 @@ exports.clientTools = class {
                 crosshairurl = config.get('crosshairPath', path.join(__dirname, '../img/Cross-lime.png'));
                 crosshairurl = 'vmc://' + crosshairurl
                 break
+            case 'list':
+                crosshairurl = 'vmc://' + path.join(app.getPath('documents'), './vmc-swap/crosshair', config.get('localCrosshairList', ''))
+                break;
         }
         return `<img src="${crosshairurl}" id="crosshair">
         <style id='crosshairCss'></style>`
@@ -580,9 +592,9 @@ exports.clientTools = class {
             let getMenuBg = fs.existsSync(path.join(app.getPath("documents"), "./vmc-swap/menu_background.jpg"))
             let swapper = path.join(app.getPath("documents"), "./vmc-swap");
             let titleLogo = path.join(__dirname, "../img/title_logo.png");
-            getTitleLogo ? fs.copyFileSync(titleLogo, path.join(swapper, "./title_logo.png")) : "";
+            !getTitleLogo ? fs.copyFileSync(titleLogo, path.join(swapper, "./title_logo.png")) : "";
             let menuBg = path.join(__dirname, "../img/menu_background.jpg");
-            getMenuBg ? fs.copyFileSync(menuBg, path.join(swapper, "./menu_background.jpg")) : "";
+            !getMenuBg ? fs.copyFileSync(menuBg, path.join(swapper, "./menu_background.jpg")) : "";
             config.set("isFirstTime", false)
         } else if (config.get("isFirstTime", true)) {
             return
@@ -620,7 +632,7 @@ exports.clientTools = class {
                     || path.extname(file).toLowerCase() === '.gif'
                     || path.extname(file).toLowerCase() === '.apng'
             })
-        let defVal = config.get("crosshairType", "url");
+        let defVal = config.get("localCrosshairList", "NONE");
         let options = `<option value="NONE" ${defVal === "NONE" ? "selected" : ""}>NONE</option> \n`;
         for (let name of crosshairList) {
             let opt = `<option value="${name}" ${defVal === name ? "selected" : ""}>${name}</option> \n`

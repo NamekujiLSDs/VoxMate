@@ -265,6 +265,7 @@ ipcMain.handle('localCssFullPath', (e, v) => {
 ipcMain.handle('localCrosshairFullPath', (e, v) => {
     return path.join(app.getPath("documents"), "./vmc-swap/crosshair", v)
 })
+
 //ローカルファイルを開いて、pathをreturnする
 ipcMain.on('openFile', (e, v) => {
     switch (v) {
@@ -331,7 +332,6 @@ ipcMain.on("openExplorer", () => {
         }
     })
 })
-
 
 //チュートリアルを開く
 ipcMain.on("openTutorial", (e, val) => {
