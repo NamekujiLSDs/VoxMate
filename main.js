@@ -164,7 +164,7 @@ const createGame = () => {
         splashWindow.destroy();
         gameWindow.show();
         config.get('maxsize') ? gameWindow.maximize() : '';
-        rpcSetting()
+        config.get("discordRpc", true) ? rpcSetting() : "";
     })
     //ショートカットキーの生成
     shortcut.register(gameWindow, 'Esc', async () => {
