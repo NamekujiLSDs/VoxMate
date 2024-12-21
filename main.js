@@ -212,6 +212,11 @@ const createGame = () => {
         }
     });
 
+    //ゲーム内からでも閉じられるようにする
+    gameWindow.webContents.on('will-prevent-unload', e => {
+        e.preventDefault()
+    })
+
 }
 
 //ウィンドウの位置やサイズを保存する
