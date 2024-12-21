@@ -1,4 +1,4 @@
-const { BrowserWindow, dialog, session, protocol, app, Menu, webContents, shell, ipcMain } = require('electron')
+const { BrowserWindow, dialog, session, protocol, app, Menu, webContents, shell, ipcMain, remote } = require('electron')
 const path = require('path')
 const store = require('electron-store')
 const config = new store()
@@ -11,6 +11,29 @@ const { request } = require('http')
 const { settings } = require('cluster')
 const vmcTool = new clientTool.clientTools()
 const { exec } = require('child_process')
+const RPC = require('discord-rpc')
+const rpc = new RPC.Client({ transport: 'ipc' })
+
+//Discord RPC settings
+const clientId = '1319464002295824404';
+rpc.login({ clientId: clientId })
+const rpcSetting = () => {
+    rpc.setActivity({
+        pid: process.pid,
+        state: 'Playing Voxiom.io',
+        details: 'Next generation...',
+        startTimestamp: new Date(),
+        largeImageText: "VMC by Namekuji",
+        buttons: [
+            {
+                label: "About VMC",
+                url: "https://namekujilsds.github.io/VoxMate"
+            }
+        ]
+    })
+}
+
+
 
 const defaultSwapList = require('./assets/json/swapper-default.json')
 const defaultBlockList = require('./assets/json/adblock-default.json').urls
@@ -141,6 +164,7 @@ const createGame = () => {
         splashWindow.destroy();
         gameWindow.show();
         config.get('maxsize') ? gameWindow.maximize() : '';
+        config.get("discordRpc", true) ? rpcSetting() : "";
     })
     //ショートカットキーの生成
     shortcut.register(gameWindow, 'Esc', async () => {
@@ -203,7 +227,6 @@ const createGame = () => {
                 }
         }
     })
-
     //ちょっと制限
     gameWindow.webContents.on('will-navigate', (e, url) => {
         if (url.startsWith("https://voxiom.io/assets/")) {
@@ -546,6 +569,9 @@ ipcMain.on('clear-all-data-and-restart', async () => {
         }
     }
 });
+
+//Discord RPCの設定
+// app.on('ready')
 
 //アプリの準備ができたらスプラッシュを起動
 app.on('ready', () => {
