@@ -1,25 +1,16 @@
 {
   "name": "voxmate",
-  "productName": "VoxMate Client",
+  "displayName": "VoxMate Client",
   "version": "1.0.0",
-  "description": "Official successor port to VancedVoxiomClient",
+  "description": "Client of Voxiom player, by the Voxiom player, for the Voxiom player.",
   "main": "main.js",
   "scripts": {
     "test": "electron .",
     "build": "electron-builder --win --x64 --publish never",
     "publish": "electron-builder --win --x64 --publish always"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/NamekujiLSDs/VoxMate.git"
-  },
-  "keywords": [],
-  "author": "NamekujiLSDs",
-  "license": "GPL-3.0-or-later",
-  "bugs": {
-    "url": "https://github.com/NamekujiLSDs/VoxMate/issues"
-  },
-  "homepage": "https://github.com/NamekujiLSDs/VoxMate#readme",
+  "author": "Namekuji",
+  "license": "GPL-3.0-only",
   "devDependencies": {
     "electron": "^10.4.7",
     "electron-builder": "^25.1.8"
@@ -28,25 +19,13 @@
     "discord-rpc": "^4.0.1",
     "electron-localshortcut": "^3.2.1",
     "electron-log": "^5.2.4",
-    "electron-store": "^6.0.1",
+    "electron-store": "^8.2.0",
     "electron-updater": "^6.3.9"
   },
   "build": {
-    "appId": "voxmate.client",
     "directories": {
-      "output": "dist"
-    },
-    "win": {
-      "publish": {
-        "provider": "github",
-        "owner": "NamekujiLSDs"
-      },
-      "target": {
-        "target": "nsis"
-      }
-    },
-    "nsis": {
-      "oneClick": true
+      "output": "./dist",
+      "buildResources": "./build"
     }
   }
 }

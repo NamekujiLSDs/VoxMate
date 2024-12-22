@@ -33,8 +33,6 @@ const rpcSetting = () => {
     })
 }
 
-
-
 const defaultSwapList = require('./assets/json/swapper-default.json')
 const defaultBlockList = require('./assets/json/adblock-default.json').urls
 
@@ -45,7 +43,7 @@ Object.defineProperty(app, 'isPackaged', {
     }
 });
 
-// [N]ms秒待つ関数
+// sleep関数
 const sleep = (time) => new Promise((resolve) => setTimeout(resolve, time));
 
 //ウィンドウの原型を作る
