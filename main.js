@@ -371,6 +371,44 @@ ipcMain.on("openTutorial", (e, val) => {
     }
 })
 
+// 設定のエクスポート
+ipcMain.on('exportSetting', async (e, val) => {
+    let folderPath = path.join(app.getPath('documents'), './vmc-swap/settings')
+    try {
+        const now = new Date();
+        const timestamp = now
+            .toISOString()
+            .replace(/[-T:.Z]/g, '')
+            .slice(0, 14); // yyyymmddhhmmss
+        const filePath = await path.join(folderPath, `${timestamp}-voxiom-setting.txt`);
+        await fs.writeFileSync(filePath, val, 'utf8');
+        return { success: true, filePath };
+    } catch (error) {
+        console.error('Error saving file:', error);
+        return { success: false, error: error.message };
+    }
+})
+
+// 設定のインポート
+ipcMain.on('importSetting', async (e, val) => {
+    dialog.showOpenDialog(
+        gameWindow,
+        {
+            properties: ['openFile'],
+            filters: [
+                {
+                    name: 'Settings',
+                    extensions: ['txt']
+                }]
+        }).then(result => {
+            if (!result.canceled) {
+                const filePath = result.filePaths[0];
+                const fileContent = fs.readFileSync(filePath, 'utf8');
+                gameWindow.webContents.send('importSettingValue', fileContent);
+            }
+        })
+})
+
 //Chromium flagの設定
 vmcTool.flagSwitch()
 

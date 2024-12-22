@@ -149,18 +149,6 @@ exports.clientTools = class {
                     oninput="window.vmc.saveSetting(this.id,this.checked)"
                     ${config.get('unlimitedFps', true) ? "checked" : ""}>
             </div>
-            <div class="horizonalLine"></div>
-
-            <div id="menuBodyItem">
-                Export Game Settings
-                <input type="button" id="menuButton" value="EXPORT" onclick="window.vmc.exportSetting()">
-            </div>
-            <div class="horizonalLine"></div>
-
-            <div id="menuBodyItem">
-                Import Game Settings
-                <input type="button" id="menuButton" value="IMPORT" onclick="window.vmc.exportSetting()">
-            </div>
             <div class="horizonalLine"></div>`;
             case "crosshairSetting":
                 let crosshairUrl
@@ -576,6 +564,7 @@ exports.clientTools = class {
         let swapFolder = path.join(documents, './vmc-swap')
         let cssFolder = path.join(swapFolder, "./css")
         let crosshairFolder = path.join(swapFolder, "./crosshair")
+        let settingFolder = path.join(swapFolder, "./settings")
         if (fs.existsSync(swapFolder)) { } else {
             fs.mkdirSync(swapFolder)
         }
@@ -584,6 +573,9 @@ exports.clientTools = class {
         }
         if (fs.existsSync(crosshairFolder)) { } else {
             fs.mkdirSync(crosshairFolder)
+        }
+        if (fs.existsSync(settingFolder)) { } else {
+            fs.mkdirSync(settingFolder)
         }
     }
     isFirstTime() {
@@ -643,3 +635,16 @@ exports.clientTools = class {
     test() {
     }
 }
+
+// 設定のインポート/エクスポートを思い出したら実装する
+// <div id="menuBodyItem">
+// Export Game Settings
+// <input type="button" id="menuButton" value="EXPORT" onclick="window.vmc.exportSetting()">
+// </div>
+// <div class="horizonalLine"></div>
+
+// <div id="menuBodyItem">
+// Import Game Settings
+// <input type="button" id="menuButton" value="IMPORT" onclick="window.vmc.importSetting()">
+// </div>
+// <div class="horizonalLine"></div>

@@ -176,6 +176,14 @@ contextBridge.exposeInMainWorld('vmc', {
     },
     resetAllData: () => {
         ipcRenderer.send('clear-all-data-and-restart')
+    },
+    importSetting: () => {
+        ipcRenderer.send('importSetting')
+    },
+    exportSetting: () => {
+        let set = localStorage.getItem("persist:root")
+        console.log(set)
+        ipcRenderer.send('exportSetting', set)
     }
 })
 
@@ -243,3 +251,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     let cssDom = await ipcRenderer.invoke('cssDom')
     document.body.insertAdjacentHTML('afterbegin', cssDom[0])
 })
+
+ipcRenderer.on('importSettingValue', (e, val) => {
+    console.log(e)
+    console.log(val)
+}) 
