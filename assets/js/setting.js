@@ -116,6 +116,14 @@ exports.clientTools = class {
             </div>
             <div class="horizonalLine"></div>
             <div id="menuBodyItem">
+                Join Game
+                <div id="joinHolder">
+                    <input type="text" name="joinGame" id="joinGame" placeholder="Enter Game URL or code">
+                    <input type="button" id="menuButton" value="JOIN" onclick="window.vmc.joinGame()">
+                </div>
+            </div>
+            <div class="horizonalLine"></div>
+            <div id="menuBodyItem">
                 Enable Custom Crosshair
                 <input type="checkbox" name="enableCustomCrosshair" id="enableCustomCrosshair"
                     oninput="window.vmc.saveSetting(this.id,this.checked);window.vmc.crosshairChange(this.id,this.value)"
@@ -153,19 +161,19 @@ exports.clientTools = class {
 
             <div id="menuBodyItem">
                 Open GOOGLE
-                <input type="button" id="menuButton" value="OPEN" onclick="window.vmc.openBrowser('https://www.google.com/')">
+                <input type="button" id="menuButton" value="OPEN" onclick="location.href = 'https://www.google.com/'">
             </div>
             <div class="horizonalLine"></div>
 
             <div id="menuBodyItem">
                 OPEN Discord
-                <input type="button" id="menuButton" value="OPEN" onclick="window.vmc.openBrowser('https://www.google.com/')">
+                <input type="button" id="menuButton" value="OPEN" onclick="location.href = 'https://www.google.com/'">
             </div>
             <div class="horizonalLine"></div>
 
             <div id="menuBodyItem">
                 OPEN Facebook
-                <input type="button" id="menuButton" value="OPEN" onclick="window.vmc.openBrowser('https://www.google.com/')">
+                <input type="button" id="menuButton" value="OPEN" onclick="location.href = 'https://www.google.com/'">
             </div>
             <div class="horizonalLine"></div>`;
             case "crosshairSetting":

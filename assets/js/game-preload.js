@@ -185,8 +185,36 @@ contextBridge.exposeInMainWorld('vmc', {
         console.log(set)
         ipcRenderer.send('exportSetting', set)
     },
-    openBrowser: (URL) => {
-        ipcRenderer.send('openBrowser', URL)
+    joinGame: async () => {
+        let v = document.getElementById('joinGame').value
+        console.log(v)
+        console.log(new URL(v).hostname)
+        let hostName = new URL(v).hostname
+        if (hostName === 'voxiom.io') {
+            location.href = v
+            location.reload()
+        } else if (v.startsWith('#')) {
+            v = v.slice(1)
+            console.log(v)
+            fetch(`https://voxiom.io/find?region=3&game_mode=ctg&version=135&tag=${v}`, {
+                "method": "GET",
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json(); // JSONレスポンスをパース
+                })
+                .then(data => {
+                    if (data.success && data.tag === v) {
+                        location.href = "https://voxiom.io/#" + v
+                        location.reload()
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                });
+        }
     }
 })
 
