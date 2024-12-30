@@ -184,6 +184,9 @@ contextBridge.exposeInMainWorld('vmc', {
         let set = localStorage.getItem("persist:root")
         console.log(set)
         ipcRenderer.send('exportSetting', set)
+    },
+    openBrowser: (URL) => {
+        ipcRenderer.send('openBrowser', URL)
     }
 })
 

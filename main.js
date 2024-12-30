@@ -363,14 +363,16 @@ ipcMain.on("openExplorer", () => {
 ipcMain.on("openTutorial", (e, val) => {
     switch (val) {
         case 'resourceSwapper':
-            shell.openExternal("https://namekujilsds.github.io/VMC/tutorial#swapper")
+            shell.openExternal("https://namekujilsds.github.io/VoxMate/tutorial#swapper")
             break;
         case 'adBlock':
-            shell.openExternal("https://namekujilsds.github.io/VMC/tutorial#adblock")
+            shell.openExternal("https://namekujilsds.github.io/VoxMate/tutorial#adblock")
             break;
     }
 })
-
+ipcMain.on("openBrowser", (e, val) => {
+    shell.openExternal(val)
+})
 // 設定のエクスポート
 ipcMain.on('exportSetting', async (e, val) => {
     let folderPath = path.join(app.getPath('documents'), './vmc-swap/settings')

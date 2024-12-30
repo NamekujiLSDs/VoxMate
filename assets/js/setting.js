@@ -149,6 +149,24 @@ exports.clientTools = class {
                     oninput="window.vmc.saveSetting(this.id,this.checked)"
                     ${config.get('unlimitedFps', true) ? "checked" : ""}>
             </div>
+            <div class="horizonalLine"></div>
+
+            <div id="menuBodyItem">
+                Open GOOGLE
+                <input type="button" id="menuButton" value="OPEN" onclick="window.vmc.openBrowser('https://www.google.com/')">
+            </div>
+            <div class="horizonalLine"></div>
+
+            <div id="menuBodyItem">
+                OPEN Discord
+                <input type="button" id="menuButton" value="OPEN" onclick="window.vmc.openBrowser('https://www.google.com/')">
+            </div>
+            <div class="horizonalLine"></div>
+
+            <div id="menuBodyItem">
+                OPEN Facebook
+                <input type="button" id="menuButton" value="OPEN" onclick="window.vmc.openBrowser('https://www.google.com/')">
+            </div>
             <div class="horizonalLine"></div>`;
             case "crosshairSetting":
                 let crosshairUrl
