@@ -393,3 +393,7 @@ div#fileNameDisplay {
 #settingWindow:focus {
     outline: unset;
 }
+
+.hidden {
+    visibility: hidden;
+}

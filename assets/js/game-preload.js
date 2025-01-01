@@ -20,6 +20,8 @@ contextBridge.exposeInMainWorld('vmc', {
         ipcRenderer.send('saveSettingValue', name, value)
     },
     crosshairChange: async (id, value) => {
+        console.log(id);
+
         switch (id) {
             case "enableCustomCrosshair":
                 value ? document.getElementById('crosshair').classList.remove('hidden') : document.getElementById('crosshair').classList.add('hidden');

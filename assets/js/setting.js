@@ -126,7 +126,7 @@ exports.clientTools = class {
             <div id="menuBodyItem">
                 Enable Custom Crosshair
                 <input type="checkbox" name="enableCustomCrosshair" id="enableCustomCrosshair"
-                    oninput="window.vmc.saveSetting(this.id,this.checked);window.vmc.crosshairChange(this.id,this.value)"
+                    oninput="window.vmc.saveSetting(this.id,this.checked);window.vmc.crosshairChange(this.id,this.checked)"
                     ${config.get('enableCustomCrosshair', true) ? "checked" : ""}>
             </div>
             <div class="horizonalLine"></div>
@@ -202,7 +202,7 @@ exports.clientTools = class {
             <div id="menuBodyItem">
                 Enable Custom Crosshair
                 <input type="checkbox" name="enableCustomCrosshair" id="enableCustomCrosshair"
-                    oninput="window.vmc.saveSetting(this.id ,this.checked);window.vmc.crosshairChange(this.id,this.value)"
+                    oninput="window.vmc.saveSetting(this.id ,this.checked);window.vmc.crosshairChange(this.id,this.checked)"
                     ${config.get('enableCustomCrosshair', true) ? "checked" : ""}>
             </div>
             <div class="horizonalLine"></div>
@@ -562,7 +562,7 @@ exports.clientTools = class {
                 crosshairurl = 'vmc://' + path.join(app.getPath('documents'), './vmc-swap/crosshair', config.get('localCrosshairList', ''))
                 break;
         }
-        return `<img src="${crosshairurl}" id="crosshair">
+        return `<img src="${crosshairurl}" id="crosshair" class="${config.get('enableCustomCrosshair', true) ? '' : 'hidden'}">
         <style id='crosshairCss'></style>`
     }
     CustomCssDom() {
