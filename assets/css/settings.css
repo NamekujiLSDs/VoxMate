@@ -397,3 +397,7 @@ div#fileNameDisplay {
 .hidden {
     visibility: hidden;
 }
+
+div[id^="voxiom-io"] {
+    display: none;
+}
