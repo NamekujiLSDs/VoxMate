@@ -3,7 +3,7 @@
   "appname": "VoxMate Client",
   "displayName": "VoxMate Client",
   "productName": "VoxMate Client",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Client of Voxiom player, by the Voxiom player, for the Voxiom player.",
   "main": "main.js",
   "scripts": {
