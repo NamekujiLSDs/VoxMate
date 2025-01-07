@@ -359,6 +359,9 @@ ipcMain.on("openExplorer", () => {
     })
 })
 
+ipcMain.handle("version", () => {
+    return app.getVersion()
+})
 //チュートリアルを開く
 ipcMain.on("openTutorial", (e, val) => {
     switch (val) {
