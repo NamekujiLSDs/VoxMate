@@ -284,7 +284,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let cssDom = await ipcRenderer.invoke('cssDom')
     document.body.insertAdjacentHTML('afterbegin', cssDom[0])
     let ver = await ipcRenderer.invoke('version')
-    document.body.insertAdjacentHTML('afterbegin', `<div id="version" style="position:fixed;right:0;bottom:0;font-size:12px;color:white;text-shadow:0 0 2px black">VoxMate - ${ver}</div>`)
+    document.body.insertAdjacentHTML('afterbegin', `<div id="version" style="position:fixed;right:0;bottom:0;font-size:12px;color:white;text-shadow:0 0 2px black;z-index:1">VoxMate - ${ver}</div>`)
 })
 
 ipcRenderer.on('importSettingValue', (e, val) => {
