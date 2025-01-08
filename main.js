@@ -1,4 +1,4 @@
-const { BrowserWindow, dialog, session, protocol, app, Menu, webContents, shell, ipcMain, remote } = require('electron')
+const { BrowserWindow, dialog, session, protocol, app, Menu, shell, ipcMain } = require('electron')
 const path = require('path')
 const store = require('electron-store')
 const config = new store()
@@ -7,8 +7,6 @@ const { autoUpdater } = require('electron-updater')
 const fs = require('fs')
 const log = require('electron-log')
 const clientTool = require('./assets/js/setting')
-const { request } = require('http')
-const { settings } = require('cluster')
 const vmcTool = new clientTool.clientTools()
 const { exec } = require('child_process')
 const RPC = require('discord-rpc')
@@ -181,13 +179,13 @@ const createGame = () => {
         await gameWindow.webContents.send('openSetting')
     })
     shortcut.register(gameWindow, 'F11', () => {
-        gameWindow.isFullScreen() ? gameWindow.setFullScreen(false) : gameWindow.setFullScreen(true)
+        gameWindow.setFullScreen(!gameWindow.isFullScreen())
     })
     shortcut.register(gameWindow, 'F5', () => {
         gameWindow.webContents.send('reload')
     })
     shortcut.register(gameWindow, 'F12', () => {
-        gameWindow.webContents.openDevTools()
+        gameWindow.webContents.toggleDevTools()
     })
     // ゲームウィンドウが破壊される前にサイズなどを保存
     gameWindow.on('close', () => {
@@ -342,8 +340,7 @@ ipcMain.handle('crosshairDom', () => {
 
 //custom css dom
 ipcMain.handle('cssDom', () => {
-    let cssDom = vmcTool.CustomCssDom()
-    return cssDom
+    return vmcTool.CustomCssDom()
 })
 
 //フォルダを開く
