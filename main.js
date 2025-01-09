@@ -213,7 +213,6 @@ const createGame = () => {
                     || url.startsWith("https://discord.gg/")
                     || url.startsWith("https://x.com/")
                     || url.startsWith("https://twitter.com/")
-                    || url.startsWith("https://twitter.com/")
                     || url.startsWith("https://reddit.com/")
                     || url.startsWith("https://voxiom.io/assets/")
                     || url.startsWith("https://cuberealm.io/")) {
@@ -347,12 +346,7 @@ ipcMain.handle('cssDom', () => {
 ipcMain.on("openExplorer", () => {
     let swapFolder = path.join(app.getPath('documents'), './vmc-swap')
     exec(`start ${swapFolder}`, (err, stdout, stderr) => {
-        if (err) {
-            return;
-        }
-        if (stderr) {
-            return;
-        }
+        if (err || stderr) return
     })
 })
 
