@@ -591,18 +591,11 @@ exports.clientTools = class {
         let cssFolder = path.join(swapFolder, "./css")
         let crosshairFolder = path.join(swapFolder, "./crosshair")
         let settingFolder = path.join(swapFolder, "./settings")
-        if (fs.existsSync(swapFolder)) { } else {
-            fs.mkdirSync(swapFolder)
-        }
-        if (fs.existsSync(cssFolder)) { } else {
-            fs.mkdirSync(cssFolder)
-        }
-        if (fs.existsSync(crosshairFolder)) { } else {
-            fs.mkdirSync(crosshairFolder)
-        }
-        if (fs.existsSync(settingFolder)) { } else {
-            fs.mkdirSync(settingFolder)
-        }
+
+        if (!fs.existsSync(swapFolder)) fs.mkdirSync(swapFolder)
+        if (!fs.existsSync(cssFolder)) fs.mkdirSync(cssFolder)
+        if (!fs.existsSync(crosshairFolder)) fs.mkdirSync(crosshairFolder)
+        if (!fs.existsSync(settingFolder)) fs.mkdirSync(settingFolder)
     }
     isFirstTime() {
         if (config.get("isFirstTime", true)) {
