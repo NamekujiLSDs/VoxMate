@@ -598,23 +598,23 @@ exports.clientTools = class {
         if (!fs.existsSync(settingFolder)) fs.mkdirSync(settingFolder)
     }
     isFirstTime() {
-        if (config.get("isFirstTime", true)) {
-            let getTitleLogo = fs.existsSync(path.join(app.getPath("documents"), "./vmc-swap/title_logo.png"))
-            let getMenuBg = fs.existsSync(path.join(app.getPath("documents"), "./vmc-swap/menu_background.jpg"))
-            let swapper = path.join(app.getPath("documents"), "./vmc-swap");
-            let titleLogo = path.join(__dirname, "../img/title_logo.png");
-            !getTitleLogo ? fs.copyFileSync(titleLogo, path.join(swapper, "./title_logo.png")) : "";
-            let menuBg = path.join(__dirname, "../img/menu_background.jpg");
-            !getMenuBg ? fs.copyFileSync(menuBg, path.join(swapper, "./menu_background.jpg")) : "";
-            config.set("isFirstTime", false)
-        } else if (config.get("isFirstTime", true)) {
-            return
-        }
+        if (!config.get("isFirstTime", true)) return
+
+        const documents = app.getPath("documents")
+        const swapper = path.join(documents, "./vmc-swap")
+        const titleLogo = path.join(__dirname, "../img/title_logo.png")
+        const menuBg = path.join(__dirname, "../img/menu_background.jpg");
+
+        if (!fs.existsSync(path.join(documents, "./vmc-swap/title_logo.png")))
+            fs.copyFileSync(titleLogo, path.join(swapper, "./title_logo.png"))
+
+        if (!fs.existsSync(path.join(documents, "./vmc-swap/menu_background.jpg")))
+            fs.copyFileSync(menuBg, path.join(swapper, "./menu_background.jpg"))
+
+        config.set("isFirstTime", false)
     }
-    exportSetting(v) {
-    }
-    importSetting(v) {
-    }
+    exportSetting(v) { }
+    importSetting(v) { }
     getCssList() {
         let documents = app.getPath('documents');
         let swapFolder = path.join(documents, './vmc-swap')
