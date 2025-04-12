@@ -77,6 +77,7 @@ const createSplash = () => {
     })
     //スプラッシュの表示するよ
     splashWindow.loadFile(path.join(__dirname, './assets/html/splash.html'))
+    // splashWindow.toggleDevTools()
     //自動アップデート機能はここから
     const update = async () => {
         let updateCheck = null
@@ -145,7 +146,8 @@ const createGame = () => {
         fullscreen: config.get('fullscreen', true),
         webPreferences: {
             preload: path.join(__dirname, './assets/js/game-preload.js'),
-            contextIsolation: true
+            contextIsolation: true,
+            nodeIntegration: false
         }
     })
     //フォーカスはずし用のウィンドウを作成
@@ -242,7 +244,7 @@ const storeWindowPos = () => {
     let { x, y, width, height } = gameWindow.getBounds()
     gameWindow.isFullScreen() ? '' : config.set('windowHeight', height || 1080);
     gameWindow.isFullScreen() ? '' : config.set('windowWidth', width || 1920);
-    gameWindow.isFullScreen() ? '' : config.set('windowHeight', height || 1080); config.set('windowX', x || 0);
+    gameWindow.isFullScreen() ? '' : config.set('windowX', x || 0);
     gameWindow.isFullScreen() ? '' : config.set('windowY', y || 0);
     config.set('fullscreen', gameWindow.isFullScreen())
     config.set('maxsize', gameWindow.isMaximized())
@@ -403,6 +405,12 @@ ipcMain.on('importSetting', async (e, val) => {
                 gameWindow.webContents.send('importSettingValue', fileContent);
             }
         })
+})
+
+//ログを送信
+ipcMain.on("log", async (e, val) => {
+    // log.info(val);
+    console.log(val[0]);
 })
 
 //Chromium flagの設定

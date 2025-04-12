@@ -124,6 +124,20 @@ exports.clientTools = class {
             </div>
             <div class="horizonalLine"></div>
             <div id="menuBodyItem">
+                Invite Friends
+                <div id="inviteHolder">
+                    <input type="text" name="inviteGame" id="inviteGame" value="" readonly>
+                </div>
+            </div>
+            <div class="horizonalLine"></div>
+            <div id="menuBodyItem">
+                Server Hooker(!!WIP!!)
+                <div id="serverHookHolder">
+                    <input type="text" name="serverHooker" id="serverHooker" value="" readonly>
+                </div>
+            </div>
+            <div class="horizonalLine"></div>
+            <div id="menuBodyItem">
                 Enable Custom Crosshair
                 <input type="checkbox" name="enableCustomCrosshair" id="enableCustomCrosshair"
                     oninput="window.vmc.saveSetting(this.id,this.checked);window.vmc.crosshairChange(this.id,this.checked)"

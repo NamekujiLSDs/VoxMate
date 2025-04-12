@@ -13,7 +13,9 @@
 </head>
 
 <body>
-    <img onMouseDown="return false;" id="bg" src="../img/splash-winter.png">
+
+    <img onMouseDown="return false;" id="bg" src="">
+    <img onMouseDown="return false;" id="logo" src="">
     <div onMouseDown="return false;" id="ver">0.0.0</div>
     <div onMouseDown="return false;" id="stat">Update</div>
     <img onMouseDown="return false;" id="logo"></img>
@@ -57,9 +59,25 @@
             position: fixed;
             left: 50%;
             top: 50%;
-            transform: translate(-50%, -50%)
+            transform: translate(-50%, -50%);
+            width: 800px;
+            height: 450px;
         }
     </style>
+    <script>
+        const imgSet = () => {
+            let season = "spring" //winter,spring,summer,fall
+            let bgDom = document.getElementById("bg")
+            let imgPath = "../img/splash-" + season + ".png";
+            console.log(imgPath)
+            bgDom.setAttribute("src", imgPath)
+            if (season === "spring") {
+                const randomNum = Math.floor(Math.random() * 2) + 1;
+                document.getElementById("logo").setAttribute("src", "../img/spring-logo-" + randomNum + ".png")
+            }
+        }
+        imgSet()
+    </script>
 </body>
 
 </html>

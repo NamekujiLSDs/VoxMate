@@ -1,4 +1,19 @@
-const { contextBridge, ipcRenderer, ipcMain } = require('electron')
+const { contextBridge, ipcRenderer } = require('electron');
+
+//console.logをhookしてサーバーを特定する
+window.addEventListener('DOMContentLoaded', () => {
+    const script = document.createElement('script');
+    script.textContent = `
+    const originalLog = console.log;
+    console.log = function (...args) {
+        originalLog.apply(console, args);
+        // window.vmc?.sendLog?.(args);
+        window.vmc?.serverLogger?.(args);
+    };`;
+    document.head.appendChild(script);
+});
+
+let serverId = ""
 
 //ゲーム側からの関数をフックする
 contextBridge.exposeInMainWorld('vmc', {
@@ -217,8 +232,20 @@ contextBridge.exposeInMainWorld('vmc', {
                     console.error('Fetch error:', error);
                 });
         }
+    },
+    sendLog: (val) => {
+        ipcRenderer.send("log", val)
+    },
+    serverLogger: (val) => {
+        val = val[0]
+        if (val.startsWith("Connected to game-server-")) {
+            const match = val.match(/game-server-([^.]+)\.voxiom\.io/);
+            const svrid = match ? match[1] : null;
+            serverId = svrid
+        }
     }
 })
+
 
 //crosshairのcssを設定する
 const refreshCrosshairCss = async () => {
@@ -249,6 +276,10 @@ ipcRenderer.on('openSetting', async () => {
         document.getElementById("menuBody").innerHTML = await settingTabDom;
     } else {
         document.getElementById("settingWindow").classList.toggle("settingShow")
+    }
+    if (document.getElementById("inviteGame")) {
+        document.getElementById("inviteGame").value = location.href
+        document.getElementById("serverHooker").value = "https://voxiom.io/#" + serverId
     }
 })
 
@@ -290,4 +321,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 ipcRenderer.on('importSettingValue', (e, val) => {
     console.log(e)
     console.log(val)
-}) 
+})
+
+//invite機能の部分
+let lastUrl = location.href;
+const observer = new MutationObserver(() => {
+    if (location.href !== lastUrl) {
+        lastUrl = location.href;
+        if (document.getElementById("inviteGame")) {
+            document.getElementById("inviteGame").value = location.href
+            document.getElementById("serverHooker").value = "https://voxiom.io/#" + serverId
+        }
+    }
+});
+observer.observe(document, { subtree: true, childList: true });
+
