@@ -1,18 +1,5 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
-//console.logをhookしてサーバーを特定する
-window.addEventListener('DOMContentLoaded', () => {
-    const script = document.createElement('script');
-    script.textContent = `
-    const originalLog = console.log;
-    console.log = function (...args) {
-        originalLog.apply(console, args);
-        // window.vmc?.sendLog?.(args);
-        window.vmc?.serverLogger?.(args);
-    };`;
-    document.head.appendChild(script);
-});
-
 let serverId = ""
 
 //ゲーム側からの関数をフックする
@@ -335,4 +322,15 @@ const observer = new MutationObserver(() => {
     }
 });
 observer.observe(document, { subtree: true, childList: true });
-
+// //console.logをhookしてサーバーを特定する
+window.addEventListener('DOMContentLoaded', () => {
+    const script = document.createElement('script');
+    script.textContent = `
+    const originalLog = console.log;
+    console.log = function (...args) {
+        originalLog.apply(console, args);
+        // window.vmc?.sendLog?.(args);
+        window.vmc?.serverLogger?.(args);
+    };`;
+    document.head.appendChild(script);
+});

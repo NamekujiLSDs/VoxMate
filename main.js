@@ -409,8 +409,7 @@ ipcMain.on('importSetting', async (e, val) => {
 
 //ログを送信
 ipcMain.on("log", async (e, val) => {
-    // log.info(val);
-    console.log(val[0]);
+    console.log(val);
 })
 
 //Chromium flagの設定
