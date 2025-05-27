@@ -236,6 +236,38 @@ const createGame = () => {
     gameWindow.webContents.on('will-prevent-unload', e => {
         e.preventDefault()
     })
+    try {
+        const scriptToExecutePath = path.join(app.getPath("documents"), "./vmc-swap/userscript"); // `${path}` の部分
+        let files = fs.readdirSync(scriptToExecutePath);
+        let fileList = [];
+        for (file of files) {
+            if (file.slice(-8) == ".user.js") {
+                fileList.push(file)
+            }
+        }
+
+        gameWindow.webContents.on('did-finish-load', () => {
+            for (file of files) {
+                fs.readFile(path.join(scriptToExecutePath, file), 'utf8', (err, scriptContent) => {
+                    if (err) {
+                        return;
+                    }
+                    gameWindow.webContents.executeJavaScript(scriptContent)
+                        .then((result) => {
+                            if (result !== undefined) {
+                            }
+                        })
+                        .catch((error) => {
+                            console.log(error)
+                            return
+                        });
+                });
+            }
+        })
+    } catch (error) {
+        console.log(error)
+    }
+
 
 }
 
