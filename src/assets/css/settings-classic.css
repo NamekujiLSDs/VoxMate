@@ -1,4 +1,4 @@
-:root {
+#settingWindow {
     --col-1: #c4e195;
     --col-2: #baa2b1;
     --col-3: #ffa1a9;
@@ -13,28 +13,30 @@
     --col-shadow-6: #28975b;
 }
 
-body {
-    padding: unset;
-    margin: unset;
-    background: url(./241213113953.png);
-}
-
 #settingWindow {
     left: 0;
     top: 0;
-    height: 100%;
-    width: 100%;
-    z-index: 1;
-    background: #0000;
-    backdrop-filter: brightness(1);
+    height: 100vh;
+    width: 100vw;
+    z-index: 1000;
     position: fixed;
     user-select: none;
+    pointer-events: none;
     font-family: Manrope;
-    transition: .2s;
+    transition: opacity .2s, visibility .2s;
     display: flex;
-    flex-direction: row;
-    z-index: 1;
+    align-items: center;
+    justify-content: center;
     visibility: hidden;
+    opacity: 0;
+    background: #0008;
+    backdrop-filter: brightness(.4);
+}
+
+#settingWindow.settingShow {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
 }
 
 #settingWindow *::-webkit-scrollbar-track {
@@ -50,85 +52,83 @@ body {
 #settingWindow *::-webkit-scrollbar-thumb {
     background-color: #0005;
     border-radius: 10px;
-    ;
-}
-
-/* 設定非表示アニメーション */
-.settingShow #menuItemHolder {
-    transform: translateX(0%);
-    transition: .2s;
-}
-
-.settingShow #menuBodyHolder {
-    transform: translateX(0%);
-    transition: .2s;
-}
-
-#settingWindow.settingShow {
-    visibility: visible;
-    background: transparent;
-    transition: .2s;
-    background: #0008;
-    backdrop-filter: brightness(.4);
 }
 
 /* クリックするとメニュー隠すやつ */
-#menuHider {
+#settingWindow #menuHider {
     top: 0;
     left: 0;
     bottom: 0;
     right: 0;
-    position: fixed;
-    background-color: #0007;
+    position: absolute;
+    background-color: transparent;
+    z-index: 1;
+}
+
+#settingWindow #settingContainer {
+    position: relative;
     z-index: 2;
+    display: flex;
+    flex-direction: row;
+    width: 85vw;
+    max-width: 900px;
+    height: 80vh;
+    max-height: 600px;
+    background: rgba(15, 15, 15, 0.95);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    overflow: hidden;
+    transform: scale(0.92);
+    transition: transform .2s ease, opacity .2s ease;
+}
+
+#settingWindow.settingShow #settingContainer {
+    transform: scale(1);
 }
 
 /* サイドバー */
 
-#menuItemHolder {
+#settingWindow #menuItemHolder {
     display: flex;
     flex-direction: column;
     background: #0006;
     min-width: 150px;
     width: 30%;
     max-width: 200px;
-    transform: translateX(-100%);
-    transition: .2s;
     z-index: 3;
 }
 
-.menuSplitter {
+#settingWindow .menuSplitter {
     height: 10px;
     background: #0009;
     width: 100%;
 }
 
-.menuItem {
+#settingWindow .menuItem {
     display: flex;
     flex-direction: column;
     height: 100%;
     align-items: center;
     justify-content: center;
-    /* border-top: 1px solid #0006; */
-    /* border-bottom: 1px solid #0006; */
     border-right: 5px transparent solid;
 }
 
-.menuItemIcon .material-symbols-outlined {
+#settingWindow .menuItemIcon .material-symbols-outlined {
     font-size: 3em !important;
     transform: scale(1);
     transition: .2s;
 }
 
-.menuItemTitle {
+#settingWindow .menuItemTitle {
     font-weight: bolder;
 }
 
-.menuSelected {
+#settingWindow .menuSelected {
     border-right: 5px solid white;
 }
 
-.menuSelected .menuItemIcon {
+#settingWindow .menuSelected .menuItemIcon {
     animation: selected .5s infinite;
 }
 
@@ -146,79 +146,67 @@ body {
     }
 }
 
-.menuItem:hover {
+#settingWindow .menuItem:hover {
     background: #fff5;
     cursor: pointer;
 }
 
-.menuItem:hover .menuItemIcon .material-symbols-outlined,
-.menuItem:hover .menuItemTitle {
-    /* color: white; */
+#settingWindow .menuItem:hover .menuItemIcon .material-symbols-outlined,
+#settingWindow .menuItem:hover .menuItemTitle {
     transform: scale(1.3);
     transition: .2s;
 }
 
-#quickSetting {
+#settingWindow #quickSetting {
     color: var(--col-1);
 }
 
-#crosshairSetting {
+#settingWindow #crosshairSetting {
     color: var(--col-2);
-    ;
 }
 
-#cssSetting {
+#settingWindow #cssSetting {
     color: var(--col-3);
-    ;
 }
 
-#swapperSetting {
+#settingWindow #swapperSetting {
     color: var(--col-4);
-    ;
 }
 
-#adblockSetting {
+#settingWindow #adblockSetting {
     color: var(--col-5);
-    ;
 }
 
-#advancedSetting {
+#settingWindow #advancedSetting {
     color: var(--col-6);
-    ;
 }
 
-#quickSetting:hover {
+#settingWindow #quickSetting:hover {
     text-shadow: 0 0 4px var(--col-shadow-1);
-    ;
 }
 
-#crosshairSetting:hover {
+#settingWindow #crosshairSetting:hover {
     text-shadow: 0 0 4px var(--col-shadow-2);
-    ;
 }
 
-#cssSetting:hover {
+#settingWindow #cssSetting:hover {
     text-shadow: 0 0 4px var(--col-shadow-3);
-    ;
 }
 
-#swapperSetting:hover {
+#settingWindow #swapperSetting:hover {
     text-shadow: 0 0 4px var(--col-shadow-4);
-    ;
 }
 
-#adblockSetting:hover {
+#settingWindow #adblockSetting:hover {
     text-shadow: 0 0 4px var(--col-shadow-5);
-    ;
 }
 
-#advancedSetting:hover {
+#settingWindow #advancedSetting:hover {
     text-shadow: 0 0 4px var(--col-shadow-6);
-    ;
 }
 
 /* チェックボックスをスイッチにする */
-input[type="checkbox"] {
+#settingWindow input[type="checkbox"] {
     appearance: none;
     width: 44px;
     height: 24px;
@@ -229,7 +217,7 @@ input[type="checkbox"] {
     transition: .2s;
 }
 
-input[type="checkbox"]::before {
+#settingWindow input[type="checkbox"]::before {
     content: "";
     height: 20px;
     width: 20px;
@@ -241,7 +229,7 @@ input[type="checkbox"]::before {
     transition: .2s;
 }
 
-input[type="checkbox"]:checked::before {
+#settingWindow input[type="checkbox"]:checked::before {
     content: "";
     height: 20px;
     width: 20px;
@@ -251,7 +239,7 @@ input[type="checkbox"]:checked::before {
     position: absolute;
 }
 
-input[type="checkbox"]:checked {
+#settingWindow input[type="checkbox"]:checked {
     background-color: #3d5;
     transition: .2s;
 }
@@ -259,35 +247,26 @@ input[type="checkbox"]:checked {
 
 /* メニュー本体 */
 
-#menuBodyHolder {
+#settingWindow #menuBodyHolder {
     position: relative;
     width: 100%;
     color: lightgray;
-    transform: translateX(100%);
-    transition: .2s;
     z-index: 3;
 }
 
-#menuBody {
+#settingWindow #menuBody {
     display: block;
-    position: absolute;
-    width: 80%;
-    height: 80%;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    background: #252525;
-    border-radius: 10px;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: transparent;
     padding: 20px;
-    border: 4px #222 solid;
-    box-shadow: 4px 4px 5px black;
-    max-width: 1000px;
-    max-height: 800px;
     overflow-y: scroll;
+    box-sizing: border-box;
     z-index: 3;
 }
 
-#menuBodyTitle {
+#settingWindow #menuBodyTitle {
     font-size: 30px;
     margin-left: auto;
     margin-right: auto;
@@ -295,7 +274,7 @@ input[type="checkbox"]:checked {
     font-weight: bold;
 }
 
-#menuBodyItem {
+#settingWindow #menuBodyItem {
     padding: 10px;
     margin: 10px;
     display: flex;
@@ -305,16 +284,16 @@ input[type="checkbox"]:checked {
     margin-right: 50px;
 }
 
-.horizonalLine {
+#settingWindow .horizonalLine {
     height: 2px;
     width: calc(100% - 50px);
     margin-left: auto;
     margin-right: auto;
     display: block;
-    background: #fff2
+    background: #fff2;
 }
 
-#menuButton {
+#settingWindow #menuButton {
     appearance: none;
     border: 2px solid #fff3;
     background: transparent;
@@ -324,12 +303,12 @@ input[type="checkbox"]:checked {
     font-weight: bolder !important;
 }
 
-#menuButton:hover {
+#settingWindow #menuButton:hover {
     background: #fff3;
 }
 
 /* クロスヘアプレビューの設定 */
-#crosshairPreview {
+#settingWindow #crosshairPreview {
     height: 200px;
     display: flex;
     flex-direction: column;
@@ -337,11 +316,11 @@ input[type="checkbox"]:checked {
     align-items: center;
 }
 
-#crosshairPreviewTitle {
+#settingWindow #crosshairPreviewTitle {
     height: 20px;
 }
 
-#previewBody {
+#settingWindow #previewBody {
     height: 180px;
     display: flex;
     align-items: center;
@@ -350,41 +329,41 @@ input[type="checkbox"]:checked {
     border: #fff2 4px solid;
 }
 
-#crosshairPreviewImage {
+#settingWindow #crosshairPreviewImage {
     max-height: 150px;
 }
 
-#nowPath {
+#settingWindow #nowPath {
     font-size: 10px;
     display: flex;
     flex-direction: inherit;
 }
 
-.sizeInput {
+#settingWindow .sizeInput {
     width: 50px;
 }
 
-#warn {
+#settingWindow #warn {
     font-size: 12px;
     margin-left: 10px;
     margin-right: auto;
     color: rgb(255, 216, 144);
 }
 
-.requireRestart {
+#settingWindow .requireRestart {
     color: #f55;
     margin-top: 5px !important;
     margin-bottom: 5px !important;
     padding: unset !important;
 }
 
-div#fileNameDisplay {
+#settingWindow div#fileNameDisplay {
     display: flex;
     flex-direction: row;
     align-items: center;
 }
 
-.filename {
+#settingWindow .filename {
     font-size: 12px;
     text-align: center;
     margin-right: 5px;
@@ -394,7 +373,7 @@ div#fileNameDisplay {
     outline: unset;
 }
 
-.hidden {
+#settingWindow .hidden {
     visibility: hidden;
 }
 

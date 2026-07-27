@@ -1,0 +1,472 @@
+/**
+ * ============================================================================================
+ * VoxMate Settings Window - Google Material Design 3 (Material You) Theme
+ * Simple, Charming, Colorful & Compact UI with Dynamic Menu Accent Matching
+ * ============================================================================================
+ */
+
+#settingWindow {
+    --m3-surface: #1E1F22;
+    --m3-surface-container: #2B2D31;
+    --m3-surface-high: #313338;
+    --m3-on-surface: #F2F3F5;
+    --m3-on-surface-variant: #B5BAC1;
+    --m3-outline: rgba(255, 255, 255, 0.08);
+
+    /* Category Accent Colors matching Left Navigation Rail */
+    --col-quick: #2DD4BF;      /* Teal */
+    --col-rendering: #A855F7;  /* Violet */
+    --col-crosshair: #F43F5E;  /* Coral Rose */
+    --col-css: #EAB308;        /* Amber */
+    --col-swapper: #0284C7;    /* Sky Blue */
+    --col-adblock: #10B981;    /* Emerald */
+    --col-info: #3B82F6;       /* Blue */
+    --col-advanced: #EC4899;   /* Magenta */
+
+    --tab-accent: #A855F7;
+
+    --radius-m: 12px;
+    --radius-l: 20px;
+    --radius-pill: 9999px;
+}
+
+/* Modal Overlay Base */
+#settingWindow {
+    left: 0;
+    top: 0;
+    height: 100vh;
+    width: 100vw;
+    z-index: 1000;
+    position: fixed;
+    user-select: none;
+    pointer-events: none;
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    visibility: hidden;
+    opacity: 0;
+    background: rgba(12, 13, 16, 0.65);
+    backdrop-filter: blur(12px) brightness(0.7);
+    transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#settingWindow.settingShow {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Custom Scrollbar */
+#settingWindow *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+#settingWindow *::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#settingWindow *::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-pill);
+}
+
+#settingWindow *::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Click-to-close Backdrop */
+#settingWindow #menuHider {
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    position: absolute;
+    background: transparent;
+    z-index: 1;
+}
+
+/* Pop-up Centered Modal Window Card */
+#settingWindow #settingContainer {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: row;
+    width: 88vw;
+    max-width: 920px;
+    height: 80vh;
+    max-height: 640px;
+    background: var(--m3-surface-container);
+    border-radius: var(--radius-l);
+    border: 1px solid var(--m3-outline);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), 0 0 1px rgba(255, 255, 255, 0.15);
+    overflow: hidden;
+    transform: scale(0.92);
+    opacity: 0;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#settingWindow.settingShow #settingContainer {
+    transform: scale(1);
+    opacity: 1;
+}
+
+/* Sidebar Navigation Rail inside Centered Card */
+#settingWindow #menuItemHolder {
+    display: flex;
+    flex-direction: column;
+    background: rgba(22, 23, 26, 0.95);
+    width: 200px;
+    min-width: 170px;
+    padding: 16px 8px;
+    gap: 6px;
+    border-right: 1px solid var(--m3-outline);
+    box-sizing: border-box;
+    overflow-y: auto;
+    flex-shrink: 0;
+}
+
+#settingWindow .menuSplitter {
+    display: none;
+}
+
+/* Charming Colorful Navigation Items */
+#settingWindow .menuItem {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 14px;
+    border-radius: var(--radius-l);
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    color: var(--m3-on-surface-variant);
+    position: relative;
+    box-sizing: border-box;
+}
+
+#settingWindow .menuItemIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.05);
+    transition: all 0.2s ease;
+}
+
+#settingWindow .menuItemIcon .material-symbols-outlined {
+    font-size: 20px !important;
+    transition: transform 0.2s ease;
+}
+
+#settingWindow .menuItemTitle {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+}
+
+/* Category Colors */
+#settingWindow #quickSetting { color: var(--col-quick); }
+#settingWindow #quickSetting .menuItemIcon { background: rgba(45, 212, 191, 0.12); color: var(--col-quick); }
+
+#settingWindow #renderingSetting, #settingWindow #skySetting { color: var(--col-rendering); }
+#settingWindow #renderingSetting .menuItemIcon, #settingWindow #skySetting .menuItemIcon { background: rgba(168, 85, 247, 0.12); color: var(--col-rendering); }
+
+#settingWindow #crosshairSetting { color: var(--col-crosshair); }
+#settingWindow #crosshairSetting .menuItemIcon { background: rgba(244, 63, 94, 0.12); color: var(--col-crosshair); }
+
+#settingWindow #cssSetting { color: var(--col-css); }
+#settingWindow #cssSetting .menuItemIcon { background: rgba(234, 179, 8, 0.12); color: var(--col-css); }
+
+#settingWindow #swapperSetting { color: var(--col-swapper); }
+#settingWindow #swapperSetting .menuItemIcon { background: rgba(2, 132, 199, 0.12); color: var(--col-swapper); }
+
+#settingWindow #adblockSetting { color: var(--col-adblock); }
+#settingWindow #adblockSetting .menuItemIcon { background: rgba(16, 185, 129, 0.12); color: var(--col-adblock); }
+
+#settingWindow #infoSetting { color: var(--col-info); }
+#settingWindow #infoSetting .menuItemIcon { background: rgba(59, 130, 246, 0.12); color: var(--col-info); }
+
+#settingWindow #performanceSetting { color: var(--col-advanced); }
+#settingWindow #performanceSetting .menuItemIcon { background: rgba(236, 72, 153, 0.12); color: var(--col-advanced); }
+
+/* Hover & Active States */
+#settingWindow .menuItem:hover {
+    background: rgba(255, 255, 255, 0.07);
+    transform: translateX(4px);
+}
+
+#settingWindow .menuItem:hover .menuItemIcon {
+    transform: scale(1.1);
+}
+
+#settingWindow .menuSelected {
+    background: rgba(255, 255, 255, 0.1) !important;
+    font-weight: 800;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+#settingWindow .menuSelected .menuItemIcon {
+    transform: scale(1.15);
+    box-shadow: 0 0 12px currentColor;
+}
+
+/* Content Holder Panel */
+#settingWindow #menuBodyHolder {
+    position: relative;
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+/* Compact Modal Card Body */
+#settingWindow #menuBody {
+    display: block;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    padding: 24px 28px;
+    overflow-y: auto;
+    box-sizing: border-box;
+    z-index: 3;
+}
+
+#settingWindow .tabContainer {
+    width: 100%;
+}
+
+/* Title Styling */
+#settingWindow #menuBodyTitle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--m3-on-surface);
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--m3-outline);
+}
+
+#settingWindow #menuBodyTitle .material-symbols-outlined {
+    font-size: 28px !important;
+    color: var(--tab-accent, #A855F7);
+}
+
+/* Section Header (Subheadings matching Left Tab Accent Color) */
+#settingWindow .settingSectionHeader {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    color: var(--tab-accent, #A855F7);
+    text-transform: uppercase;
+    margin: 18px 8px 8px 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Setting Row Item */
+#settingWindow #menuBodyItem {
+    padding: 10px 14px;
+    margin: 4px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--m3-on-surface);
+    background: var(--m3-surface);
+    border-radius: var(--radius-m);
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+}
+
+#settingWindow #menuBodyItem:hover {
+    background: var(--m3-surface-high);
+    border-color: var(--m3-outline);
+}
+
+#settingWindow .horizonalLine {
+    height: 1px;
+    width: 100%;
+    margin: 4px 0;
+    background: transparent;
+}
+
+/* Material M3 Switch (Compact Pill Checkbox using Left Tab Accent Color) */
+#settingWindow input[type="checkbox"] {
+    appearance: none;
+    width: 44px;
+    height: 24px;
+    background-color: #36373A;
+    border-radius: var(--radius-pill);
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    outline: none;
+}
+
+#settingWindow input[type="checkbox"]::before {
+    content: "";
+    height: 18px;
+    width: 18px;
+    border-radius: 50%;
+    background: #C4C7C5;
+    position: absolute;
+    left: 3px;
+    top: 3px;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease;
+}
+
+#settingWindow input[type="checkbox"]:checked {
+    background-color: var(--tab-accent, #A855F7);
+}
+
+#settingWindow input[type="checkbox"]:checked::before {
+    transform: translateX(20px);
+    background: #FFFFFF;
+}
+
+/* Material Select & Input Controls */
+#settingWindow select, #settingWindow input[type="text"], #settingWindow input[type="url"], #settingWindow input[type="number"] {
+    background: #1E1F22;
+    color: var(--m3-on-surface);
+    border: 1px solid var(--m3-outline);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#settingWindow select:focus, #settingWindow input[type="text"]:focus, #settingWindow input[type="url"]:focus, #settingWindow input[type="number"]:focus {
+    border-color: var(--tab-accent, #A855F7);
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
+}
+
+/* Color Picker Input */
+#settingWindow input[type="color"] {
+    width: 40px;
+    height: 28px;
+    border-radius: 8px;
+    border: 1px solid var(--m3-outline);
+    cursor: pointer;
+    background: transparent;
+    padding: 0;
+}
+
+/* Material Buttons with Left Tab Accent Color Gradient */
+#settingWindow #menuButton, #settingWindow input[type="button"] {
+    appearance: none;
+    border: none;
+    background: var(--tab-accent, #A855F7);
+    color: #FFFFFF;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    padding: 6px 16px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+#settingWindow #menuButton:hover, #settingWindow input[type="button"]:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+    filter: brightness(1.15);
+}
+
+#settingWindow #menuButton:active, #settingWindow input[type="button"]:active {
+    transform: translateY(0);
+}
+
+/* Holders & Ranges */
+#settingWindow #joinHolder, #settingWindow #inviteHolder, #settingWindow #serverHookHolder, #settingWindow #rangeNumHolder {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#settingWindow input[type="range"] {
+    accent-color: var(--tab-accent, #A855F7);
+    cursor: pointer;
+}
+
+#settingWindow .sizeInput {
+    width: 55px;
+    text-align: center;
+}
+
+/* Crosshair Preview Section */
+#settingWindow #crosshairPreview {
+    height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+#settingWindow #crosshairPreviewTitle {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--m3-on-surface-variant);
+    margin-bottom: 6px;
+}
+
+#settingWindow #previewBody {
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 95%;
+    background: var(--m3-surface);
+    border: 1px solid var(--m3-outline);
+    border-radius: var(--radius-m);
+}
+
+#settingWindow #crosshairPreviewImage {
+    max-height: 130px;
+}
+
+#settingWindow #warn {
+    font-size: 11px;
+    color: #FDE047;
+    margin-left: 8px;
+}
+
+#settingWindow .requireRestart {
+    color: #F87171 !important;
+    font-size: 12px !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 2px 4px !important;
+}
+
+#settingWindow .filename {
+    font-size: 12px;
+    color: var(--m3-on-surface-variant);
+    margin-right: 8px;
+}
+
+#settingWindow:focus {
+    outline: none;
+}
+
+#settingWindow .hidden {
+    visibility: hidden;
+}
+
+div[id^="voxiom-io"] {
+    display: none;
+}
