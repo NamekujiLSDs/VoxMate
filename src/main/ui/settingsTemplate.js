@@ -8,10 +8,12 @@ class SettingsTemplate {
     }
 
     loadSettingStylesheets() {
-        const cssPath = path.join(this.baseDir, './src/assets/css/settings.css');
+        const useTailwind = config.get('useTailwindCss', true);
+        const cssFile = useTailwind ? 'settings-tailwind.css' : 'settings.css';
+        const cssPath = path.join(this.baseDir, `./src/assets/css/${cssFile}`);
         return `<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
-    <link rel="stylesheet" href="vmc://${cssPath}">`;
+    <link id="voxmateMenuStylesheet" rel="stylesheet" href="vmc://${cssPath}">`;
     }
 
     renderSettingsFrame() {
@@ -485,6 +487,13 @@ class SettingsTemplate {
             <input type="checkbox" name="enableCustomCss" id="enableCustomCss"
                 oninput="window.vmc.saveSetting(this.id ,this.checked);window.vmc.customCssChange(this.id,this.checked)"
                 ${config.get('enableCustomCss', true) ? 'checked' : ''}>
+        </div>
+        <div class="horizonalLine"></div>
+        <div id="menuBodyItem">
+            Tailwind CSS Menu Theme
+            <input type="checkbox" name="useTailwindCss" id="useTailwindCss"
+                oninput="window.vmc.saveSetting(this.id, this.checked); window.vmc.toggleMenuTheme(this.checked)"
+                ${config.get('useTailwindCss', true) ? 'checked' : ''}>
         </div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">

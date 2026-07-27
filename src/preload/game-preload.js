@@ -221,6 +221,15 @@ contextBridge.exposeInMainWorld('vmc', {
         }
     },
 
+    toggleMenuTheme: async (useTailwind) => {
+        const link = document.getElementById('voxmateMenuStylesheet');
+        const dir = await ipcRenderer.invoke('dirName', '');
+        const cssFile = useTailwind ? 'settings-tailwind.css' : 'settings.css';
+        if (link) {
+            link.href = 'vmc://' + dir + '/src/assets/css/' + cssFile;
+        }
+    },
+
     openSwapperFolder: () => {
         ipcRenderer.send('openExplorer', 'swapper');
     },
