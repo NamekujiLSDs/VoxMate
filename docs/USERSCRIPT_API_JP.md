@@ -1,34 +1,34 @@
-# VoxMate UserScript Custom Settings API Documentation
+# VoxMate UserScript カスタム設定 API ドキュメント
 
-VoxMate allows UserScripts to add custom settings entries to the F1 settings menu. This makes it possible for users to change script behavior directly from the in-game settings UI.
+VoxMate では、UserScript から F1 設定メニューへ独自の設定項目を追加できます。これにより、ユーザーはそのままゲーム内の設定メニューから UI を操作しながら、スクリプトの動作を変更できます。
 
-This document explains the API from the basics to practical examples so that anyone can create a UserScript with custom controls.
+このドキュメントでは、最小構成から実務的なサンプルまで順に説明します。
 
 ---
 
-## 1. What You Should Know First
+## 1. まず知っておくこと
 
-UserScripts can participate in the menu through two APIs:
+UserScript からは、次の 2 つの API を使ってメニューへ参加できます。
 
 - `window.vmc.registerSetting(...)`
-  - Adds a new setting entry.
-  - Examples include checkboxes, sliders, text fields, dropdowns, and buttons.
+  - 設定項目を追加します。
+  - 例: チェックボックス、スライダー、入力欄、セレクトボックス、ボタン
 - `window.vmc.registerTab(...)`
-  - Adds a dedicated tab to the left sidebar.
-  - Settings can then be placed inside that tab.
+  - 左サイドバーに専用タブを追加します。
+  - 追加したタブ内に設定項目を配置できます。
 
-### Important Notes
+### 重要なポイント
 
-- `category` creates a section heading inside the current tab.
-- If you want a new left-sidebar tab, register it first with `registerTab`.
-- If `tab` is omitted, the setting is placed into the default UserScript tab.
-- Changes are received through the `vmc-setting-change` event.
+- `category` は「現在のタブ内で見出しを作る」ためのものです。
+- 左サイドバーに新しいタブを追加したい場合は、先に `registerTab` を呼びます。
+- `tab` を指定しない場合、設定項目は既定の UserScript タブへ入ります。
+- 設定変更は `vmc-setting-change` イベントで受け取ります。
 
 ---
 
-## 2. Minimal Example
+## 2. 最小構成の例
 
-The simplest example adds a single checkbox.
+最もシンプルな例は、チェックボックス 1 個を追加する形です。
 
 ```javascript
 // ==UserScript==
@@ -173,16 +173,6 @@ window.vmc.registerSetting({
 | `title` | `string` | 必須 | サイドバーに表示されるタイトル |
 | `icon` | `string` | オプション | Material Symbols のアイコン名。既定値は `tune` |
 
-#### 例
-
-```javascript
-window.vmc.registerTab({
-    id: 'my_mod_tab',
-    title: 'My Mod',
-    icon: 'auto_awesome'
-});
-```
-
 ---
 
 ### `window.vmc.registerSetting(settingConfig)`
@@ -201,22 +191,6 @@ window.vmc.registerTab({
 | `step` | `number` | オプション | `range`, `number` の刻み値 |
 | `options` | `Array<{label: string, value: any}>` | オプション | `select` 用の選択肢 |
 | `buttonText` | `string` | オプション | `button` の表示テキスト。既定値は `RUN` |
-
-#### 例
-
-```javascript
-window.vmc.registerSetting({
-    id: 'fov_angle',
-    label: 'FOV',
-    category: 'Graphics',
-    tab: 'my_mod_tab',
-    type: 'range',
-    min: 60,
-    max: 120,
-    step: 1,
-    default: 90
-});
-```
 
 ---
 
@@ -331,25 +305,9 @@ document.addEventListener('vmc-setting-change', (e) => {
 });
 ```
 
-### 使い方の例
-
-```javascript
-document.addEventListener('vmc-setting-change', (e) => {
-    if (e.detail.id === 'mod_enabled') {
-        applyFeature(e.detail.value);
-    }
-
-    if (e.detail.id === 'mod_speed') {
-        applySpeed(e.detail.value);
-    }
-});
-```
-
 ---
 
 ## 8. 実務向けの完全サンプル
-
-以下は、タブ・カテゴリ・複数設定・イベント処理をまとめた実例です。
 
 ```javascript
 // ==UserScript==
@@ -493,4 +451,3 @@ document.addEventListener('vmc-setting-change', (e) => {
     }
 })();
 ```
-
