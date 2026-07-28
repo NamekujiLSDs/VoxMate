@@ -35,10 +35,14 @@ const injectSimpleInfoGui = () => {
             downloadBps: 0, uploadBps: 0
         };
 
+        let lastRenderTime = 0;
+        const RENDER_INTERVAL_MS = 750;
+
         document.addEventListener('vmc-info-update', (e) => {
             if (!e.detail) return;
             Object.assign(window.simpleInfoSettings, e.detail);
             updateHUDStyle();
+            lastRenderTime = 0;
             renderHUD();
         });
 
@@ -88,7 +92,11 @@ const injectSimpleInfoGui = () => {
                         currentData.uploadBps = typeof this.pVI === 'number' ? parseFloat(this.pVI.toFixed(1)) : 0;
 
                         if (isEnabled) {
-                            renderHUD();
+                            const now = performance.now();
+                            if (now - lastRenderTime >= RENDER_INTERVAL_MS) {
+                                lastRenderTime = now;
+                                renderHUD();
+                            }
                         }
                     }
 

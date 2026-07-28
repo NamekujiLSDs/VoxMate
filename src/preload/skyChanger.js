@@ -222,13 +222,13 @@ const injectSkyChanger = () => {
                 const speed = (window.mySkySettings.speed || 2) * 0.4;
                 hue = (hue + speed) % 360;
                 window.mySkySettings.color = hslToRgb(hue / 360, 1.0, 0.5);
-            }
 
-            if (actualRenderer && actualRenderer.setClearColor && window.mySkySettings.color) {
-                const hexColor = (Math.round(window.mySkySettings.color.r * 255) << 16) |
-                                 (Math.round(window.mySkySettings.color.g * 255) << 8) |
-                                 Math.round(window.mySkySettings.color.b * 255);
-                actualRenderer.setClearColor(hexColor);
+                if (actualRenderer && actualRenderer.setClearColor) {
+                    const hexColor = (Math.round(window.mySkySettings.color.r * 255) << 16) |
+                                     (Math.round(window.mySkySettings.color.g * 255) << 8) |
+                                     Math.round(window.mySkySettings.color.b * 255);
+                    actualRenderer.setClearColor(hexColor);
+                }
             }
         }
         window.requestAnimationFrame(animate);

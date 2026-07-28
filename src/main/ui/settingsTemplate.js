@@ -1,6 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const { config, getSwapFolderPath } = require('../utils/config');
+const { getUserScriptsList } = require('../services/userscripts');
 
 class SettingsTemplate {
     constructor(baseDir) {
@@ -57,6 +58,11 @@ class SettingsTemplate {
                         <div id="infoSetting" class="menuItem ${lastOpen === 'infoSetting' ? 'menuSelected' : ''}" onclick="window.vmc.showSetting(this.id);window.vmc.saveSetting('lastOpen',this.id)">
                             <div class="menuItemIcon"><span class="material-symbols-outlined">monitoring</span></div>
                             <div class="menuItemTitle">HUD Info</div>
+                        </div>
+                        <div class="menuSplitter"></div>
+                        <div id="userscriptSetting" class="menuItem ${lastOpen === 'userscriptSetting' ? 'menuSelected' : ''}" onclick="window.vmc.showSetting(this.id);window.vmc.saveSetting('lastOpen',this.id)">
+                            <div class="menuItemIcon"><span class="material-symbols-outlined">extension</span></div>
+                            <div class="menuItemTitle">UserScript</div>
                         </div>
                         <div class="menuSplitter"></div>
                         <div id="performanceSetting" class="menuItem ${lastOpen === 'performanceSetting' ? 'menuSelected' : ''}" onclick="window.vmc.showSetting(this.id);window.vmc.saveSetting('lastOpen',this.id)">
@@ -131,6 +137,8 @@ class SettingsTemplate {
                 return this.renderAdblockSetting();
             case 'infoSetting':
                 return this.renderInfoSetting();
+            case 'userscriptSetting':
+                return this.renderUserscriptSetting();
             case 'performanceSetting':
                 return this.renderPerformanceSetting();
             default:
@@ -218,6 +226,20 @@ class SettingsTemplate {
             <input type="checkbox" name="unlimitedFps" id="unlimitedFps"
                 oninput="window.vmc.saveSetting(this.id,this.checked)"
                 ${config.get('unlimitedFps', true) ? 'checked' : ''}>
+        </div>
+        <div class="horizonalLine"></div>
+        <div id="menuBodyItem">
+            Enable Raw Input (Low Latency Mouse)
+            <input type="checkbox" name="enableRawInput" id="enableRawInput"
+                oninput="window.vmc.saveSetting(this.id,this.checked)"
+                ${config.get('enableRawInput', true) ? 'checked' : ''}>
+        </div>
+        <div class="horizonalLine"></div>
+        <div id="menuBodyItem">
+            Enable WebGL Desynchronized (Low Latency Canvas)
+            <input type="checkbox" name="enableDesynchronized" id="enableDesynchronized"
+                oninput="window.vmc.saveSetting(this.id,this.checked)"
+                ${config.get('enableDesynchronized', true) ? 'checked' : ''}>
         </div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
@@ -625,6 +647,18 @@ class SettingsTemplate {
         </div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
+            Enable Raw Input (Low Latency Mouse)
+            <input type="checkbox" name="enableRawInput" id="enableRawInput"
+                oninput="window.vmc.saveSetting(this.id,this.checked);" ${config.get('enableRawInput', true) ? 'checked' : ''}>
+        </div>
+        <div class="horizonalLine"></div>
+        <div id="menuBodyItem">
+            Enable WebGL Desynchronized (Low Latency Canvas)
+            <input type="checkbox" name="enableDesynchronized" id="enableDesynchronized"
+                oninput="window.vmc.saveSetting(this.id,this.checked);" ${config.get('enableDesynchronized', true) ? 'checked' : ''}>
+        </div>
+        <div class="horizonalLine"></div>
+        <div id="menuBodyItem">
             Enable Discord RPC
             <input type="checkbox" name="discordRpc" id="discordRpc"
                 oninput="window.vmc.saveSetting(this.id,this.checked);" ${config.get('discordRpc', true) ? 'checked' : ''}>
@@ -794,6 +828,66 @@ class SettingsTemplate {
                 oninput="window.vmc.saveSetting(this.id,this.checked);window.vmc.infoGuiChange(this.id,this.checked)"
                 ${config.get('infoShowNetBps', false) ? 'checked' : ''}>
         </div>
+        </div>`;
+    }
+
+    renderUserscriptSetting() {
+        const scripts = getUserScriptsList();
+        const enableGlobal = config.get('enableUserScripts', true);
+
+        let listHtml = '';
+        if (scripts.length === 0) {
+            listHtml = `
+            <div style="padding: 20px; text-align: center; color: #888; background: rgba(0,0,0,0.2); border-radius: 8px; margin-top: 15px; font-size: 13px;">
+                No <code>*.user.js</code> scripts found in <code>/vmc-swap/userscript</code> folder.<br>
+                Click <b>OPEN</b> above to add UserScripts to the folder.
+            </div>`;
+        } else {
+            for (const s of scripts) {
+                listHtml += `
+                <div class="horizonalLine"></div>
+                <div id="menuBodyItem" style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 10px 0;">
+                    <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                        <div style="font-weight: bold; color: #60a5fa; font-size: 14px;">
+                            ${s.name} <span style="font-size: 11px; color: #94a3b8; font-weight: normal; margin-left: 6px;">v${s.version} (${s.author})</span>
+                        </div>
+                        <input type="checkbox" name="userscript_${s.filename}" id="userscript_${s.filename}"
+                            oninput="window.vmc.saveSetting(this.id, this.checked)"
+                            ${s.enabled ? 'checked' : ''}>
+                    </div>
+                    <div style="font-size: 12px; color: #cbd5e1; word-break: break-word;">
+                        ${s.description}
+                    </div>
+                    <div style="font-size: 11px; color: #64748b; font-family: monospace;">
+                        📄 ${s.filename}
+                    </div>
+                </div>`;
+            }
+        }
+
+        return `<div class="tabContainer" style="--tab-accent: #3b82f6;">
+        <div id="menuBodyTitle">
+            <span class="material-symbols-outlined">extension</span>
+            UserScript Settings
+        </div>
+        <div class="horizonalLine"></div>
+        <div id="menuBodyItem" class="requireRestart">*Require Restart Client</div>
+        <div class="horizonalLine"></div>
+        <div id="menuBodyItem">
+            Enable UserScripts
+            <input type="checkbox" name="enableUserScripts" id="enableUserScripts"
+                oninput="window.vmc.saveSetting(this.id,this.checked);" ${enableGlobal ? 'checked' : ''}>
+        </div>
+        <div class="horizonalLine"></div>
+        <div id="menuBodyItem">
+            Open UserScript Folder
+            <input type="button" id="menuButton" value="OPEN" onclick="window.vmc.openUserscriptFolder()">
+        </div>
+        
+        <div class="settingSectionHeader" style="margin-top: 15px;">Installed UserScripts (${scripts.length})</div>
+        ${listHtml}
+        
+        <div id="customUserScriptSettingsContainer"></div>
         </div>`;
     }
 }

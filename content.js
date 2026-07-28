@@ -71,7 +71,11 @@ Object.defineProperty(Object.prototype, 'pVX', {
                 if (window.wsLoggerState.sourceMode === 'GAME_STATS' && !window.wsLoggerState.isPaused) {
                     window.wsLoggerState.packetCount++;
                     window.wsLoggerState.lastParsedValues = values;
-                    renderHUD(values);
+                    const now = performance.now();
+                    if (!window._lastWsHudRenderTime || now - window._lastWsHudRenderTime >= 750) {
+                        window._lastWsHudRenderTime = now;
+                        renderHUD(values);
+                    }
                 }
             }
 
@@ -289,7 +293,11 @@ function processPacket(data) {
     window.wsLoggerState.packetCount++;
     window.wsLoggerState.lastParsedValues = values;
 
-    renderHUD(values);
+    const now = performance.now();
+    if (!window._lastWsHudRenderTime || now - window._lastWsHudRenderTime >= 750) {
+        window._lastWsHudRenderTime = now;
+        renderHUD(values);
+    }
 }
 
 /**

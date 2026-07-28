@@ -3,6 +3,42 @@ const { injectSkyChanger } = require('./skyChanger');
 const { injectSimpleInfoGui } = require('./simpleInfoGui');
 
 let serverId = '';
+let isRawInputEnabled = true;
+let isDesynchronizedEnabled = true;
+
+const registeredCustomSettings = new Map();
+const registeredCustomTabs = new Map();
+
+ipcRenderer.invoke('getSetting', 'enableRawInput').then(val => {
+    if (typeof val === 'boolean') isRawInputEnabled = val;
+});
+
+ipcRenderer.invoke('getSetting', 'enableDesynchronized').then(val => {
+    if (typeof val === 'boolean') isDesynchronizedEnabled = val;
+});
+
+const originalRequestPointerLock = Element.prototype.requestPointerLock;
+Element.prototype.requestPointerLock = function(options) {
+    if (isRawInputEnabled) {
+        const opts = Object.assign({}, options, { unadjustedMovement: true });
+        return originalRequestPointerLock.call(this, opts).catch(() => {
+            return originalRequestPointerLock.call(this, options);
+        });
+    }
+    return originalRequestPointerLock.call(this, options);
+};
+
+// WebGL Desynchronized & High Performance Hook
+const originalGetContext = HTMLCanvasElement.prototype.getContext;
+HTMLCanvasElement.prototype.getContext = function(type, attributes) {
+    if (isDesynchronizedEnabled && (type === 'webgl' || type === 'webgl2' || type === 'experimental-webgl')) {
+        attributes = Object.assign({}, attributes, {
+            desynchronized: true,
+            powerPreference: 'high-performance'
+        });
+    }
+    return originalGetContext.call(this, type, attributes);
+};
 
 // Crosshair CSS Helper
 const refreshCrosshairCss = async () => {
@@ -29,6 +65,137 @@ const refreshCrosshairCss = async () => {
     }
 };
 
+// Dynamic UserScript Custom Settings UI Renderer (Category Grouping & Custom Tabs)
+const renderCustomSettingsUI = async (targetTabId = 'userscriptSetting') => {
+    let container = document.getElementById('customUserScriptSettingsContainer');
+    if (!container && targetTabId !== 'userscriptSetting') {
+        container = document.getElementById('menuBody');
+    }
+    if (!container || !window.vmc?.getRegisteredCustomSettings) return;
+
+    const allList = await window.vmc.getRegisteredCustomSettings();
+    if (!allList || allList.length === 0) {
+        if (container.id === 'customUserScriptSettingsContainer') container.innerHTML = '';
+        return;
+    }
+
+    const list = allList.filter(item => {
+        if (targetTabId === 'userscriptSetting') {
+            return !item.tab || item.tab === 'userscriptSetting';
+        }
+        return item.tab === targetTabId;
+    });
+
+    if (list.length === 0) {
+        if (container.id === 'customUserScriptSettingsContainer') container.innerHTML = '';
+        return;
+    }
+
+    // Group items by category
+    const categoriesMap = new Map();
+    for (const item of list) {
+        const cat = item.category || 'UserScript Dynamic Settings';
+        if (!categoriesMap.has(cat)) categoriesMap.set(cat, []);
+        categoriesMap.get(cat).push(item);
+    }
+
+    let html = '';
+    for (const [catName, items] of categoriesMap.entries()) {
+        html += `
+        <div class="settingSectionHeader" style="margin-top: 20px; color: #a855f7;">${catName} (${items.length})</div>
+        <div class="horizonalLine"></div>`;
+
+        for (const item of items) {
+            const id = item.id;
+            const key = `custom_${id}`;
+            const label = item.label || id;
+            const type = item.type || 'text';
+            const val = item.value !== undefined ? item.value : (item.default !== undefined ? item.default : '');
+
+            html += `<div id="menuBodyItem" style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-top:8px;">`;
+            html += `<span>${label}</span>`;
+
+            if (type === 'checkbox') {
+                html += `<input type="checkbox" name="${key}" id="${key}" oninput="window.vmc.saveSetting(this.id, this.checked)" ${val ? 'checked' : ''}>`;
+            } else if (type === 'range') {
+                const min = item.min ?? 0;
+                const max = item.max ?? 100;
+                const step = item.step ?? 1;
+                html += `<div id="rangeNumHolder">
+                    <input type="number" class="sizeInput" value="${val}" min="${min}" max="${max}" step="${step}" oninput="document.getElementById('${key}').value=this.value;window.vmc.saveSetting('${key}', parseFloat(this.value));">
+                    <input type="range" name="${key}" id="${key}" value="${val}" min="${min}" max="${max}" step="${step}" oninput="window.vmc.saveSetting(this.id, parseFloat(this.value));">
+                </div>`;
+            } else if (type === 'number') {
+                const min = item.min ?? 0;
+                const max = item.max ?? 999999;
+                const step = item.step ?? 1;
+                html += `<input type="number" class="sizeInput" name="${key}" id="${key}" value="${val}" min="${min}" max="${max}" step="${step}" oninput="window.vmc.saveSetting(this.id, parseFloat(this.value));">`;
+            } else if (type === 'select') {
+                const options = Array.isArray(item.options) ? item.options : [];
+                let optHtml = '';
+                for (const opt of options) {
+                    const optVal = typeof opt === 'object' ? opt.value : opt;
+                    const optLabel = typeof opt === 'object' ? opt.label : opt;
+                    optHtml += `<option value="${optVal}" ${String(val) === String(optVal) ? 'selected' : ''}>${optLabel}</option>`;
+                }
+                html += `<select name="${key}" id="${key}" onchange="window.vmc.saveSetting(this.id, this.value)">${optHtml}</select>`;
+            } else if (type === 'button') {
+                const btnText = item.buttonText || 'RUN';
+                html += `<input type="button" id="menuButton" value="${btnText}" onclick="window.vmc.triggerCustomButton('${id}')">`;
+            } else {
+                html += `<input type="text" name="${key}" id="${key}" value="${val}" onchange="window.vmc.saveSetting(this.id, this.value)">`;
+            }
+
+            html += `</div><div class="horizonalLine"></div>`;
+        }
+    }
+
+    if (container.id === 'menuBody' && targetTabId !== 'userscriptSetting') {
+        const tabInfo = registeredCustomTabs.get(targetTabId);
+        const title = tabInfo ? tabInfo.title : targetTabId;
+        const icon = tabInfo ? tabInfo.icon : 'tune';
+
+        container.innerHTML = `
+        <div class="tabContainer" style="--tab-accent: #a855f7;">
+            <div id="menuBodyTitle">
+                <span class="material-symbols-outlined">${icon}</span>
+                ${title}
+            </div>
+            <div class="horizonalLine"></div>
+            ${html}
+        </div>`;
+    } else {
+        container.innerHTML = html;
+    }
+};
+
+const renderCustomSidebarTabs = () => {
+    const itemHolder = document.getElementById('menuItemHolder');
+    if (!itemHolder) return;
+
+    for (const t of registeredCustomTabs.values()) {
+        if (document.getElementById(t.id)) continue;
+
+        const splitter = document.createElement('div');
+        splitter.className = 'menuSplitter';
+
+        const tabDiv = document.createElement('div');
+        tabDiv.id = t.id;
+        tabDiv.className = `menuItem`;
+        tabDiv.onclick = () => {
+            window.vmc.showSetting(t.id);
+            window.vmc.saveSetting('lastOpen', t.id);
+        };
+        tabDiv.innerHTML = `
+            <div class="menuItemIcon"><span class="material-symbols-outlined">${t.icon}</span></div>
+            <div class="menuItemTitle">${t.title}</div>
+        `;
+
+        itemHolder.appendChild(splitter);
+        itemHolder.appendChild(tabDiv);
+    }
+};
+
 // Expose APIs to window.vmc
 contextBridge.exposeInMainWorld('vmc', {
     closeSetting: () => {
@@ -46,10 +213,25 @@ contextBridge.exposeInMainWorld('vmc', {
         if (targetTab) targetTab.classList.add('menuSelected');
 
         const menuBody = document.getElementById('menuBody');
-        if (menuBody) menuBody.innerHTML = settingDom;
+        if (menuBody) {
+            menuBody.innerHTML = settingDom;
+            if (tabId === 'userscriptSetting') {
+                renderCustomSettingsUI();
+            }
+        }
     },
 
     saveSetting: (name, value) => {
+        if (name === 'enableRawInput') {
+            isRawInputEnabled = Boolean(value);
+        }
+        if (name === 'enableDesynchronized') {
+            isDesynchronizedEnabled = Boolean(value);
+        }
+        if (name.startsWith('custom_')) {
+            const customId = name.replace('custom_', '');
+            document.dispatchEvent(new CustomEvent('vmc-setting-change', { detail: { id: customId, value } }));
+        }
         ipcRenderer.send('saveSettingValue', name, value);
     },
 
@@ -234,6 +416,65 @@ contextBridge.exposeInMainWorld('vmc', {
         ipcRenderer.send('openExplorer', 'swapper');
     },
 
+    openUserscriptFolder: () => {
+        ipcRenderer.send('openExplorer', 'userscript');
+    },
+
+    registerTab: (tabConfig) => {
+        if (!tabConfig || !tabConfig.id) return;
+        registeredCustomTabs.set(tabConfig.id, {
+            id: tabConfig.id,
+            title: tabConfig.title || tabConfig.id,
+            icon: tabConfig.icon || 'tune'
+        });
+    },
+
+    getRegisteredCustomTabs: () => {
+        return Array.from(registeredCustomTabs.values());
+    },
+
+    registerSetting: async (configObj) => {
+        if (!configObj || !configObj.id) return;
+        const key = `custom_${configObj.id}`;
+        registeredCustomSettings.set(configObj.id, configObj);
+
+        const currentVal = await ipcRenderer.invoke('getSetting', key);
+        if (currentVal === undefined && configObj.default !== undefined) {
+            ipcRenderer.send('saveSettingValue', key, configObj.default);
+        }
+    },
+
+    getCustomSetting: async (id) => {
+        const key = `custom_${id}`;
+        const val = await ipcRenderer.invoke('getSetting', key);
+        if (val !== undefined) return val;
+        const item = registeredCustomSettings.get(id);
+        return item ? item.default : undefined;
+    },
+
+    setCustomSetting: (id, value) => {
+        const key = `custom_${id}`;
+        ipcRenderer.send('saveSettingValue', key, value);
+        document.dispatchEvent(new CustomEvent('vmc-setting-change', { detail: { id, value } }));
+    },
+
+    getRegisteredCustomSettings: async () => {
+        const list = [];
+        for (const [id, item] of registeredCustomSettings.entries()) {
+            const key = `custom_${id}`;
+            const val = await ipcRenderer.invoke('getSetting', key);
+            list.push({
+                ...item,
+                value: val !== undefined ? val : item.default
+            });
+        }
+        return list;
+    },
+
+    triggerCustomButton: (id) => {
+        document.dispatchEvent(new CustomEvent('vmc-setting-change', { detail: { id, value: true } }));
+    },
+
     openLocal: (name) => {
         ipcRenderer.send('openFile', name);
     },
@@ -297,9 +538,13 @@ contextBridge.exposeInMainWorld('vmc', {
         if (Array.isArray(val) && val[0] && typeof val[0] === 'string') {
             if (val[0].startsWith('Connected to game-server-')) {
                 const match = val[0].match(/game-server-([^.]+)\.voxiom\.io/);
-                if (match) serverId = match[1];
+                if (match) {
+                    serverId = match[1];
+                    return true;
+                }
             }
         }
+        return false;
     }
 });
 
@@ -313,10 +558,16 @@ ipcRenderer.on('openSetting', async () => {
             appElem.insertAdjacentHTML('afterbegin', settingDom);
             const menuBody = document.getElementById('menuBody');
             if (menuBody) menuBody.innerHTML = settingTabDom;
+            renderCustomSidebarTabs();
         }
     } else {
         const settingWindow = document.getElementById('settingWindow');
-        if (settingWindow) settingWindow.classList.toggle('settingShow');
+        if (settingWindow) {
+            settingWindow.classList.toggle('settingShow');
+            if (settingWindow.classList.contains('settingShow')) {
+                renderCustomSidebarTabs();
+            }
+        }
     }
 
     const inviteGameElem = document.getElementById('inviteGame');
@@ -432,16 +683,17 @@ const updateInviteUrls = () => {
 };
 window.addEventListener('hashchange', updateInviteUrls);
 window.addEventListener('popstate', updateInviteUrls);
-setInterval(updateInviteUrls, 2000);
 
-// Hook console.log to identify connected server
+// Hook console.log to identify connected server (auto-unhook once captured)
 window.addEventListener('DOMContentLoaded', () => {
     const script = document.createElement('script');
     script.textContent = `
     const originalLog = console.log;
     console.log = function (...args) {
         originalLog.apply(console, args);
-        window.vmc?.serverLogger?.(args);
+        if (window.vmc?.serverLogger?.(args)) {
+            console.log = originalLog;
+        }
     };`;
     document.head.appendChild(script);
 });

@@ -4,9 +4,20 @@ const { config } = require('./config');
 const applyChromiumFlags = () => {
     if (config.get('unlimitedFps', true)) {
         app.commandLine.appendSwitch('disable-frame-rate-limit');
+        app.commandLine.appendSwitch('disable-gpu-vsync');
+        app.commandLine.appendSwitch('max-gum-fps', '9999');
+        app.commandLine.appendSwitch('disable-v8-idle-notification');
     }
     if (config.get('disableGpuVsync', true)) {
         app.commandLine.appendSwitch('disable-gpu-vsync');
+    }
+    if (config.get('enableRawInput', true)) {
+        app.commandLine.appendSwitch('enable-pointer-lock-options');
+        app.commandLine.appendSwitch('enable-raw-pointer-events');
+        app.commandLine.appendSwitch('disable-ipc-flooding-protection');
+        app.commandLine.appendSwitch('enable-high-resolution-time');
+        app.commandLine.appendSwitch('disable-input-resampling');
+        app.commandLine.appendSwitch('disable-features', 'InputPredictor,ResamplingScrollEvents');
     }
     if (config.get('inProcess', false)) {
         app.commandLine.appendSwitch('in-process-gpu');

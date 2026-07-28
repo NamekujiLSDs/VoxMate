@@ -15,12 +15,14 @@ const createSwapFolder = () => {
     const crosshairFolder = path.join(swapFolder, './crosshair');
     const skyboxFolder = path.join(swapFolder, './skybox');
     const settingFolder = path.join(swapFolder, './settings');
+    const userscriptFolder = path.join(swapFolder, './userscript');
 
     if (!fs.existsSync(swapFolder)) fs.mkdirSync(swapFolder, { recursive: true });
     if (!fs.existsSync(cssFolder)) fs.mkdirSync(cssFolder, { recursive: true });
     if (!fs.existsSync(crosshairFolder)) fs.mkdirSync(crosshairFolder, { recursive: true });
     if (!fs.existsSync(skyboxFolder)) fs.mkdirSync(skyboxFolder, { recursive: true });
     if (!fs.existsSync(settingFolder)) fs.mkdirSync(settingFolder, { recursive: true });
+    if (!fs.existsSync(userscriptFolder)) fs.mkdirSync(userscriptFolder, { recursive: true });
 };
 
 const initFirstTimeAssets = (baseDir) => {

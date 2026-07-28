@@ -3,9 +3,12 @@ const { exec } = require('child_process');
 const { getSwapFolderPath } = require('../utils/config');
 
 const registerSystemHandlers = (getGameWindow) => {
-    ipcMain.on('openExplorer', () => {
-        const swapFolder = getSwapFolderPath();
-        exec(`start "" "${swapFolder}"`, (err) => {
+    ipcMain.on('openExplorer', (e, subFolder) => {
+        const path = require('path');
+        const fs = require('fs');
+        const targetFolder = (typeof subFolder === 'string' && subFolder) ? path.join(getSwapFolderPath(), subFolder) : getSwapFolderPath();
+        if (!fs.existsSync(targetFolder)) fs.mkdirSync(targetFolder, { recursive: true });
+        exec(`start "" "${targetFolder}"`, (err) => {
             if (err) console.error('Failed to open explorer:', err);
         });
     });
