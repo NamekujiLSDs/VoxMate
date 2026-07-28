@@ -294,6 +294,18 @@
     border-color: var(--m3-outline);
 }
 
+#settingWindow .customSettingLabel {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--m3-on-surface);
+}
+
 #settingWindow .horizonalLine {
     height: 1px;
     width: 100%;

@@ -1,61 +1,144 @@
 # VoxMate UserScript Custom Settings API Documentation
 
-VoxMate では、UserScript から簡単に F1 設定メニューに独自の設定項目（スライダー、チェックボックス、ドロップダウン、テキスト入力、ボタンなど）を追加し、**カテゴリ別のグループ化表示** や **専用サイドバータブの作成** ができる高度な API を提供しています。
+VoxMate では、UserScript から F1 設定メニューへ独自の設定項目を追加できます。これにより、ユーザーはそのままゲーム内メニューから UI を操作しながら、スクリプトの挙動を変更できます。
+
+このドキュメントは、誰でも UserScript を作れるように、最小構成から実務的なサンプルまで順に説明するものです。
 
 ---
 
-## 1. クイックスタート
+## 1. まず知っておくこと
 
-UserScript 内から `window.vmc.registerSetting` または `window.vmc.registerTab` を呼び出すだけで、VoxMate の設定メニュー内に動的コントロールや新しいタブが追加されます。
+UserScript からは、次の 2 つの API を使ってメニューへ参加できます。
+
+- `window.vmc.registerSetting(...)`
+  - 設定項目を追加します。
+  - 例: チェックボックス、スライダー、入力欄、セレクトボックス、ボタン
+- `window.vmc.registerTab(...)`
+  - 左サイドバーに専用タブを追加します。
+  - 追加したタブ内に設定項目を配置できます。
+
+### 重要なポイント
+
+- `category` は「現在のタブ内で見出しを作る」ためのものです。
+- 左サイドバーに新しいタブを追加したい場合は、先に `registerTab` を呼びます。
+- `tab` を指定しない場合、設定項目は既定の UserScript タブへ入ります。
+- 設定変更は `vmc-setting-change` イベントで受け取ります。
+
+---
+
+## 2. 最小構成の例
+
+最もシンプルな例は、チェックボックス 1 個を追加する形です。
 
 ```javascript
 // ==UserScript==
-// @name         Voxiom Custom FOV & Mod
+// @name         Example Mod
 // @version      1.0
-// @description  Adds custom FOV slider and custom tab to VoxMate menu.
-// @author       Namekuji
+// @description  Adds a simple toggle to VoxMate menu.
+// @author       YourName
 // ==/UserScript==
 
-(function() {
+(function () {
     'use strict';
 
-    if (window.vmc && window.vmc.registerSetting) {
+    const init = () => {
+        if (!window.vmc || typeof window.vmc.registerSetting !== 'function') return;
 
-        // 1. カテゴリを指定して設定項目を定義
         window.vmc.registerSetting({
-            id: 'fov_angle',
-            label: 'Custom Field of View (FOV)',
-            category: 'Graphics & Camera', // カテゴリ名でグループ化
-            type: 'range',
-            min: 60,
-            max: 120,
-            step: 1,
-            default: 90
+            id: 'example_toggle',
+            label: 'Enable Example Feature',
+            type: 'checkbox',
+            default: true
         });
 
-        // 2. 設定変更のリアルタイム受信
         document.addEventListener('vmc-setting-change', (e) => {
-            if (e.detail.id === 'fov_angle') {
-                console.log('New FOV Value:', e.detail.value);
-                applyFov(e.detail.value);
+            if (e.detail.id === 'example_toggle') {
+                console.log('changed:', e.detail.value);
             }
         });
-    }
+    };
 
-    function applyFov(val) {
-        // ゲームへの適用処理
+    if (window.vmc && typeof window.vmc.registerSetting === 'function') {
+        init();
+    } else {
+        const interval = setInterval(() => {
+            if (window.vmc && typeof window.vmc.registerSetting === 'function') {
+                clearInterval(interval);
+                init();
+            }
+        }, 100);
     }
 })();
 ```
 
 ---
 
-## 2. カテゴリグループ化 (`category` プロパティ)
+## 3. タブを作る例
 
-設定項目を登録する際、`category` プロパティを指定すると設定画面内で見出しヘッダー付きでカテゴリ別に美しく整理されて表示されます。
+自分専用のタブを作り、その中に設定項目をまとめたい場合は次のように書きます。
 
 ```javascript
-// 「描画・カメラ」カテゴリ
+// ==UserScript==
+// @name         Custom Tab Example
+// @version      1.0
+// @description  Adds a custom tab and related settings.
+// @author       YourName
+// ==/UserScript==
+
+(function () {
+    'use strict';
+
+    const init = () => {
+        if (!window.vmc) return;
+
+        window.vmc.registerTab({
+            id: 'my_mod_tab',
+            title: 'My Mod',
+            icon: 'tune'
+        });
+
+        window.vmc.registerSetting({
+            id: 'mod_enabled',
+            label: 'Enable Mod',
+            category: 'Main Settings',
+            tab: 'my_mod_tab',
+            type: 'checkbox',
+            default: true
+        });
+
+        window.vmc.registerSetting({
+            id: 'mod_speed',
+            label: 'Speed',
+            category: 'Main Settings',
+            tab: 'my_mod_tab',
+            type: 'range',
+            min: 1,
+            max: 10,
+            step: 1,
+            default: 3
+        });
+    };
+
+    if (window.vmc && typeof window.vmc.registerTab === 'function') {
+        init();
+    } else {
+        const interval = setInterval(() => {
+            if (window.vmc && typeof window.vmc.registerTab === 'function') {
+                clearInterval(interval);
+                init();
+            }
+        }, 100);
+    }
+})();
+```
+
+---
+
+## 4. カテゴリを使う例
+
+`category` を指定すると、そのタブ内で見出しが作られます。
+
+```javascript
 window.vmc.registerSetting({
     id: 'fov_angle',
     label: 'Custom FOV Angle',
@@ -66,7 +149,6 @@ window.vmc.registerSetting({
     default: 90
 });
 
-// 「オートメーション」カテゴリ
 window.vmc.registerSetting({
     id: 'auto_bhop',
     label: 'Enable BunnyHop Auto Jump',
@@ -76,185 +158,339 @@ window.vmc.registerSetting({
 });
 ```
 
+> `category` は「見出し」を作るだけです。左サイドバーのタブ自体を作るには `registerTab` が必要です。
+
 ---
 
-## 3. 専用サイドバータブの作成 (`window.vmc.registerTab`)
+## 5. API リファレンス
 
-UserScript 専用の新しいタブを F1 設定メニューの左サイドバーに追加したい場合は `registerTab` を使用します。
+### `window.vmc.registerTab(tabConfig)`
+左サイドバーに独自の設定タブを追加します。
+
+| プロパティ | 型 | 必須 | 説明 |
+| :--- | :--- | :--- | :--- |
+| `id` | `string` | 必須 | タブを識別する一意の ID |
+| `title` | `string` | 必須 | サイドバーに表示されるタイトル |
+| `icon` | `string` | オプション | Material Symbols のアイコン名。既定値は `tune` |
+
+#### 例
 
 ```javascript
-// 1. 左サイドバーに独自タブを定義
 window.vmc.registerTab({
-    id: 'my_custom_mod',
-    title: 'My Custom Mod',
-    icon: 'auto_awesome' // Material Symbols のアイコン名
-});
-
-// 2. 登録したタブ ID を指定して項目を追加
-window.vmc.registerSetting({
-    tab: 'my_custom_mod', // 上で定義したタブ ID を指定
-    category: 'General Mod Settings',
-    id: 'mod_enabled',
-    label: 'Enable Mod Features',
-    type: 'checkbox',
-    default: true
+    id: 'my_mod_tab',
+    title: 'My Mod',
+    icon: 'auto_awesome'
 });
 ```
 
 ---
 
-## 4. API リファレンス
-
-### `window.vmc.registerTab(tabConfig)`
-左サイドバーにオリジナルの設定タブを新規追加します。
-
-| プロパティ | 型 | 必須 | 説明 |
-| :--- | :--- | :--- | :--- |
-| `id` | `string` | **必須** | タブを一意に識別するID |
-| `title` | `string` | **必須** | サイドバーに表示されるタブ名 |
-| `icon` | `string` | オプション | Material Symbols のアイコン名 (デフォルト: `'tune'`) |
-
----
-
 ### `window.vmc.registerSetting(settingConfig)`
-新しい設定コントロール項目を VoxMate メニューに登録します。
-
-#### パラメータ (`settingConfig` オブジェクト)
+メニューに新しい設定項目を登録します。
 
 | プロパティ | 型 | 必須 | 説明 |
 | :--- | :--- | :--- | :--- |
-| `id` | `string` | **必須** | 設定を一意に識別するキー（アルファベット・数字・アンダースコア） |
-| `label` | `string` | **必須** | メニュー上に表示される項目ラベル名 |
-| `type` | `string` | **必須** | コントロールのタイプ (`'checkbox'`, `'range'`, `'number'`, `'text'`, `'select'`, `'button'`) |
-| `category` | `string` | オプション | セクションの見出しカテゴリ名 |
-| `tab` | `string` | オプション | 配置先のタブID (`registerTab` で作成したID、または省略時 `'userscriptSetting'`) |
+| `id` | `string` | 必須 | 設定を識別する一意のキー。英数字とアンダースコア推奨 |
+| `label` | `string` | 必須 | メニュー上に表示される名前 |
+| `type` | `string` | 必須 | `checkbox`, `range`, `number`, `text`, `select`, `button` のいずれか |
+| `category` | `string` | オプション | 現在のタブ内で表示するカテゴリ見出し |
+| `tab` | `string` | オプション | 配置先タブ ID。省略時は `userscriptSetting` |
 | `default` | `any` | オプション | 初期値 |
-| `min` | `number` | オプション | `range`, `number` 時の最小値 |
-| `max` | `number` | オプション | `range`, `number` 時の最大値 |
-| `step` | `number` | オプション | `range`, `number` 時のステップ刻み値 |
-| `options` | `Array<{label: string, value: any}>` | オプション | `select` 時の選択肢リスト |
-| `buttonText` | `string` | オプション | `button` 時のボタン表示名 (デフォルト: `'RUN'`) |
+| `min` | `number` | オプション | `range`, `number` の最小値 |
+| `max` | `number` | オプション | `range`, `number` の最大値 |
+| `step` | `number` | オプション | `range`, `number` の刻み値 |
+| `options` | `Array<{label: string, value: any}>` | オプション | `select` 用の選択肢 |
+| `buttonText` | `string` | オプション | `button` の表示テキスト。既定値は `RUN` |
+
+#### 例
+
+```javascript
+window.vmc.registerSetting({
+    id: 'fov_angle',
+    label: 'FOV',
+    category: 'Graphics',
+    tab: 'my_mod_tab',
+    type: 'range',
+    min: 60,
+    max: 120,
+    step: 1,
+    default: 90
+});
+```
 
 ---
 
 ### `window.vmc.getCustomSetting(id)`
-指定された `id` の現在の設定値を取得します（`Promise` を返します）。
+指定した設定値を取得します。戻り値は `Promise` です。
 
 ```javascript
-const value = await window.vmc.getCustomSetting('fov_angle');
+const value = await window.vmc.getCustomSetting('mod_enabled');
 ```
 
 ---
 
 ### `window.vmc.setCustomSetting(id, value)`
-指定された `id` の設定値をプログラム側から変更し、メニュー表示と保存値を更新します。
+設定値をプログラム側から変更し、メニューの表示状態と保存値を更新します。
 
 ```javascript
-window.vmc.setCustomSetting('fov_angle', 100);
+window.vmc.setCustomSetting('mod_speed', 7);
 ```
 
 ---
 
-## 5. サポートされているコントロールタイプ一覧
+## 6. 対応コントロール一覧
 
-### ① チェックボックス (`type: 'checkbox'`)
-ON/OFF の切り替えスイッチ。
+### 1) Checkbox
 
 ```javascript
 window.vmc.registerSetting({
-    id: 'enable_auto_jump',
-    label: 'Enable Auto Jump (BunnyHop)',
+    id: 'enable_feature',
+    label: 'Enable Feature',
     type: 'checkbox',
     default: true
 });
 ```
 
-### ② スライダー (`type: 'range'`)
-数値範囲を調節するスライダーバー。
+### 2) Range
 
 ```javascript
 window.vmc.registerSetting({
-    id: 'crosshair_gap',
-    label: 'Crosshair Gap Offset',
+    id: 'speed',
+    label: 'Speed',
     type: 'range',
-    min: 0,
-    max: 50,
+    min: 1,
+    max: 10,
     step: 1,
-    default: 5
+    default: 3
 });
 ```
 
-### ③ 数値入力 (`type: 'number'`)
-直接数値を入力するボックス。
+### 3) Number
 
 ```javascript
 window.vmc.registerSetting({
-    id: 'max_fps_cap',
-    label: 'Custom Target FPS Cap',
+    id: 'max_fps',
+    label: 'Max FPS',
     type: 'number',
     min: 30,
-    max: 1000,
+    max: 300,
     step: 10,
-    default: 240
+    default: 120
 });
 ```
 
-### ④ テキスト / URL入力 (`type: 'text'`)
-文字列を入力するテキストボックス。
+### 4) Text
 
 ```javascript
 window.vmc.registerSetting({
-    id: 'custom_hud_title',
-    label: 'Custom Clan Tag / Name',
+    id: 'player_name',
+    label: 'Player Name',
     type: 'text',
     default: 'VoxMate Player'
 });
 ```
 
-### ⑤ ドロップダウン (`type: 'select'`)
-複数の選択肢から1つを選ぶプルダウンメニュー。
+### 5) Select
 
 ```javascript
 window.vmc.registerSetting({
-    id: 'theme_color',
-    label: 'HUD Accent Theme Color',
+    id: 'theme',
+    label: 'Theme',
     type: 'select',
-    default: 'lime',
+    default: 'dark',
     options: [
-        { label: 'Lime Green', value: 'lime' },
-        { label: 'Cyan Blue', value: 'cyan' },
-        { label: 'Hot Pink', value: 'pink' }
+        { label: 'Dark', value: 'dark' },
+        { label: 'Light', value: 'light' }
     ]
 });
 ```
 
-### ⑥ アクションボタン (`type: 'button'`)
-クリックした際に関数を実行するボタン。
+### 6) Button
 
 ```javascript
 window.vmc.registerSetting({
-    id: 'reset_stats_btn',
-    label: 'Reset Local Game Statistics',
+    id: 'reset_btn',
+    label: 'Reset Settings',
     type: 'button',
     buttonText: 'RESET NOW'
 });
+```
 
+ボタンを押した場合は、`vmc-setting-change` で `id` と `value: true` が渡されます。
+
+---
+
+## 7. イベント `vmc-setting-change`
+
+ユーザーが設定項目を変更すると、`document` 上に `vmc-setting-change` というカスタムイベントが送られます。
+
+```javascript
 document.addEventListener('vmc-setting-change', (e) => {
-    if (e.detail.id === 'reset_stats_btn') {
-        alert('Statistics reset!');
+    const { id, value } = e.detail;
+    console.log('changed', id, value);
+});
+```
+
+### 使い方の例
+
+```javascript
+document.addEventListener('vmc-setting-change', (e) => {
+    if (e.detail.id === 'mod_enabled') {
+        applyFeature(e.detail.value);
+    }
+
+    if (e.detail.id === 'mod_speed') {
+        applySpeed(e.detail.value);
     }
 });
 ```
 
 ---
 
-## 6. イベントリスナー (`vmc-setting-change`)
+## 8. 実務向けの完全サンプル
 
-ユーザーが F1 設定メニュー上で設定を変更すると、`document` に対して `vmc-setting-change` カスタムイベントが送出されます。
+以下は、タブ・カテゴリ・複数設定・イベント処理をまとめた実例です。
 
 ```javascript
-document.addEventListener('vmc-setting-change', (e) => {
-    const { id, value } = e.detail;
-    console.log(`Setting [${id}] changed to:`, value);
-});
+// ==UserScript==
+// @name         Full Example Mod
+// @version      1.0
+// @description  Demonstrates VoxMate custom settings API.
+// @author       YourName
+// ==/UserScript==
+
+(function () {
+    'use strict';
+
+    const init = () => {
+        if (!window.vmc) return;
+
+        window.vmc.registerTab({
+            id: 'full_example_tab',
+            title: 'Full Example',
+            icon: 'widgets'
+        });
+
+        window.vmc.registerSetting({
+            id: 'enable_mod',
+            label: 'Enable Mod',
+            category: 'Main Settings',
+            tab: 'full_example_tab',
+            type: 'checkbox',
+            default: true
+        });
+
+        window.vmc.registerSetting({
+            id: 'mode',
+            label: 'Mode',
+            category: 'Main Settings',
+            tab: 'full_example_tab',
+            type: 'select',
+            default: 'auto',
+            options: [
+                { label: 'Auto', value: 'auto' },
+                { label: 'Manual', value: 'manual' }
+            ]
+        });
+
+        window.vmc.registerSetting({
+            id: 'strength',
+            label: 'Strength',
+            category: 'Main Settings',
+            tab: 'full_example_tab',
+            type: 'range',
+            min: 1,
+            max: 10,
+            step: 1,
+            default: 5
+        });
+
+        document.addEventListener('vmc-setting-change', async (e) => {
+            const { id, value } = e.detail;
+
+            if (id === 'enable_mod') {
+                console.log('Enable mod:', value);
+            } else if (id === 'mode') {
+                console.log('Mode:', value);
+            } else if (id === 'strength') {
+                console.log('Strength:', value);
+            }
+        });
+    };
+
+    if (window.vmc && typeof window.vmc.registerTab === 'function') {
+        init();
+    } else {
+        const interval = setInterval(() => {
+            if (window.vmc && typeof window.vmc.registerTab === 'function') {
+                clearInterval(interval);
+                init();
+            }
+        }, 100);
+    }
+})();
 ```
+
+---
+
+## 9. 実装時の注意点
+
+- `id` は重複しないようにしてください。
+- `category` は見出しなので、タブを作りたい場合は `registerTab` も合わせて使ってください。
+- `tab` を省略した場合は、既定で UserScript タブへ配置されます。
+- 設定値は VoxMate 側で保持されるため、再起動後も値を引き継ぐことがあります。
+- UI への反映は、設定変更イベントを受けてスクリプト側で行うのが基本です。
+
+---
+
+## 10. すぐ使えるテンプレート
+
+```javascript
+// ==UserScript==
+// @name         My VoxMate Mod
+// @version      1.0
+// @description  Template for VoxMate UserScript settings.
+// @author       YourName
+// ==/UserScript==
+
+(function () {
+    'use strict';
+
+    const init = () => {
+        if (!window.vmc) return;
+
+        window.vmc.registerTab({
+            id: 'my_template_tab',
+            title: 'My Template',
+            icon: 'build'
+        });
+
+        window.vmc.registerSetting({
+            id: 'my_setting',
+            label: 'My Setting',
+            category: 'General',
+            tab: 'my_template_tab',
+            type: 'checkbox',
+            default: true
+        });
+
+        document.addEventListener('vmc-setting-change', (e) => {
+            if (e.detail.id === 'my_setting') {
+                console.log('my_setting changed to', e.detail.value);
+            }
+        });
+    };
+
+    if (window.vmc) {
+        init();
+    } else {
+        const interval = setInterval(() => {
+            if (window.vmc) {
+                clearInterval(interval);
+                init();
+            }
+        }, 100);
+    }
+})();
+```
+

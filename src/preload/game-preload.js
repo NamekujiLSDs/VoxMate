@@ -66,14 +66,87 @@ const refreshCrosshairCss = async () => {
 };
 
 // Dynamic UserScript Custom Settings UI Renderer (Category Grouping & Custom Tabs)
+const switchSettingTab = async (tabId, persistLastOpen = false) => {
+    const selected = document.getElementsByClassName('menuSelected');
+    if (selected.length > 0) {
+        selected[0].classList.remove('menuSelected');
+    }
+
+    const targetTab = document.getElementById(tabId);
+    if (targetTab) targetTab.classList.add('menuSelected');
+
+    const menuBody = document.getElementById('menuBody');
+    if (!menuBody) return;
+
+    const builtinTabs = new Set([
+        'quickSetting',
+        'renderingSetting',
+        'skySetting',
+        'crosshairSetting',
+        'cssSetting',
+        'swapperSetting',
+        'adblockSetting',
+        'infoSetting',
+        'userscriptSetting',
+        'performanceSetting'
+    ]);
+
+    if (builtinTabs.has(tabId)) {
+        const settingDom = await ipcRenderer.invoke('settingTabChange', tabId);
+        menuBody.innerHTML = settingDom;
+        if (tabId === 'userscriptSetting' || registeredCustomTabs.has(tabId)) {
+            await renderCustomSettingsUI(tabId);
+        }
+    } else {
+        const tabInfo = registeredCustomTabs.get(tabId);
+        const title = tabInfo ? tabInfo.title : tabId;
+        const icon = tabInfo ? tabInfo.icon : 'tune';
+        menuBody.innerHTML = `
+        <div class="tabContainer" style="--tab-accent: #a855f7;">
+            <div id="menuBodyTitle">
+                <span class="material-symbols-outlined">${icon}</span>
+                ${title}
+            </div>
+            <div class="horizonalLine"></div>
+            <div id="customTabContent"></div>
+        </div>`;
+        await renderCustomSettingsUI(tabId);
+    }
+
+    if (persistLastOpen) {
+        ipcRenderer.send('saveSettingValue', 'lastOpen', tabId);
+    }
+};
+
+const getRegisteredCustomSettingsList = async () => {
+    const list = [];
+    for (const [id, item] of registeredCustomSettings.entries()) {
+        const key = `custom_${id}`;
+        const val = await ipcRenderer.invoke('getSetting', key);
+        list.push({
+            ...item,
+            value: val !== undefined ? val : item.default
+        });
+    }
+    return list;
+};
+
+const refreshCustomMenuUI = async () => {
+    const selectedTab = document.getElementsByClassName('menuSelected')[0];
+    const activeTabId = selectedTab?.id || 'userscriptSetting';
+    if (activeTabId === 'userscriptSetting' || registeredCustomTabs.has(activeTabId)) {
+        await renderCustomSettingsUI(activeTabId);
+    }
+};
+
 const renderCustomSettingsUI = async (targetTabId = 'userscriptSetting') => {
     let container = document.getElementById('customUserScriptSettingsContainer');
     if (!container && targetTabId !== 'userscriptSetting') {
-        container = document.getElementById('menuBody');
+        container = document.getElementById('customTabContent') || document.getElementById('menuBody');
     }
-    if (!container || !window.vmc?.getRegisteredCustomSettings) return;
+    if (!container) return;
 
-    const allList = await window.vmc.getRegisteredCustomSettings();
+    const allList = await getRegisteredCustomSettingsList();
     if (!allList || allList.length === 0) {
         if (container.id === 'customUserScriptSettingsContainer') container.innerHTML = '';
         return;
@@ -112,8 +185,8 @@ const renderCustomSettingsUI = async (targetTabId = 'userscriptSetting') => {
             const type = item.type || 'text';
             const val = item.value !== undefined ? item.value : (item.default !== undefined ? item.default : '');
 
-            html += `<div id="menuBodyItem" style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-top:8px;">`;
-            html += `<span>${label}</span>`;
+            html += `<div id="menuBodyItem">`;
+            html += `<div class="customSettingLabel">${label}</div>`;
 
             if (type === 'checkbox') {
                 html += `<input type="checkbox" name="${key}" id="${key}" oninput="window.vmc.saveSetting(this.id, this.checked)" ${val ? 'checked' : ''}>`;
@@ -162,8 +235,10 @@ const renderCustomSettingsUI = async (targetTabId = 'userscriptSetting') => {
                 ${title}
             </div>
             <div class="horizonalLine"></div>
-            ${html}
+            <div id="customTabContent"></div>
         </div>`;
+        const contentContainer = document.getElementById('customTabContent');
+        if (contentContainer) contentContainer.innerHTML = html;
     } else {
         container.innerHTML = html;
     }
@@ -183,8 +258,7 @@ const renderCustomSidebarTabs = () => {
         tabDiv.id = t.id;
         tabDiv.className = `menuItem`;
         tabDiv.onclick = () => {
-            window.vmc.showSetting(t.id);
-            window.vmc.saveSetting('lastOpen', t.id);
+            switchSettingTab(t.id);
         };
         tabDiv.innerHTML = `
             <div class="menuItemIcon"><span class="material-symbols-outlined">${t.icon}</span></div>
@@ -204,21 +278,7 @@ contextBridge.exposeInMainWorld('vmc', {
     },
 
     showSetting: async (tabId) => {
-        const settingDom = await ipcRenderer.invoke('settingTabChange', tabId);
-        const selected = document.getElementsByClassName('menuSelected');
-        if (selected.length > 0) {
-            selected[0].classList.remove('menuSelected');
-        }
-        const targetTab = document.getElementById(tabId);
-        if (targetTab) targetTab.classList.add('menuSelected');
-
-        const menuBody = document.getElementById('menuBody');
-        if (menuBody) {
-            menuBody.innerHTML = settingDom;
-            if (tabId === 'userscriptSetting') {
-                renderCustomSettingsUI();
-            }
-        }
+        await switchSettingTab(tabId, true);
     },
 
     saveSetting: (name, value) => {
@@ -427,6 +487,7 @@ contextBridge.exposeInMainWorld('vmc', {
             title: tabConfig.title || tabConfig.id,
             icon: tabConfig.icon || 'tune'
         });
+        renderCustomSidebarTabs();
     },
 
     getRegisteredCustomTabs: () => {
@@ -442,6 +503,11 @@ contextBridge.exposeInMainWorld('vmc', {
         if (currentVal === undefined && configObj.default !== undefined) {
             ipcRenderer.send('saveSettingValue', key, configObj.default);
         }
+
+        if (document.getElementById('menuItemHolder')) {
+            renderCustomSidebarTabs();
+        }
+        await refreshCustomMenuUI();
     },
 
     getCustomSetting: async (id) => {
@@ -459,16 +525,7 @@ contextBridge.exposeInMainWorld('vmc', {
     },
 
     getRegisteredCustomSettings: async () => {
-        const list = [];
-        for (const [id, item] of registeredCustomSettings.entries()) {
-            const key = `custom_${id}`;
-            const val = await ipcRenderer.invoke('getSetting', key);
-            list.push({
-                ...item,
-                value: val !== undefined ? val : item.default
-            });
-        }
-        return list;
+        return getRegisteredCustomSettingsList();
     },
 
     triggerCustomButton: (id) => {

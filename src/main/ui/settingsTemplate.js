@@ -846,7 +846,7 @@ class SettingsTemplate {
             for (const s of scripts) {
                 listHtml += `
                 <div class="horizonalLine"></div>
-                <div id="menuBodyItem" style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 10px 0;">
+                <div id="menuBodyItem" style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px;">
                     <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
                         <div style="font-weight: bold; color: #60a5fa; font-size: 14px;">
                             ${s.name} <span style="font-size: 11px; color: #94a3b8; font-weight: normal; margin-left: 6px;">v${s.version} (${s.author})</span>
@@ -858,8 +858,9 @@ class SettingsTemplate {
                     <div style="font-size: 12px; color: #cbd5e1; word-break: break-word;">
                         ${s.description}
                     </div>
-                    <div style="font-size: 11px; color: #64748b; font-family: monospace;">
-                        📄 ${s.filename}
+                    <div style="font-size: 11px; color: #64748b; font-family: monospace; display: flex; align-items: center; gap: 6px;">
+                        <span class="material-symbols-outlined" style="font-size: 14px;">description</span>
+                        ${s.filename}
                     </div>
                 </div>`;
             }
