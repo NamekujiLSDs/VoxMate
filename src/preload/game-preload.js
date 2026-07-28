@@ -1,6 +1,7 @@
 const { contextBridge, ipcRenderer } = require('electron');
 const { injectSkyChanger } = require('./skyChanger');
 const { injectSimpleInfoGui } = require('./simpleInfoGui');
+const { validateTabRegistration, validateSettingRegistration, isReservedSettingId, DEFAULT_CATEGORY_NAME } = require('./customSettingsRegistry');
 
 let serverId = '';
 let isRawInputEnabled = true;
@@ -167,7 +168,7 @@ const renderCustomSettingsUI = async (targetTabId = 'userscriptSetting') => {
     // Group items by category
     const categoriesMap = new Map();
     for (const item of list) {
-        const cat = item.category || 'UserScript Dynamic Settings';
+        const cat = item.category || DEFAULT_CATEGORY_NAME;
         if (!categoriesMap.has(cat)) categoriesMap.set(cat, []);
         categoriesMap.get(cat).push(item);
     }
@@ -481,10 +482,16 @@ contextBridge.exposeInMainWorld('vmc', {
     },
 
     registerTab: (tabConfig) => {
-        if (!tabConfig || !tabConfig.id) return;
-        registeredCustomTabs.set(tabConfig.id, {
-            id: tabConfig.id,
-            title: tabConfig.title || tabConfig.id,
+        const validation = validateTabRegistration(tabConfig, registeredCustomTabs);
+        if (!validation.ok) {
+            console.warn(`[VoxMate] ${validation.reason}`);
+            return;
+        }
+
+        const tabId = validation.tabId;
+        registeredCustomTabs.set(tabId, {
+            id: tabId,
+            title: tabConfig.title || tabId,
             icon: tabConfig.icon || 'tune'
         });
         renderCustomSidebarTabs();
@@ -495,9 +502,19 @@ contextBridge.exposeInMainWorld('vmc', {
     },
 
     registerSetting: async (configObj) => {
-        if (!configObj || !configObj.id) return;
-        const key = `custom_${configObj.id}`;
-        registeredCustomSettings.set(configObj.id, configObj);
+        const validation = validateSettingRegistration(configObj, registeredCustomSettings);
+        if (!validation.ok) {
+            console.warn(`[VoxMate] ${validation.reason}`);
+            return;
+        }
+
+        const settingId = validation.id;
+        if (isReservedSettingId(settingId)) {
+            console.warn(`[VoxMate] Setting id "${settingId}" is reserved by VoxMate.`);
+            return;
+        }
+        const key = `custom_${settingId}`;
+        registeredCustomSettings.set(settingId, configObj);
 
         const currentVal = await ipcRenderer.invoke('getSetting', key);
         if (currentVal === undefined && configObj.default !== undefined) {

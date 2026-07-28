@@ -23,6 +23,62 @@ UserScript からは、次の 2 つの API を使ってメニューへ参加で�
 - 左サイドバーに新しいタブを追加したい場合は、先に `registerTab` を呼びます。
 - `tab` を指定しない場合、設定項目は既定の UserScript タブへ入ります。
 - 設定変更は `vmc-setting-change` イベントで受け取ります。
+- `id` は登録済みの他の設定と重複してはいけません。
+- カスタムタブの `id` も一意であり、VoxMate の組み込みタブ ID を使ってはいけません。
+
+### 予約済みタブ ID
+
+次のタブ ID は VoxMate で予約済みなので、UserScript のカスタムタブとして使用しないでください。
+
+| 予約済み ID | 内容 |
+| :--- | :--- |
+| `quickSetting` | クイック設定タブ |
+| `renderingSetting` | レンダリング設定タブ |
+| `skySetting` | スカイ設定タブ |
+| `crosshairSetting` | クロスヘア設定タブ |
+| `cssSetting` | CSS 設定タブ |
+| `swapperSetting` | スワッパー設定タブ |
+| `adblockSetting` | アドブロッカー設定タブ |
+| `infoSetting` | 情報表示設定タブ |
+| `userscriptSetting` | UserScript 設定タブ |
+| `performanceSetting` | パフォーマンス設定タブ |
+
+### 予約済みの設定ボディ ID
+
+次の ID は VoxMate の設定 UI 本体で既に使われているため、カスタム設定 ID として再利用しないでください。
+
+| 予約済み ID | 内容 |
+| :--- | :--- |
+| `menuBody` | 設定内容のメインコンテナ |
+| `menuBodyTitle` | セクション見出しコンテナ |
+| `menuBodyItem` | 標準の設定行コンテナ |
+| `menuButton` | 共通ボタン用 ID |
+| `enableCustomCrosshair` | クロスヘア切り替え項目 |
+| `crosshairType` | クロスヘア種類選択項目 |
+| `enableCustomCss` | CSS 切り替え項目 |
+| `cssType` | CSS モード選択項目 |
+| `enableResourceSwapper` | スワッパー切り替え項目 |
+| `enableAdBlocker` | アドブロッカー切り替え項目 |
+| `enableRawInput` | Raw Input 切り替え項目 |
+| `enableDesynchronized` | Desynchronized 切り替え項目 |
+| `enableSimpleInfo` | Info HUD 切り替え項目 |
+| `infoPosition` | Info HUD 位置選択項目 |
+| `unlimitedFps` | パフォーマンス切り替え項目 |
+
+### 推奨プラクティス
+
+- `my_mod_enabled` や `my_mod_theme` のように、説明的で一意な ID を使いましょう。
+- `settings`, `tab`, `config` のような汎用名は避けましょう。
+- 小さな設定を毎回新しいタブに分けるより、`category` で整理するほうが見やすいです。
+
+### 衝突回避チェックリスト
+
+UserScript を公開する前に、次の点を確認してください。
+
+- タブ ID が VoxMate の予約済みタブ ID ではない。
+- 設定 ID が他の登録済み設定と重複していない。
+- カテゴリ名が `Quick Settings`, `Rendering`, `Sky`, `Crosshair`, `CSS`, `Swapper`, `Ad Blocker`, `Info`, `UserScript`, `Performance` のような組み込みセクション名と重複していない。意図的でない限り、同じ名前は避ける方が自然です。
+- `my_mod_` や `my_script_` のような接頭辞を使って、衝突を防ぎましょう。
 
 ---
 

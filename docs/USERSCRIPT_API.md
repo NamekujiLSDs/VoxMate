@@ -23,6 +23,62 @@ UserScripts can participate in the menu through two APIs:
 - If you want a new left-sidebar tab, register it first with `registerTab`.
 - If `tab` is omitted, the setting is placed into the default UserScript tab.
 - Changes are received through the `vmc-setting-change` event.
+- `id` values must be unique across all registered settings.
+- Custom tab IDs must be unique and must not reuse built-in VoxMate tab IDs.
+
+### Reserved Tab IDs
+
+The following tab IDs are reserved by VoxMate and should not be used for custom UserScript tabs:
+
+| Reserved ID | Reason |
+| :--- | :--- |
+| `quickSetting` | Built-in Quick Settings tab |
+| `renderingSetting` | Built-in Rendering tab |
+| `skySetting` | Built-in Sky tab |
+| `crosshairSetting` | Built-in Crosshair tab |
+| `cssSetting` | Built-in CSS tab |
+| `swapperSetting` | Built-in Swapper tab |
+| `adblockSetting` | Built-in Ad Blocker tab |
+| `infoSetting` | Built-in Info tab |
+| `userscriptSetting` | Built-in UserScript tab |
+| `performanceSetting` | Built-in Performance tab |
+
+### Reserved Settings-Body IDs
+
+The following IDs are already used by the built-in settings UI and should not be reused for custom setting IDs:
+
+| Reserved ID | Reason |
+| :--- | :--- |
+| `menuBody` | Main settings content container |
+| `menuBodyTitle` | Section title container |
+| `menuBodyItem` | Standard row container |
+| `menuButton` | Shared button style ID |
+| `enableCustomCrosshair` | Built-in crosshair toggle |
+| `crosshairType` | Built-in crosshair type selector |
+| `enableCustomCss` | Built-in CSS toggle |
+| `cssType` | Built-in CSS mode selector |
+| `enableResourceSwapper` | Built-in swapper toggle |
+| `enableAdBlocker` | Built-in ad blocker toggle |
+| `enableRawInput` | Built-in raw input toggle |
+| `enableDesynchronized` | Built-in desync toggle |
+| `enableSimpleInfo` | Built-in info HUD toggle |
+| `infoPosition` | Built-in info HUD position selector |
+| `unlimitedFps` | Built-in performance toggle |
+
+### Recommended Practice
+
+- Use descriptive, unique IDs such as `my_mod_enabled` or `my_mod_theme`.
+- Avoid generic names like `settings`, `tab`, or `config`.
+- If you want to group controls, prefer `category` instead of creating a new tab for every small setting.
+
+### Conflict Avoidance Checklist
+
+Before publishing a Userscript, verify the following:
+
+- The tab ID is not one of the reserved VoxMate tab IDs.
+- The setting ID is not already used by another registered setting.
+- The category name does not duplicate built-in section names such as `Quick Settings`, `Rendering`, `Sky`, `Crosshair`, `CSS`, `Swapper`, `Ad Blocker`, `Info`, `UserScript`, or `Performance` unless you intentionally want that appearance.
+- Use a prefix such as `my_mod_` or `my_script_` to avoid accidental collisions.
 
 ---
 
