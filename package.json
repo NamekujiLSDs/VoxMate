@@ -3,12 +3,15 @@
   "appname": "VoxMate Client",
   "displayName": "VoxMate Client",
   "productName": "VoxMate Client",
-  "version": "1.1.2",
+  "version": "1.1.4",
   "description": "Client of Voxiom player, by the Voxiom player, for the Voxiom player.",
   "main": "main.js",
   "scripts": {
     "test": "electron .",
     "build": "electron-builder --win --x64 --publish never",
+    "build:mac": "electron-builder --mac --publish never",
+    "build:linux": "electron-builder --linux --publish never",
+    "build:all": "electron-builder --win --mac --linux --publish never",
     "publish": "electron-builder --win --x64 --publish always"
   },
   "author": "Namekuji",

@@ -17,10 +17,21 @@ const startAutoUpdateCheck = (splashWindow, onComplete) => {
         }, 15000);
     });
 
+    const isMac = process.platform === 'darwin';
+
     autoUpdater.on('update-available', (i) => {
         if (updateCheckTimeout) clearTimeout(updateCheckTimeout);
-        if (!splashWindow.isDestroyed()) {
-            splashWindow.webContents.send('status', `Found new version v${i.version}!`);
+        if (isMac) {
+            const { shell } = require('electron');
+            if (!splashWindow.isDestroyed()) {
+                splashWindow.webContents.send('status', `New version v${i.version} available! Opening download page...`);
+            }
+            shell.openExternal('https://github.com/NamekujiLSDs/VoxMate/releases/latest');
+            setTimeout(() => onComplete(), 2500);
+        } else {
+            if (!splashWindow.isDestroyed()) {
+                splashWindow.webContents.send('status', `Found new version v${i.version}! Downloading...`);
+            }
         }
     });
 

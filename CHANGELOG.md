@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.1.4] - 2026-07-31
+
+### Added
+- **Multi-Platform Support & Automated Release Pipeline:**
+  - Added cross-platform folder opening (`shell.openPath`) for seamless compatibility with macOS and Linux.
+  - Added macOS manual update handling in `autoUpdater.js` to redirect users to GitHub Releases on new versions.
+  - Added GitHub Actions workflow (`.github/workflows/deploy.yml`) for automated multi-platform (Windows, macOS, Linux) releases on tag push.
+
+---
+
+## [1.1.3] - 2026-07-31
+
+### Fixed
+- Fixed an issue where enabled UserScript custom settings entries were omitted from the F1 settings menu or shortcut key triggers.
+- Ensured all active UserScript settings are 100% reliably registered and rendered in the in-game settings menu and keybind handlers.
+
+---
+
 ## [1.1.2] - 2026-07-31
 
 ### Added

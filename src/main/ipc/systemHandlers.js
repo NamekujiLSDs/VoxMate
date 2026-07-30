@@ -8,8 +8,8 @@ const registerSystemHandlers = (getGameWindow) => {
         const fs = require('fs');
         const targetFolder = (typeof subFolder === 'string' && subFolder) ? path.join(getSwapFolderPath(), subFolder) : getSwapFolderPath();
         if (!fs.existsSync(targetFolder)) fs.mkdirSync(targetFolder, { recursive: true });
-        exec(`start "" "${targetFolder}"`, (err) => {
-            if (err) console.error('Failed to open explorer:', err);
+        shell.openPath(targetFolder).catch(err => {
+            console.error('Failed to open folder:', err);
         });
     });
 
