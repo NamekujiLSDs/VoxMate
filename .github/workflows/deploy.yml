@@ -81,6 +81,8 @@ jobs:
         with:
           files: |
             all-artifacts/dist-*/*
+          draft: false
+          prerelease: false
           fail_on_unmatched_files: false
           generate_release_notes: true
         env:

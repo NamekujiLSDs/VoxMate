@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.7] - 2026-07-31
+
+### Changed
+- **Automated Release Publishing:**
+  - Configured GitHub Actions to automatically publish releases directly (`draft: false`) without requiring manual approval in the GitHub dashboard.
+
+---
+
 ## [1.1.6] - 2026-07-31
 
 ### Fixed
