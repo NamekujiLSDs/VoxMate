@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.1.6] - 2026-07-31
+
+### Fixed
+- **CI Release Consolidation:**
+  - Restructured GitHub Actions release workflow into a two-stage pipeline (`build` -> `release`) to prevent duplicate Draft releases from concurrent OS builds.
+  - Guaranteed all platform installers (Windows, macOS, Linux) are published into a single GitHub release page.
+
+---
+
 ## [1.1.5] - 2026-07-31
 
 ### Fixed

@@ -6,8 +6,8 @@ on:
       - 'v*'
 
 jobs:
-  release:
-    name: Build and Release (${{ matrix.os }})
+  build:
+    name: Build (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -37,24 +37,51 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libarchive-tools libopenjp2-7
 
-      - name: Build and Publish (Windows)
+      - name: Build (Windows)
         if: matrix.os == 'windows-latest'
-        run: npx electron-builder --win --x64 --publish always
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx electron-builder --win --x64 --publish never
 
-      - name: Build and Publish (macOS)
+      - name: Build (macOS)
         if: matrix.os == 'macos-latest'
-        run: npx electron-builder --mac --x64 --publish always
+        run: npx electron-builder --mac --x64 --publish never
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSC_IDENTITY_AUTO_DISCOVERY: false
 
-      - name: Build and Publish (Linux)
+      - name: Build (Linux)
         if: matrix.os == 'ubuntu-latest'
-        run: npx electron-builder --linux --x64 --publish always
+        run: npx electron-builder --linux --x64 --publish never
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ matrix.os }}
+          path: |
+            dist/*.exe
+            dist/*.dmg
+            dist/*.AppImage
+            dist/*.blockmap
+            dist/latest*.yml
+          retention-days: 1
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all-artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            all-artifacts/dist-*/*
+          fail_on_unmatched_files: false
+          generate_release_notes: true
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
