@@ -135,7 +135,7 @@ const loadUserScripts = async (webContents) => {
                     }
                 }
 
-                fullScript = `window.__currentExecutingUserscript = ${JSON.stringify(file)};\n` + fullScript + `\nwindow.__currentExecutingUserscript = null;`;
+                fullScript += scriptContent;
 
                 webContents.executeJavaScript(fullScript)
                     .catch(error => console.error(`Error executing userscript (${file}):`, error));

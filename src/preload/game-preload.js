@@ -495,12 +495,10 @@ contextBridge.exposeInMainWorld('vmc', {
         }
 
         const tabId = validation.tabId;
-        const scriptFile = window.__currentExecutingUserscript || tabConfig.scriptFile || null;
         registeredCustomTabs.set(tabId, {
             id: tabId,
             title: tabConfig.title || tabId,
-            icon: tabConfig.icon || 'tune',
-            _scriptFile: scriptFile
+            icon: tabConfig.icon || 'tune'
         });
         renderCustomSidebarTabs();
     },
@@ -522,8 +520,7 @@ contextBridge.exposeInMainWorld('vmc', {
             return;
         }
         const key = `custom_${settingId}`;
-        const scriptFile = window.__currentExecutingUserscript || configObj.scriptFile || null;
-        registeredCustomSettings.set(settingId, { ...configObj, _scriptFile: scriptFile });
+        registeredCustomSettings.set(settingId, configObj);
 
         const currentVal = await ipcRenderer.invoke('getSetting', key);
         const initialValue = currentVal !== undefined ? currentVal : (configObj.default !== undefined ? configObj.default : undefined);
@@ -866,13 +863,6 @@ document.addEventListener('keydown', async (e) => {
                     const customSettingObj = registeredCustomSettings.get(cleanId) || registeredCustomSettings.get(`custom_${cleanId}`);
                     if (!customSettingObj) {
                         continue;
-                    }
-
-                    if (customSettingObj._scriptFile) {
-                        const isScriptEnabled = await ipcRenderer.invoke('getSetting', `userscript_${customSettingObj._scriptFile}`);
-                        if (isScriptEnabled === false) {
-                            continue;
-                        }
                     }
                 }
 
