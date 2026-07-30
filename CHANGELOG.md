@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.1.2] - 2026-07-31
+
+### Added
+- **Global Shortcut Key Assignment:**
+  - Added dedicated keybind buttons for all built-in settings and UserScript settings in the F1 menu.
+  - Added `getAllKeybinds` IPC handler to fetch and persist all saved shortcut keys (`keybind_${settingId}`) independently from setting values.
+  - Added dynamic keybind auto-loader (`loadAllSavedKeybinds`) on startup to ensure all shortcuts are active after restart.
+
+### Fixed
+- **UserScript Keybind Persistence & Execution Validation:**
+  - Fixed an issue where saved UserScript shortcut keys did not work after client restart.
+  - Fixed an issue where setting boolean values (`true`/`false`) corrupted keybind button text (`TRUE`/`FALSE`).
+  - Fixed an issue where disabled UserScripts responded to shortcut keys; keybind triggers now validate script ownership (`_scriptFile`) and script enabled state.
+
+### Improved & Redesigned
+- Small UI Fix
+
+---
+
 ## [1.1.1] - 2026-07-28
 
 ### Added

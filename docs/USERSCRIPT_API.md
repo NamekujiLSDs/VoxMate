@@ -298,6 +298,43 @@ window.vmc.setCustomSetting('mod_speed', 7);
 
 ---
 
+### `window.vmc.registerKeybind(config)`
+
+Registers a shortcut key that automatically toggles a boolean custom setting or triggers a callback, with a Toast notification displayed in the bottom-right corner.
+
+| Property | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `string` | Optional | Unique ID for the keybind |
+| `key` | `string` | Yes | The key to listen for (e.g. `'\\'`, `'k'`, `'='`, `'i'`). Set to `""` or `null` to clear |
+| `settingId` | `string` | Optional | Target custom setting ID to toggle on key press |
+| `callback` | `function` | Optional | Function executed on key press |
+
+> **Notes**:
+> - **Multi-Feature Keybinding**: If multiple features or settings are assigned to the same key, all bound features execute simultaneously on keypress.
+> - **Clearing Keybinds**: Pressing `Backspace` or `Escape` during UI key assignment clears the shortcut key (sets it to `Blank` / `None`).
+
+#### Example
+
+```javascript
+window.vmc.registerKeybind({
+    id: 'keybind_silentAim',
+    key: '\\',
+    settingId: 'esp_silentAim'
+});
+```
+
+---
+
+### `window.vmc.showToast(message, type, duration)`
+
+Displays a sleek toast notification overlay in the bottom-right corner of the screen.
+
+```javascript
+window.vmc.showToast('Silent Aim: <span style="color:white">ON</span>');
+```
+
+---
+
 ## 6. Supported Controls
 
 ### 1) Checkbox

@@ -1,5 +1,8 @@
 const fs = require('fs');
 const path = require('path');
+const https = require('https');
+const http = require('http');
+const crypto = require('crypto');
 const { app } = require('electron');
 const { config } = require('../utils/config');
 
@@ -9,7 +12,8 @@ const parseUserscriptHeader = (content, filename) => {
         name: filename,
         version: '1.0',
         description: 'No description provided.',
-        author: 'Unknown'
+        author: 'Unknown',
+        requires: []
     };
     const headerMatch = content.match(/\/\/\s*==UserScript==([\s\S]*?)\/\/\s*==\/UserScript==/);
     if (!headerMatch) return meta;
@@ -25,9 +29,50 @@ const parseUserscriptHeader = (content, filename) => {
             else if (cleanKey === 'version') meta.version = cleanVal;
             else if (cleanKey === 'description') meta.description = cleanVal;
             else if (cleanKey === 'author') meta.author = cleanVal;
+            else if (cleanKey === 'require') meta.requires.push(cleanVal);
         }
     }
     return meta;
+};
+
+const getCachePath = (url, cacheDir) => {
+    const hash = crypto.createHash('md5').update(url).digest('hex');
+    return path.join(cacheDir, `${hash}.js`);
+};
+
+const fetchRequireScript = (url, cacheDir) => {
+    return new Promise((resolve) => {
+        if (!fs.existsSync(cacheDir)) {
+            fs.mkdirSync(cacheDir, { recursive: true });
+        }
+        const cacheFile = getCachePath(url, cacheDir);
+        if (fs.existsSync(cacheFile)) {
+            try {
+                const cachedContent = fs.readFileSync(cacheFile, 'utf8');
+                return resolve(cachedContent);
+            } catch (e) {}
+        }
+
+        const client = url.startsWith('https') ? https : http;
+        client.get(url, (res) => {
+            if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+                return fetchRequireScript(res.headers.location, cacheDir).then(resolve);
+            }
+            let data = '';
+            res.on('data', (chunk) => data += chunk);
+            res.on('end', () => {
+                if (res.statusCode === 200 && data) {
+                    try {
+                        fs.writeFileSync(cacheFile, data, 'utf8');
+                    } catch (e) {}
+                }
+                resolve(data);
+            });
+        }).on('error', (err) => {
+            console.error(`Failed to fetch @require script (${url}):`, err);
+            resolve('');
+        });
+    });
 };
 
 const getUserScriptsList = () => {
@@ -57,12 +102,14 @@ const getUserScriptsList = () => {
     }
 };
 
-const loadUserScripts = (webContents) => {
+const loadUserScripts = async (webContents) => {
     try {
         if (!config.get('enableUserScripts', true)) return;
 
         const scriptFolderPath = path.join(app.getPath('documents'), './vmc-swap/userscript');
         if (!fs.existsSync(scriptFolderPath)) return;
+
+        const cacheDir = path.join(scriptFolderPath, '.cache');
 
         const files = fs.readdirSync(scriptFolderPath);
         const userJsFiles = files.filter(file => file.endsWith('.user.js'));
@@ -72,12 +119,29 @@ const loadUserScripts = (webContents) => {
             if (!isEnabled) continue;
 
             const filePath = path.join(scriptFolderPath, file);
-            fs.readFile(filePath, 'utf8', (err, scriptContent) => {
-                if (err || !scriptContent) return;
+            try {
+                const scriptContent = fs.readFileSync(filePath, 'utf8');
+                if (!scriptContent) continue;
 
-                webContents.executeJavaScript(scriptContent)
+                const meta = parseUserscriptHeader(scriptContent, file);
+                let fullScript = '';
+
+                if (meta.requires && meta.requires.length > 0) {
+                    for (const reqUrl of meta.requires) {
+                        const reqCode = await fetchRequireScript(reqUrl, cacheDir);
+                        if (reqCode) {
+                            fullScript += reqCode + '\n;\n';
+                        }
+                    }
+                }
+
+                fullScript = `window.__currentExecutingUserscript = ${JSON.stringify(file)};\n` + fullScript + `\nwindow.__currentExecutingUserscript = null;`;
+
+                webContents.executeJavaScript(fullScript)
                     .catch(error => console.error(`Error executing userscript (${file}):`, error));
-            });
+            } catch (err) {
+                console.error(`Error reading userscript (${file}):`, err);
+            }
         }
     } catch (error) {
         console.error('Error loading userscripts:', error);

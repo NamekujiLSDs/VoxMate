@@ -35,7 +35,7 @@ const startAutoUpdateCheck = (splashWindow, onComplete) => {
     autoUpdater.on('error', (e) => {
         if (updateCheckTimeout) clearTimeout(updateCheckTimeout);
         if (!splashWindow.isDestroyed()) {
-            splashWindow.webContents.send('status', 'Error! ' + (e ? e.name : ''));
+            splashWindow.webContents.send('status', 'Skip update check');
         }
         setTimeout(() => onComplete(), 1000);
     });
@@ -57,7 +57,22 @@ const startAutoUpdateCheck = (splashWindow, onComplete) => {
 
     autoUpdater.autoDownload = 'download';
     autoUpdater.allowPrerelease = false;
-    autoUpdater.checkForUpdates();
+
+    try {
+        const p = autoUpdater.checkForUpdates();
+        if (p && typeof p.catch === 'function') {
+            p.catch((err) => {
+                console.log('AutoUpdater check bypassed (dev/test):', err.message);
+                if (!splashWindow.isDestroyed()) {
+                    splashWindow.webContents.send('status', 'Bypassed update check');
+                }
+                setTimeout(() => onComplete(), 1000);
+            });
+        }
+    } catch (err) {
+        console.log('AutoUpdater Exception bypassed:', err.message);
+        setTimeout(() => onComplete(), 1000);
+    }
 };
 
 module.exports = {

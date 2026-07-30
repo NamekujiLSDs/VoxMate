@@ -298,6 +298,43 @@ window.vmc.setCustomSetting('mod_speed', 7);
 
 ---
 
+### `window.vmc.registerKeybind(config)`
+
+カスタム設定（Boolean）のトグル操作やコールバック実行を行うショートカットキーを登録します。キー押下時には画面右下にトースト通知が表示されます。
+
+| プロパティ | 型 | 必須 | 説明 |
+| :--- | :--- | :--- | :--- |
+| `id` | `string` | 任意 | キーバインド識別ID |
+| `key` | `string` | **必須** | 割り当てるキー（例: `'\\'`, `'k'`, `'='`, `'i'`）。空文字または `null` で解除 |
+| `settingId` | `string` | 任意 | トグル対象のカスタム設定ID |
+| `callback` | `function` | 任意 | キー押下時に実行される関数 |
+
+> **補足**:
+> - **複数機能の同一キー割り当て**: 1つのキーに複数の機能・設定が設定されている場合、キー押下時に割り当てられたすべての機能が同時に実行されます。
+> - **キー設定のクリア（Blank化）**: UIでのキー設定時、`Backspace` または `Escape` キーを押すとショートカットキーがクリア（`Blank` / `None`）に更新されます。
+
+#### 例
+
+```javascript
+window.vmc.registerKeybind({
+    id: 'keybind_silentAim',
+    key: '\\',
+    settingId: 'esp_silentAim'
+});
+```
+
+---
+
+### `window.vmc.showToast(message, type, duration)`
+
+画面右下にスマートなトースト通知を表示します。
+
+```javascript
+window.vmc.showToast('Silent Aim: <span style="color:white">ON</span>');
+```
+
+---
+
 ## 6. 対応コントロール一覧
 
 ### 1) Checkbox

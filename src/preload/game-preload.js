@@ -188,7 +188,16 @@ const renderCustomSettingsUI = async (targetTabId = 'userscriptSetting') => {
             html += `<div class="customSettingLabel">${label}</div>`;
 
             if (type === 'checkbox') {
-                html += `<input type="checkbox" name="${key}" id="${key}" oninput="window.vmc.saveSetting(this.id, this.checked)" ${val ? 'checked' : ''}>`;
+                const savedKey = await ipcRenderer.invoke('getSetting', `keybind_${id}`);
+                const displayKey = (savedKey && typeof savedKey === 'string' && savedKey.trim()) ? savedKey.trim().toUpperCase() : 'NONE';
+                const isBound = displayKey !== 'NONE';
+                const btnColor = isBound ? '#ffffff' : '#64748b';
+                const borderColor = isBound ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.1)';
+                const bgColor = isBound ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.3)';
+                html += `<div style="display: flex; align-items: center;">
+                    <input type="button" class="keybindBtn" style="min-width: 95px; width: auto; height: 26px; font-weight: 600; font-size: 11px; padding: 0 10px; background: ${bgColor}; color: ${btnColor}; border: 1px solid ${borderColor}; cursor: pointer; text-transform: uppercase; border-radius: 4px; margin-right: 8px; transition: all 0.15s ease; box-sizing: border-box;" id="kb_btn_${id}" value="${displayKey}" onclick="window.vmc.listenKeybind('${id}', this.id)" title="Assign shortcut key (Backspace/Esc to clear)">
+                    <input type="checkbox" name="${key}" id="${key}" oninput="window.vmc.saveSetting(this.id, this.checked)" ${val ? 'checked' : ''}>
+                </div>`;
             } else if (type === 'range') {
                 const min = item.min ?? 0;
                 const max = item.max ?? 100;
@@ -214,6 +223,9 @@ const renderCustomSettingsUI = async (targetTabId = 'userscriptSetting') => {
             } else if (type === 'button') {
                 const btnText = item.buttonText || 'RUN';
                 html += `<input type="button" id="menuButton" value="${btnText}" onclick="window.vmc.triggerCustomButton('${id}')">`;
+            } else if (type === 'keybind') {
+                const keyVal = (val && String(val).trim()) ? String(val).toUpperCase() : 'None';
+                html += `<input type="button" class="sizeInput" style="min-width: 90px; font-weight: bold; background: rgba(0,0,0,0.5); color: ${keyVal !== 'None' ? '#00ff00' : '#888888'}; border: 1px solid ${keyVal !== 'None' ? '#00ff00' : '#444444'}; cursor: pointer; text-transform: uppercase;" id="${key}" value="${keyVal}" onclick="window.vmc.listenKeybind('${id}', this.id)">`;
             } else {
                 html += `<input type="text" name="${key}" id="${key}" value="${val}" onchange="window.vmc.saveSetting(this.id, this.value)">`;
             }
@@ -483,10 +495,12 @@ contextBridge.exposeInMainWorld('vmc', {
         }
 
         const tabId = validation.tabId;
+        const scriptFile = window.__currentExecutingUserscript || tabConfig.scriptFile || null;
         registeredCustomTabs.set(tabId, {
             id: tabId,
             title: tabConfig.title || tabId,
-            icon: tabConfig.icon || 'tune'
+            icon: tabConfig.icon || 'tune',
+            _scriptFile: scriptFile
         });
         renderCustomSidebarTabs();
     },
@@ -508,7 +522,8 @@ contextBridge.exposeInMainWorld('vmc', {
             return;
         }
         const key = `custom_${settingId}`;
-        registeredCustomSettings.set(settingId, configObj);
+        const scriptFile = window.__currentExecutingUserscript || configObj.scriptFile || null;
+        registeredCustomSettings.set(settingId, { ...configObj, _scriptFile: scriptFile });
 
         const currentVal = await ipcRenderer.invoke('getSetting', key);
         const initialValue = currentVal !== undefined ? currentVal : (configObj.default !== undefined ? configObj.default : undefined);
@@ -618,11 +633,312 @@ contextBridge.exposeInMainWorld('vmc', {
             }
         }
         return false;
-    }
+    },
+
+    showToast: (msg, type, duration) => showToast(msg, type, duration),
+    registerKeybind: (config) => registerKeybind(config),
+    listenKeybind: (settingId, buttonId) => listenKeybind(settingId, buttonId)
 });
+
+const formatSettingLabel = (rawLabel) => {
+    if (!rawLabel) return '';
+    if (rawLabel.includes(' ')) return rawLabel;
+    return rawLabel
+        .replace(/([a-z])([A-Z])/g, '$1 $2')
+        .replace(/_/g, ' ')
+        .replace(/\b\w/g, c => c.toUpperCase());
+};
+
+const showToast = (message, duration = 1600) => {
+    try {
+        let container = document.getElementById('vmcToastContainer');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'vmcToastContainer';
+            container.style.cssText = `
+                position: fixed;
+                bottom: 18px;
+                right: 18px;
+                z-index: 999999;
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 5px;
+                pointer-events: none;
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            `;
+            (document.body || document.documentElement).appendChild(container);
+        }
+
+        const isOff = message.includes('OFF') || message.includes('CLOSED') || message.includes('BLANK');
+        const accentColor = isOff ? '#ef4444' : '#10b981';
+
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+            background: rgba(15, 23, 42, 0.82);
+            color: #e2e8f0;
+            border-left: 3px solid ${accentColor};
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 11.5px;
+            font-weight: 500;
+            letter-spacing: 0.2px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(8px);
+            transform: translateX(12px);
+            opacity: 0;
+            transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+            white-space: nowrap;
+        `;
+        toast.innerHTML = message;
+        container.appendChild(toast);
+
+        requestAnimationFrame(() => {
+            toast.style.transform = 'translateX(0)';
+            toast.style.opacity = '1';
+        });
+
+        setTimeout(() => {
+            toast.style.transform = 'translateX(12px)';
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 200);
+        }, duration);
+    } catch (e) {}
+};
+
+const BUILTIN_SETTING_IDS = new Set([
+    'enableSimpleInfo', 'enableCustomCrosshair', 'enableCustomCss', 'enableResourceSwapper',
+    'enableAdBlocker', 'unlimitedFps', 'enableRawInput', 'enableDesynchronized', 'discordRpc',
+    'disableGpuVsync', 'inProcess', 'enableGpuRasterization', 'enableZerocopy', 'useTailwindCss',
+    'useDefSwapList', 'useUserSwapList', 'useDefAdBlockList', 'useUserAdBlockList',
+    'infoShowFPS', 'infoShowPing', 'infoShowPos', 'infoShowBlockPos', 'infoShowChunkPos',
+    'infoShowVelocity', 'infoShowAngles', 'infoShowChunks', 'infoShowNetBps',
+    'enableQuic', 'enablePointerLockOptions', 'enableHeavyAdIntervention', 'ignoreGpuBlocklist',
+    'enableV8Opt', 'enableParallelShader', 'enableAudioOpt'
+]);
+
+const registeredKeybinds = new Map();
+
+const loadAllSavedKeybinds = async () => {
+    try {
+        const keybindMap = await ipcRenderer.invoke('getAllKeybinds');
+        if (keybindMap && typeof keybindMap === 'object') {
+            for (const [settingId, key] of Object.entries(keybindMap)) {
+                if (key && typeof key === 'string' && key.trim() !== '') {
+                    const cleanSettingId = settingId.replace(/^custom_/, '');
+                    registeredKeybinds.set(`kb_${cleanSettingId}`, {
+                        id: `kb_${cleanSettingId}`,
+                        key: key.trim().toLowerCase(),
+                        label: cleanSettingId,
+                        settingId: cleanSettingId,
+                        callback: null
+                    });
+                }
+            }
+        }
+    } catch (e) {
+        console.error('[VoxMate Keybind Auto-Load Error]', e);
+    }
+};
+
+const registerKeybind = async (config) => {
+    if (!config) return;
+    const cleanSettingId = config.settingId ? config.settingId.replace(/^custom_/, '') : null;
+    const id = config.id || (cleanSettingId ? `kb_${cleanSettingId}` : `keybind_${Date.now()}_${Math.random()}`);
+
+    let key = config.key;
+
+    // Check if user saved a custom shortcut key in config
+    if (cleanSettingId) {
+        try {
+            const savedKey = await ipcRenderer.invoke('getSetting', `keybind_${cleanSettingId}`);
+            if (typeof savedKey === 'string' && savedKey.trim() !== '') {
+                key = savedKey.trim();
+            }
+        } catch (e) {}
+    }
+
+    if (!key || key === '' || String(key).toLowerCase() === 'none' || String(key).toLowerCase() === 'blank') {
+        registeredKeybinds.delete(id);
+        if (cleanSettingId) {
+            for (const [k, v] of registeredKeybinds.entries()) {
+                if (v.settingId === cleanSettingId) registeredKeybinds.delete(k);
+            }
+        }
+        return;
+    }
+
+    const keyLower = String(key).toLowerCase();
+    registeredKeybinds.set(id, {
+        id,
+        key: keyLower,
+        label: config.label || cleanSettingId || id,
+        settingId: cleanSettingId,
+        callback: config.callback || null
+    });
+};
+
+const listenKeybind = (settingId, buttonId) => {
+    const btn = document.getElementById(buttonId) || (typeof event !== 'undefined' && event ? event.target : null);
+    if (!btn) return;
+
+    btn.value = 'PRESS KEY';
+    btn.style.color = '#f59e0b';
+    btn.style.borderColor = '#f59e0b';
+    btn.style.background = 'rgba(245, 158, 11, 0.1)';
+
+    const onKeyCaptured = async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        window.removeEventListener('keydown', onKeyCaptured, true);
+
+        const pressedKey = e.key;
+        const keyLower = pressedKey.toLowerCase();
+
+        const cleanSettingId = settingId.replace(/^custom_/, '');
+        const keyStorageKey = `keybind_${cleanSettingId}`;
+
+        // Backspace or Escape -> CLEAR SHORTCUT KEY (Blank)
+        if (keyLower === 'backspace' || keyLower === 'escape') {
+            ipcRenderer.send('saveSettingValue', keyStorageKey, '');
+            btn.value = 'NONE';
+            btn.style.color = '#64748b';
+            btn.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+            btn.style.background = 'rgba(0, 0, 0, 0.3)';
+
+            await registerKeybind({ id: `kb_${cleanSettingId}`, settingId: cleanSettingId, key: '' });
+            showToast(`${formatSettingLabel(cleanSettingId)} Keybind: <span style="color:#ef4444; font-weight:600;">BLANK</span>`);
+            return;
+        }
+
+        // Normal Key Assignment
+        const displayKey = pressedKey.length === 1 ? pressedKey.toUpperCase() : pressedKey;
+        ipcRenderer.send('saveSettingValue', keyStorageKey, keyLower);
+        btn.value = displayKey;
+        btn.style.color = '#ffffff';
+        btn.style.borderColor = 'rgba(255, 255, 255, 0.25)';
+        btn.style.background = 'rgba(255, 255, 255, 0.08)';
+
+        await registerKeybind({
+            id: `kb_${cleanSettingId}`,
+            key: keyLower,
+            settingId: cleanSettingId,
+            label: cleanSettingId
+        });
+
+        showToast(`${formatSettingLabel(cleanSettingId)} Keybind: <span style="color:#10b981; font-weight:600;">${displayKey}</span>`);
+    };
+
+    window.addEventListener('keydown', onKeyCaptured, true);
+};
+
+document.addEventListener('keydown', async (e) => {
+    const isInputField = e.target && (e.target.isContentEditable || e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement);
+    if (isInputField) return;
+
+    const pressedKey = e.key.toLowerCase();
+
+    // Match all registered keybinds for this key so multiple functions bound to the same key execute cleanly
+    const matchingBinds = [];
+    for (const bind of registeredKeybinds.values()) {
+        if (bind.key === pressedKey) {
+            matchingBinds.push(bind);
+        }
+    }
+
+    for (const bind of matchingBinds) {
+        try {
+            if (bind.settingId) {
+                const cleanId = bind.settingId.replace(/^custom_/, '');
+                const isBuiltIn = BUILTIN_SETTING_IDS.has(cleanId);
+                const isCustom = !isBuiltIn;
+
+                if (isCustom) {
+                    const globalUserScriptsEnabled = await ipcRenderer.invoke('getSetting', 'enableUserScripts');
+                    if (globalUserScriptsEnabled === false) {
+                        continue;
+                    }
+
+                    const customSettingObj = registeredCustomSettings.get(cleanId) || registeredCustomSettings.get(`custom_${cleanId}`);
+                    if (!customSettingObj) {
+                        continue;
+                    }
+
+                    if (customSettingObj._scriptFile) {
+                        const isScriptEnabled = await ipcRenderer.invoke('getSetting', `userscript_${customSettingObj._scriptFile}`);
+                        if (isScriptEnabled === false) {
+                            continue;
+                        }
+                    }
+                }
+
+                const storageKey = isCustom ? `custom_${cleanId}` : cleanId;
+
+                const currentVal = await ipcRenderer.invoke('getSetting', storageKey);
+                const newVal = !currentVal;
+
+                // Save setting value in config
+                ipcRenderer.send('saveSettingValue', storageKey, newVal);
+
+                // Update UI checkbox in DOM if settings menu is open
+                const elemId = isCustom ? `custom_${cleanId}` : cleanId;
+                const checkboxElem = document.getElementById(elemId) || document.getElementById(cleanId);
+                if (checkboxElem && checkboxElem.type === 'checkbox') {
+                    checkboxElem.checked = newVal;
+                }
+
+                // Always dispatch vmc-setting-change for UserScripts
+                document.dispatchEvent(new CustomEvent('vmc-setting-change', { detail: { id: cleanId, value: newVal } }));
+                if (cleanId !== storageKey) {
+                    document.dispatchEvent(new CustomEvent('vmc-setting-change', { detail: { id: storageKey, value: newVal } }));
+                }
+
+                // Handle built-in setting side effects
+                if (isBuiltIn) {
+                    if (cleanId === 'enableRawInput') isRawInputEnabled = newVal;
+                    if (cleanId === 'enableDesynchronized') isDesynchronizedEnabled = newVal;
+                    if (cleanId.startsWith('enableCustomCrosshair') || cleanId.startsWith('crosshair')) {
+                        const crosshairImg = document.getElementById('crosshair');
+                        if (crosshairImg) newVal ? crosshairImg.classList.remove('hidden') : crosshairImg.classList.add('hidden');
+                    }
+                    if (cleanId.startsWith('enableCustomCss') || cleanId.startsWith('css')) {
+                        const customCssElem = document.getElementById('customCss');
+                        if (customCssElem && cleanId === 'enableCustomCss') {
+                            if (newVal) {
+                                const cssUrl = await ipcRenderer.invoke('getSetting', 'cssUrl');
+                                if (cssUrl) customCssElem.href = cssUrl;
+                            } else {
+                                customCssElem.href = '';
+                            }
+                        }
+                    }
+                    if (cleanId.startsWith('enableSimpleInfo') || cleanId.startsWith('info')) {
+                        document.dispatchEvent(new CustomEvent('vmc-info-update', { detail: { enabled: newVal } }));
+                    }
+                }
+
+                const settingConfig = registeredCustomSettings.get(cleanId);
+                const rawLabel = bind.label && bind.label !== bind.id ? bind.label : (settingConfig ? (settingConfig.label || cleanId) : cleanId);
+                const formattedLabel = formatSettingLabel(rawLabel);
+                showToast(`${formattedLabel}: <span style="color:${newVal ? '#10b981' : '#ef4444'}; font-weight:600;">${newVal ? 'ON' : 'OFF'}</span>`);
+            }
+
+            if (typeof bind.callback === 'function') {
+                bind.callback();
+            }
+        } catch (err) {
+            console.error('[VoxMate Keybind Error]', err);
+        }
+    }
+}, true);
 
 // IPC Event Listeners
 ipcRenderer.on('openSetting', async () => {
+    let isOpen = false;
     if (!document.getElementById('settingWindow')) {
         const settingDom = await ipcRenderer.invoke('settingDom');
         const settingTabDom = await ipcRenderer.invoke('settingTabChange', 'onload');
@@ -632,16 +948,24 @@ ipcRenderer.on('openSetting', async () => {
             const menuBody = document.getElementById('menuBody');
             if (menuBody) menuBody.innerHTML = settingTabDom;
             renderCustomSidebarTabs();
+            const win = document.getElementById('settingWindow');
+            if (win) {
+                win.classList.add('settingShow');
+                isOpen = true;
+            }
         }
     } else {
         const settingWindow = document.getElementById('settingWindow');
         if (settingWindow) {
             settingWindow.classList.toggle('settingShow');
-            if (settingWindow.classList.contains('settingShow')) {
+            isOpen = settingWindow.classList.contains('settingShow');
+            if (isOpen) {
                 renderCustomSidebarTabs();
             }
         }
     }
+
+    showToast(`⚙ Menu: <span style="color:${isOpen ? '#10b981' : '#ef4444'}; font-weight:600;">${isOpen ? 'OPEN' : 'CLOSED'}</span>`);
 
     const inviteGameElem = document.getElementById('inviteGame');
     if (inviteGameElem) {
@@ -731,6 +1055,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const ver = await ipcRenderer.invoke('version');
     document.body.insertAdjacentHTML('afterbegin', `<div id="version" style="position:fixed;right:0;bottom:0;font-size:12px;color:white;text-shadow:0 0 2px black;z-index:1">VoxMate - ${ver}</div>`);
+
+    // Dynamic auto-load of ALL stored keybinds (both built-in client settings and UserScript custom settings)
+    await loadAllSavedKeybinds();
 });
 
 ipcRenderer.on('importSettingValue', (e, val) => {

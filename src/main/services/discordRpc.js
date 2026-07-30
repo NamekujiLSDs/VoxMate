@@ -20,9 +20,19 @@ class DiscordRpcService {
 
             this.rpc.login({ clientId: this.clientId }).catch(err => {
                 console.log('Discord RPC login failed:', err.message);
+                this.isLoggedIn = false;
+                if (this.rpc) {
+                    try {
+                        const p = this.rpc.destroy();
+                        if (p && typeof p.catch === 'function') p.catch(() => {});
+                    } catch (e) {}
+                    this.rpc = null;
+                }
             });
         } catch (e) {
             console.log('Discord RPC error:', e.message);
+            this.rpc = null;
+            this.isLoggedIn = false;
         }
     }
 
@@ -48,9 +58,12 @@ class DiscordRpcService {
 
     destroy() {
         if (this.rpc) {
-            try {
-                this.rpc.destroy();
-            } catch (e) {}
+            if (this.isLoggedIn) {
+                try {
+                    const p = this.rpc.destroy();
+                    if (p && typeof p.catch === 'function') p.catch(() => {});
+                } catch (e) {}
+            }
             this.rpc = null;
             this.isLoggedIn = false;
         }

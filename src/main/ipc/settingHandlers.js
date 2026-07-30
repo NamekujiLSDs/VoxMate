@@ -25,6 +25,18 @@ const registerSettingHandlers = (baseDir, settingsTemplate, getGameWindow) => {
         return config.get(value);
     });
 
+    ipcMain.handle('getAllKeybinds', async () => {
+        const storeObj = config.store || {};
+        const keybinds = {};
+        for (const key in storeObj) {
+            if (key.startsWith('keybind_')) {
+                const settingId = key.replace(/^keybind_/, '');
+                keybinds[settingId] = storeObj[key];
+            }
+        }
+        return keybinds;
+    });
+
     ipcMain.handle('dirName', (e, v) => {
         return path.join(baseDir, v);
     });

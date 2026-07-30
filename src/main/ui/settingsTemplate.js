@@ -116,6 +116,17 @@ class SettingsTemplate {
         return options;
     }
 
+    renderKeybindBtn(settingId) {
+        const keyVal = config.get(`keybind_${settingId}`, '');
+        const isStringKey = typeof keyVal === 'string' && keyVal.trim().length > 0;
+        const displayVal = isStringKey ? keyVal.trim().toUpperCase() : 'NONE';
+        const isBound = displayVal !== 'NONE';
+        const btnColor = isBound ? '#ffffff' : '#64748b';
+        const borderColor = isBound ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.1)';
+        const bgColor = isBound ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.3)';
+        return `<input type="button" class="keybindBtn" style="min-width: 95px; width: auto; height: 26px; font-weight: 600; font-size: 11px; padding: 0 10px; background: ${bgColor}; color: ${btnColor}; border: 1px solid ${borderColor}; cursor: pointer; text-transform: uppercase; border-radius: 4px; margin-right: 8px; transition: all 0.15s ease; box-sizing: border-box;" id="kb_btn_${settingId}" value="${displayVal}" onclick="window.vmc.listenKeybind('${settingId}', this.id)" title="Assign shortcut key (Backspace/Esc to clear)">`;
+    }
+
     renderTab(tabName) {
         if (tabName === 'onload') {
             tabName = config.get('lastOpen', 'quickSetting');
@@ -176,58 +187,82 @@ class SettingsTemplate {
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
             Enable SimpleInfo HUD
-            <input type="checkbox" name="enableSimpleInfo" id="enableSimpleInfo"
-                oninput="window.vmc.saveSetting(this.id,this.checked);window.vmc.infoGuiChange(this.id,this.checked)"
-                ${config.get('enableSimpleInfo', true) ? 'checked' : ''}>
+            <div style="display: flex; align-items: center;">
+                ${this.renderKeybindBtn('enableSimpleInfo')}
+                <input type="checkbox" name="enableSimpleInfo" id="enableSimpleInfo"
+                    oninput="window.vmc.saveSetting(this.id,this.checked);window.vmc.infoGuiChange(this.id,this.checked)"
+                    ${config.get('enableSimpleInfo', true) ? 'checked' : ''}>
+            </div>
         </div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
             Enable Custom Crosshair
-            <input type="checkbox" name="enableCustomCrosshair" id="enableCustomCrosshair"
-                oninput="window.vmc.saveSetting(this.id,this.checked);window.vmc.crosshairChange(this.id,this.checked)"
-                ${config.get('enableCustomCrosshair', true) ? 'checked' : ''}>
+            <div style="display: flex; align-items: center;">
+                ${this.renderKeybindBtn('enableCustomCrosshair')}
+                <input type="checkbox" name="enableCustomCrosshair" id="enableCustomCrosshair"
+                    oninput="window.vmc.saveSetting(this.id,this.checked);window.vmc.crosshairChange(this.id,this.checked)"
+                    ${config.get('enableCustomCrosshair', true) ? 'checked' : ''}>
+            </div>
         </div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
             Enable Custom CSS
-            <input type="checkbox" name="enableCustomCss" id="enableCustomCss"
-                oninput="window.vmc.saveSetting(this.id,this.checked);window.vmc.customCssChange(this.id,this.checked)"
-                ${config.get('enableCustomCss', true) ? 'checked' : ''}>
+            <div style="display: flex; align-items: center;">
+                ${this.renderKeybindBtn('enableCustomCss')}
+                <input type="checkbox" name="enableCustomCss" id="enableCustomCss"
+                    oninput="window.vmc.saveSetting(this.id,this.checked);window.vmc.customCssChange(this.id,this.checked)"
+                    ${config.get('enableCustomCss', true) ? 'checked' : ''}>
+            </div>
         </div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
             Enable Resource Swapper
-            <input type="checkbox" name="enableResourceSwapper" id="enableResourceSwapper"
-                oninput="window.vmc.saveSetting(this.id,this.checked)"
-                ${config.get('enableResourceSwapper', true) ? 'checked' : ''}>
+            <div style="display: flex; align-items: center;">
+                ${this.renderKeybindBtn('enableResourceSwapper')}
+                <input type="checkbox" name="enableResourceSwapper" id="enableResourceSwapper"
+                    oninput="window.vmc.saveSetting(this.id,this.checked)"
+                    ${config.get('enableResourceSwapper', true) ? 'checked' : ''}>
+            </div>
         </div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
             Enable Ad Blocker
-            <input type="checkbox" name="enableAdBlocker" id="enableAdBlocker"
-                oninput="window.vmc.saveSetting(this.id,this.checked)"
-                ${config.get('enableAdBlocker', true) ? 'checked' : ''}>
+            <div style="display: flex; align-items: center;">
+                ${this.renderKeybindBtn('enableAdBlocker')}
+                <input type="checkbox" name="enableAdBlocker" id="enableAdBlocker"
+                    oninput="window.vmc.saveSetting(this.id,this.checked)"
+                    ${config.get('enableAdBlocker', true) ? 'checked' : ''}>
+            </div>
         </div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
             Enable Unlimited FPS
-            <input type="checkbox" name="unlimitedFps" id="unlimitedFps"
-                oninput="window.vmc.saveSetting(this.id,this.checked)"
-                ${config.get('unlimitedFps', true) ? 'checked' : ''}>
+            <div style="display: flex; align-items: center;">
+                ${this.renderKeybindBtn('unlimitedFps')}
+                <input type="checkbox" name="unlimitedFps" id="unlimitedFps"
+                    oninput="window.vmc.saveSetting(this.id,this.checked)"
+                    ${config.get('unlimitedFps', true) ? 'checked' : ''}>
+            </div>
         </div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
             Enable Raw Input (Low Latency Mouse)
-            <input type="checkbox" name="enableRawInput" id="enableRawInput"
-                oninput="window.vmc.saveSetting(this.id,this.checked)"
-                ${config.get('enableRawInput', true) ? 'checked' : ''}>
+            <div style="display: flex; align-items: center;">
+                ${this.renderKeybindBtn('enableRawInput')}
+                <input type="checkbox" name="enableRawInput" id="enableRawInput"
+                    oninput="window.vmc.saveSetting(this.id,this.checked)"
+                    ${config.get('enableRawInput', true) ? 'checked' : ''}>
+            </div>
         </div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
             Enable WebGL Desynchronized (Low Latency Canvas)
-            <input type="checkbox" name="enableDesynchronized" id="enableDesynchronized"
-                oninput="window.vmc.saveSetting(this.id,this.checked)"
-                ${config.get('enableDesynchronized', true) ? 'checked' : ''}>
+            <div style="display: flex; align-items: center;">
+                ${this.renderKeybindBtn('enableDesynchronized')}
+                <input type="checkbox" name="enableDesynchronized" id="enableDesynchronized"
+                    oninput="window.vmc.saveSetting(this.id,this.checked)"
+                    ${config.get('enableDesynchronized', true) ? 'checked' : ''}>
+            </div>
         </div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
@@ -275,8 +310,11 @@ class SettingsTemplate {
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
             Disable GPU Vsync
-            <input type="checkbox" name="disableGpuVsync" id="disableGpuVsync"
-                oninput="window.vmc.saveSetting(this.id,this.checked);" ${config.get('disableGpuVsync', true) ? 'checked' : ''}>
+            <div style="display: flex; align-items: center;">
+                ${this.renderKeybindBtn('disableGpuVsync')}
+                <input type="checkbox" name="disableGpuVsync" id="disableGpuVsync"
+                    oninput="window.vmc.saveSetting(this.id,this.checked);" ${config.get('disableGpuVsync', true) ? 'checked' : ''}>
+            </div>
         </div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
@@ -292,20 +330,29 @@ class SettingsTemplate {
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
             Enable In-process-gpu
-            <input type="checkbox" name="inProcess" id="inProcess"
-                oninput="window.vmc.saveSetting(this.id,this.checked);" ${config.get('inProcess', false) ? 'checked' : ''}>
+            <div style="display: flex; align-items: center;">
+                ${this.renderKeybindBtn('inProcess')}
+                <input type="checkbox" name="inProcess" id="inProcess"
+                    oninput="window.vmc.saveSetting(this.id,this.checked);" ${config.get('inProcess', false) ? 'checked' : ''}>
+            </div>
         </div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
             Enable GPU Rasterization
-            <input type="checkbox" name="enableGpuRasterization" id="enableGpuRasterization"
-                oninput="window.vmc.saveSetting(this.id,this.checked);" ${config.get('enableGpuRasterization', true) ? 'checked' : ''}>
+            <div style="display: flex; align-items: center;">
+                ${this.renderKeybindBtn('enableGpuRasterization')}
+                <input type="checkbox" name="enableGpuRasterization" id="enableGpuRasterization"
+                    oninput="window.vmc.saveSetting(this.id,this.checked);" ${config.get('enableGpuRasterization', true) ? 'checked' : ''}>
+            </div>
         </div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
             Enable Zero Copy
-            <input type="checkbox" name="enableZerocopy" id="enableZerocopy"
-                oninput="window.vmc.saveSetting(this.id,this.checked);" ${config.get('enableZerocopy', true) ? 'checked' : ''}>
+            <div style="display: flex; align-items: center;">
+                ${this.renderKeybindBtn('enableZerocopy')}
+                <input type="checkbox" name="enableZerocopy" id="enableZerocopy"
+                    oninput="window.vmc.saveSetting(this.id,this.checked);" ${config.get('enableZerocopy', true) ? 'checked' : ''}>
+            </div>
         </div>
         <div class="horizonalLine"></div>
         </div>`;
@@ -335,9 +382,12 @@ class SettingsTemplate {
         </div>
         <div id="menuBodyItem">
             Enable Custom Crosshair
-            <input type="checkbox" name="enableCustomCrosshair" id="enableCustomCrosshair"
-                oninput="window.vmc.saveSetting(this.id ,this.checked);window.vmc.crosshairChange(this.id,this.checked)"
-                ${config.get('enableCustomCrosshair', true) ? 'checked' : ''}>
+            <div style="display: flex; align-items: center;">
+                ${this.renderKeybindBtn('enableCustomCrosshair')}
+                <input type="checkbox" name="enableCustomCrosshair" id="enableCustomCrosshair"
+                    oninput="window.vmc.saveSetting(this.id ,this.checked);window.vmc.crosshairChange(this.id,this.checked)"
+                    ${config.get('enableCustomCrosshair', true) ? 'checked' : ''}>
+            </div>
         </div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
@@ -442,16 +492,22 @@ class SettingsTemplate {
         </div>
         <div id="menuBodyItem">
             Enable Custom CSS
-            <input type="checkbox" name="enableCustomCss" id="enableCustomCss"
-                oninput="window.vmc.saveSetting(this.id ,this.checked);window.vmc.customCssChange(this.id,this.checked)"
-                ${config.get('enableCustomCss', true) ? 'checked' : ''}>
+            <div style="display: flex; align-items: center;">
+                ${this.renderKeybindBtn('enableCustomCss')}
+                <input type="checkbox" name="enableCustomCss" id="enableCustomCss"
+                    oninput="window.vmc.saveSetting(this.id ,this.checked);window.vmc.customCssChange(this.id,this.checked)"
+                    ${config.get('enableCustomCss', true) ? 'checked' : ''}>
+            </div>
         </div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
             Tailwind CSS Menu Theme
-            <input type="checkbox" name="useTailwindCss" id="useTailwindCss"
-                oninput="window.vmc.saveSetting(this.id, this.checked); window.vmc.toggleMenuTheme(this.checked)"
-                ${config.get('useTailwindCss', true) ? 'checked' : ''}>
+            <div style="display: flex; align-items: center;">
+                ${this.renderKeybindBtn('useTailwindCss')}
+                <input type="checkbox" name="useTailwindCss" id="useTailwindCss"
+                    oninput="window.vmc.saveSetting(this.id, this.checked); window.vmc.toggleMenuTheme(this.checked)"
+                    ${config.get('useTailwindCss', true) ? 'checked' : ''}>
+            </div>
         </div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
@@ -503,20 +559,29 @@ class SettingsTemplate {
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
             Enable Resource Swapper
-            <input type="checkbox" name="enableResourceSwapper" id="enableResourceSwapper"
-                oninput="window.vmc.saveSetting(this.id,this.checked);" ${config.get('enableResourceSwapper', true) ? 'checked' : ''}>
+            <div style="display: flex; align-items: center;">
+                ${this.renderKeybindBtn('enableResourceSwapper')}
+                <input type="checkbox" name="enableResourceSwapper" id="enableResourceSwapper"
+                    oninput="window.vmc.saveSetting(this.id,this.checked);" ${config.get('enableResourceSwapper', true) ? 'checked' : ''}>
+            </div>
         </div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
             Use Default Swapper List
-            <input type="checkbox" name="useDefSwapList" id="useDefSwapList"
-                oninput="window.vmc.saveSetting(this.id,this.checked);" ${config.get('useDefSwapList', true) ? 'checked' : ''}>
+            <div style="display: flex; align-items: center;">
+                ${this.renderKeybindBtn('useDefSwapList')}
+                <input type="checkbox" name="useDefSwapList" id="useDefSwapList"
+                    oninput="window.vmc.saveSetting(this.id,this.checked);" ${config.get('useDefSwapList', true) ? 'checked' : ''}>
+            </div>
         </div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
             Use User Swapper List
-            <input type="checkbox" name="useUserSwapList" id="useUserSwapList"
-                oninput="window.vmc.saveSetting(this.id,this.checked);" ${config.get('useUserSwapList', true) ? 'checked' : ''}>
+            <div style="display: flex; align-items: center;">
+                ${this.renderKeybindBtn('useUserSwapList')}
+                <input type="checkbox" name="useUserSwapList" id="useUserSwapList"
+                    oninput="window.vmc.saveSetting(this.id,this.checked);" ${config.get('useUserSwapList', true) ? 'checked' : ''}>
+            </div>
         </div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
@@ -543,20 +608,29 @@ class SettingsTemplate {
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
             Enable Ad Blocker
-            <input type="checkbox" name="enableAdBlocker" id="enableAdBlocker"
-                oninput="window.vmc.saveSetting(this.id,this.checked);" ${config.get('enableAdBlocker', true) ? 'checked' : ''}>
+            <div style="display: flex; align-items: center;">
+                ${this.renderKeybindBtn('enableAdBlocker')}
+                <input type="checkbox" name="enableAdBlocker" id="enableAdBlocker"
+                    oninput="window.vmc.saveSetting(this.id,this.checked);" ${config.get('enableAdBlocker', true) ? 'checked' : ''}>
+            </div>
         </div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
             Use Default Adblock List
-            <input type="checkbox" name="useDefAdBlockList" id="useDefAdBlockList"
-                oninput="window.vmc.saveSetting(this.id,this.checked);" ${config.get('useDefAdBlockList', true) ? 'checked' : ''}>
+            <div style="display: flex; align-items: center;">
+                ${this.renderKeybindBtn('useDefAdBlockList')}
+                <input type="checkbox" name="useDefAdBlockList" id="useDefAdBlockList"
+                    oninput="window.vmc.saveSetting(this.id,this.checked);" ${config.get('useDefAdBlockList', true) ? 'checked' : ''}>
+            </div>
         </div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
             Use User Adblock List
-            <input type="checkbox" name="useUserAdBlockList" id="useUserAdBlockList"
-                oninput="window.vmc.saveSetting(this.id,this.checked);" ${config.get('useUserAdBlockList', true) ? 'checked' : ''}>
+            <div style="display: flex; align-items: center;">
+                ${this.renderKeybindBtn('useUserAdBlockList')}
+                <input type="checkbox" name="useUserAdBlockList" id="useUserAdBlockList"
+                    oninput="window.vmc.saveSetting(this.id,this.checked);" ${config.get('useUserAdBlockList', true) ? 'checked' : ''}>
+            </div>
         </div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
@@ -578,26 +652,38 @@ class SettingsTemplate {
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
             Enable Unlimited FPS
-            <input type="checkbox" name="unlimitedFps" id="unlimitedFps"
-                oninput="window.vmc.saveSetting(this.id,this.checked);" ${config.get('unlimitedFps', true) ? 'checked' : ''}>
+            <div style="display: flex; align-items: center;">
+                ${this.renderKeybindBtn('unlimitedFps')}
+                <input type="checkbox" name="unlimitedFps" id="unlimitedFps"
+                    oninput="window.vmc.saveSetting(this.id,this.checked);" ${config.get('unlimitedFps', true) ? 'checked' : ''}>
+            </div>
         </div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
             Enable Raw Input (Low Latency Mouse)
-            <input type="checkbox" name="enableRawInput" id="enableRawInput"
-                oninput="window.vmc.saveSetting(this.id,this.checked);" ${config.get('enableRawInput', true) ? 'checked' : ''}>
+            <div style="display: flex; align-items: center;">
+                ${this.renderKeybindBtn('enableRawInput')}
+                <input type="checkbox" name="enableRawInput" id="enableRawInput"
+                    oninput="window.vmc.saveSetting(this.id,this.checked);" ${config.get('enableRawInput', true) ? 'checked' : ''}>
+            </div>
         </div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
             Enable WebGL Desynchronized (Low Latency Canvas)
-            <input type="checkbox" name="enableDesynchronized" id="enableDesynchronized"
-                oninput="window.vmc.saveSetting(this.id,this.checked);" ${config.get('enableDesynchronized', true) ? 'checked' : ''}>
+            <div style="display: flex; align-items: center;">
+                ${this.renderKeybindBtn('enableDesynchronized')}
+                <input type="checkbox" name="enableDesynchronized" id="enableDesynchronized"
+                    oninput="window.vmc.saveSetting(this.id,this.checked);" ${config.get('enableDesynchronized', true) ? 'checked' : ''}>
+            </div>
         </div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
             Enable Discord RPC
-            <input type="checkbox" name="discordRpc" id="discordRpc"
-                oninput="window.vmc.saveSetting(this.id,this.checked);" ${config.get('discordRpc', true) ? 'checked' : ''}>
+            <div style="display: flex; align-items: center;">
+                ${this.renderKeybindBtn('discordRpc')}
+                <input type="checkbox" name="discordRpc" id="discordRpc"
+                    oninput="window.vmc.saveSetting(this.id,this.checked);" ${config.get('discordRpc', true) ? 'checked' : ''}>
+            </div>
         </div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
@@ -666,9 +752,12 @@ class SettingsTemplate {
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
             Enable SimpleInfo HUD
-            <input type="checkbox" name="enableSimpleInfo" id="enableSimpleInfo"
-                oninput="window.vmc.saveSetting(this.id,this.checked);window.vmc.infoGuiChange(this.id,this.checked)"
-                ${config.get('enableSimpleInfo', true) ? 'checked' : ''}>
+            <div style="display: flex; align-items: center;">
+                ${this.renderKeybindBtn('enableSimpleInfo')}
+                <input type="checkbox" name="enableSimpleInfo" id="enableSimpleInfo"
+                    oninput="window.vmc.saveSetting(this.id,this.checked);window.vmc.infoGuiChange(this.id,this.checked)"
+                    ${config.get('enableSimpleInfo', true) ? 'checked' : ''}>
+            </div>
         </div>
         <div class="horizonalLine"></div>
 
@@ -704,65 +793,92 @@ class SettingsTemplate {
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
             Show FPS
-            <input type="checkbox" name="infoShowFPS" id="infoShowFPS"
-                oninput="window.vmc.saveSetting(this.id,this.checked);window.vmc.infoGuiChange(this.id,this.checked)"
-                ${config.get('infoShowFPS', true) ? 'checked' : ''}>
+            <div style="display: flex; align-items: center;">
+                ${this.renderKeybindBtn('infoShowFPS')}
+                <input type="checkbox" name="infoShowFPS" id="infoShowFPS"
+                    oninput="window.vmc.saveSetting(this.id,this.checked);window.vmc.infoGuiChange(this.id,this.checked)"
+                    ${config.get('infoShowFPS', true) ? 'checked' : ''}>
+            </div>
         </div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
             Show Ping (Latency)
-            <input type="checkbox" name="infoShowPing" id="infoShowPing"
-                oninput="window.vmc.saveSetting(this.id,this.checked);window.vmc.infoGuiChange(this.id,this.checked)"
-                ${config.get('infoShowPing', true) ? 'checked' : ''}>
+            <div style="display: flex; align-items: center;">
+                ${this.renderKeybindBtn('infoShowPing')}
+                <input type="checkbox" name="infoShowPing" id="infoShowPing"
+                    oninput="window.vmc.saveSetting(this.id,this.checked);window.vmc.infoGuiChange(this.id,this.checked)"
+                    ${config.get('infoShowPing', true) ? 'checked' : ''}>
+            </div>
         </div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
             Show Player Position (XYZ)
-            <input type="checkbox" name="infoShowPos" id="infoShowPos"
-                oninput="window.vmc.saveSetting(this.id,this.checked);window.vmc.infoGuiChange(this.id,this.checked)"
-                ${config.get('infoShowPos', true) ? 'checked' : ''}>
+            <div style="display: flex; align-items: center;">
+                ${this.renderKeybindBtn('infoShowPos')}
+                <input type="checkbox" name="infoShowPos" id="infoShowPos"
+                    oninput="window.vmc.saveSetting(this.id,this.checked);window.vmc.infoGuiChange(this.id,this.checked)"
+                    ${config.get('infoShowPos', true) ? 'checked' : ''}>
+            </div>
         </div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
             Show Block Position
-            <input type="checkbox" name="infoShowBlockPos" id="infoShowBlockPos"
-                oninput="window.vmc.saveSetting(this.id,this.checked);window.vmc.infoGuiChange(this.id,this.checked)"
-                ${config.get('infoShowBlockPos', false) ? 'checked' : ''}>
+            <div style="display: flex; align-items: center;">
+                ${this.renderKeybindBtn('infoShowBlockPos')}
+                <input type="checkbox" name="infoShowBlockPos" id="infoShowBlockPos"
+                    oninput="window.vmc.saveSetting(this.id,this.checked);window.vmc.infoGuiChange(this.id,this.checked)"
+                    ${config.get('infoShowBlockPos', false) ? 'checked' : ''}>
+            </div>
         </div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
             Show Chunk Position
-            <input type="checkbox" name="infoShowChunkPos" id="infoShowChunkPos"
-                oninput="window.vmc.saveSetting(this.id,this.checked);window.vmc.infoGuiChange(this.id,this.checked)"
-                ${config.get('infoShowChunkPos', false) ? 'checked' : ''}>
+            <div style="display: flex; align-items: center;">
+                ${this.renderKeybindBtn('infoShowChunkPos')}
+                <input type="checkbox" name="infoShowChunkPos" id="infoShowChunkPos"
+                    oninput="window.vmc.saveSetting(this.id,this.checked);window.vmc.infoGuiChange(this.id,this.checked)"
+                    ${config.get('infoShowChunkPos', false) ? 'checked' : ''}>
+            </div>
         </div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
             Show Player Velocity
-            <input type="checkbox" name="infoShowVelocity" id="infoShowVelocity"
-                oninput="window.vmc.saveSetting(this.id,this.checked);window.vmc.infoGuiChange(this.id,this.checked)"
-                ${config.get('infoShowVelocity', false) ? 'checked' : ''}>
+            <div style="display: flex; align-items: center;">
+                ${this.renderKeybindBtn('infoShowVelocity')}
+                <input type="checkbox" name="infoShowVelocity" id="infoShowVelocity"
+                    oninput="window.vmc.saveSetting(this.id,this.checked);window.vmc.infoGuiChange(this.id,this.checked)"
+                    ${config.get('infoShowVelocity', false) ? 'checked' : ''}>
+            </div>
         </div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
             Show Yaw / Pitch Angles
-            <input type="checkbox" name="infoShowAngles" id="infoShowAngles"
-                oninput="window.vmc.saveSetting(this.id,this.checked);window.vmc.infoGuiChange(this.id,this.checked)"
-                ${config.get('infoShowAngles', false) ? 'checked' : ''}>
+            <div style="display: flex; align-items: center;">
+                ${this.renderKeybindBtn('infoShowAngles')}
+                <input type="checkbox" name="infoShowAngles" id="infoShowAngles"
+                    oninput="window.vmc.saveSetting(this.id,this.checked);window.vmc.infoGuiChange(this.id,this.checked)"
+                    ${config.get('infoShowAngles', false) ? 'checked' : ''}>
+            </div>
         </div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
             Show Loaded Chunks Count
-            <input type="checkbox" name="infoShowChunks" id="infoShowChunks"
-                oninput="window.vmc.saveSetting(this.id,this.checked);window.vmc.infoGuiChange(this.id,this.checked)"
-                ${config.get('infoShowChunks', false) ? 'checked' : ''}>
+            <div style="display: flex; align-items: center;">
+                ${this.renderKeybindBtn('infoShowChunks')}
+                <input type="checkbox" name="infoShowChunks" id="infoShowChunks"
+                    oninput="window.vmc.saveSetting(this.id,this.checked);window.vmc.infoGuiChange(this.id,this.checked)"
+                    ${config.get('infoShowChunks', false) ? 'checked' : ''}>
+            </div>
         </div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
             Show Network Transfer Speed (B/s)
-            <input type="checkbox" name="infoShowNetBps" id="infoShowNetBps"
-                oninput="window.vmc.saveSetting(this.id,this.checked);window.vmc.infoGuiChange(this.id,this.checked)"
-                ${config.get('infoShowNetBps', false) ? 'checked' : ''}>
+            <div style="display: flex; align-items: center;">
+                ${this.renderKeybindBtn('infoShowNetBps')}
+                <input type="checkbox" name="infoShowNetBps" id="infoShowNetBps"
+                    oninput="window.vmc.saveSetting(this.id,this.checked);window.vmc.infoGuiChange(this.id,this.checked)"
+                    ${config.get('infoShowNetBps', false) ? 'checked' : ''}>
+            </div>
         </div>
         </div>`;
     }
