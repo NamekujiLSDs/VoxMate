@@ -36,6 +36,18 @@
       "output": "./dist",
       "buildResources": "./build"
     },
+    "linux": {
+      "target": ["AppImage"],
+      "category": "Game"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64"]
+        }
+      ]
+    },
     "publish": [
       {
         "provider": "github",
