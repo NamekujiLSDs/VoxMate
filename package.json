@@ -36,9 +36,13 @@
       "output": "./dist",
       "buildResources": "./build"
     },
+    "win": {
+      "artifactName": "VoxMate-Windows-${version}.${ext}"
+    },
     "linux": {
       "target": ["AppImage"],
-      "category": "Game"
+      "category": "Game",
+      "artifactName": "VoxMate-Linux-${version}.${ext}"
     },
     "mac": {
       "target": [
@@ -46,7 +50,8 @@
           "target": "dmg",
           "arch": ["x64"]
         }
-      ]
+      ],
+      "artifactName": "VoxMate-macOS-${version}.${ext}"
     },
     "publish": [
       {
