@@ -28,9 +28,18 @@
     "electron-updater": "^6.3.9"
   },
   "build": {
+    "appId": "com.namekuji.voxmate",
+    "productName": "VoxMate Client",
     "directories": {
       "output": "./dist",
       "buildResources": "./build"
-    }
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "NamekujiLSDs",
+        "repo": "VoxMate"
+      }
+    ]
   }
 }
