@@ -2,7 +2,7 @@
 
 VoxMate では、UserScript から F1 設定メニューへ独自の設定項目を追加できます。これにより、ユーザーはそのままゲーム内の設定メニューから UI を操作しながら、スクリプトの動作を変更できます。
 
-このドキュメントでは、最小構成から実務的なサンプルまで順に説明します。
+このドキュメントでは、基本操作から実務的なサンプルまで順を追って説明します。
 
 ---
 
@@ -12,7 +12,7 @@ UserScript からは、次の 2 つの API を使ってメニューへ参加で�
 
 - `window.vmc.registerSetting(...)`
   - 設定項目を追加します。
-  - 例: チェックボックス、スライダー、入力欄、セレクトボックス、ボタン
+  - 例: チェックボックス、スライダー、テキスト入力欄、ドロップダウン選択肢、ボタン
 - `window.vmc.registerTab(...)`
   - 左サイドバーに専用タブを追加します。
   - 追加したタブ内に設定項目を配置できます。
@@ -20,21 +20,21 @@ UserScript からは、次の 2 つの API を使ってメニューへ参加で�
 ### 重要なポイント
 
 - `category` は「現在のタブ内で見出しを作る」ためのものです。
-- 左サイドバーに新しいタブを追加したい場合は、先に `registerTab` を呼びます。
-- `tab` を指定しない場合、設定項目は既定の UserScript タブへ入ります。
+- 左サイドバーに新しいタブを追加したい場合は、先に `registerTab` を呼び出します。
+- `tab` を指定しない場合、設定項目は既定の UserScript タブへ配置されます。
 - 設定変更は `vmc-setting-change` イベントで受け取ります。
+- スクリプト起動時の初期状態を取得するには、登録後に `await window.vmc.getCustomSetting(id)` を呼び出すか、初期 `vmc-setting-change` イベントを処理します。
 - `id` は登録済みの他の設定と重複してはいけません。
 - カスタムタブの `id` も一意であり、VoxMate の組み込みタブ ID を使ってはいけません。
 
 ### 予約済みタブ ID
 
-次のタブ ID は VoxMate で予約済みなので、UserScript のカスタムタブとして使用しないでください。
+次のタブ ID は VoxMate で予約済みのため、UserScript のカスタムタブとして使用しないでください。
 
 | 予約済み ID | 内容 |
 | :--- | :--- |
 | `quickSetting` | クイック設定タブ |
 | `renderingSetting` | レンダリング設定タブ |
-| `skySetting` | スカイ設定タブ |
 | `crosshairSetting` | クロスヘア設定タブ |
 | `cssSetting` | CSS 設定タブ |
 | `swapperSetting` | スワッパー設定タブ |
@@ -75,10 +75,10 @@ UserScript からは、次の 2 つの API を使ってメニューへ参加で�
 
 UserScript を公開する前に、次の点を確認してください。
 
-- タブ ID が VoxMate の予約済みタブ ID ではない。
-- 設定 ID が他の登録済み設定と重複していない。
-- カテゴリ名が `Quick Settings`, `Rendering`, `Sky`, `Crosshair`, `CSS`, `Swapper`, `Ad Blocker`, `Info`, `UserScript`, `Performance` のような組み込みセクション名と重複していない。意図的でない限り、同じ名前は避ける方が自然です。
-- `my_mod_` や `my_script_` のような接頭辞を使って、衝突を防ぎましょう。
+- タブ ID が VoxMate の予約済みタブ ID ではないこと。
+- 設定 ID が他の登録済み設定と重複していないこと。
+- カテゴリ名が `Quick Settings`, `Rendering`, `Crosshair`, `CSS`, `Swapper`, `Ad Blocker`, `Info`, `UserScript`, `Performance` のような組み込みセクション名と重複していないこと（意図的なデザインでない限り）。
+- `my_mod_` や `my_script_` のような接頭辞を使って衝突を防ぐこと。
 
 ---
 
@@ -221,6 +221,7 @@ window.vmc.registerSetting({
 ## 5. API リファレンス
 
 ### `window.vmc.registerTab(tabConfig)`
+
 左サイドバーに独自の設定タブを追加します。
 
 | プロパティ | 型 | 必須 | 説明 |
@@ -229,14 +230,25 @@ window.vmc.registerSetting({
 | `title` | `string` | 必須 | サイドバーに表示されるタイトル |
 | `icon` | `string` | オプション | Material Symbols のアイコン名。既定値は `tune` |
 
+#### 例
+
+```javascript
+window.vmc.registerTab({
+    id: 'my_mod_tab',
+    title: 'My Mod',
+    icon: 'auto_awesome'
+});
+```
+
 ---
 
 ### `window.vmc.registerSetting(settingConfig)`
+
 メニューに新しい設定項目を登録します。
 
 | プロパティ | 型 | 必須 | 説明 |
 | :--- | :--- | :--- | :--- |
-| `id` | `string` | 必須 | 設定を識別する一意のキー。英数字とアンダースコア推奨 |
+| `id` | `string` | 必須 | 設定を識別する一意のキー。半角英数字とアンダースコア推奨 |
 | `label` | `string` | 必須 | メニュー上に表示される名前 |
 | `type` | `string` | 必須 | `checkbox`, `range`, `number`, `text`, `select`, `button` のいずれか |
 | `category` | `string` | オプション | 現在のタブ内で表示するカテゴリ見出し |
@@ -248,9 +260,26 @@ window.vmc.registerSetting({
 | `options` | `Array<{label: string, value: any}>` | オプション | `select` 用の選択肢 |
 | `buttonText` | `string` | オプション | `button` の表示テキスト。既定値は `RUN` |
 
+#### 例
+
+```javascript
+window.vmc.registerSetting({
+    id: 'fov_angle',
+    label: 'FOV',
+    category: 'Graphics',
+    tab: 'my_mod_tab',
+    type: 'range',
+    min: 60,
+    max: 120,
+    step: 1,
+    default: 90
+});
+```
+
 ---
 
 ### `window.vmc.getCustomSetting(id)`
+
 指定した設定値を取得します。戻り値は `Promise` です。
 
 ```javascript
@@ -260,6 +289,7 @@ const value = await window.vmc.getCustomSetting('mod_enabled');
 ---
 
 ### `window.vmc.setCustomSetting(id, value)`
+
 設定値をプログラム側から変更し、メニューの表示状態と保存値を更新します。
 
 ```javascript
@@ -361,9 +391,25 @@ document.addEventListener('vmc-setting-change', (e) => {
 });
 ```
 
+### 使い方の例
+
+```javascript
+document.addEventListener('vmc-setting-change', (e) => {
+    if (e.detail.id === 'mod_enabled') {
+        applyFeature(e.detail.value);
+    }
+
+    if (e.detail.id === 'mod_speed') {
+        applySpeed(e.detail.value);
+    }
+});
+```
+
 ---
 
 ## 8. 実務向けの完全サンプル
+
+以下は、タブ・カテゴリ・複数設定・イベント処理をまとめた実例です。
 
 ```javascript
 // ==UserScript==
@@ -452,7 +498,7 @@ document.addEventListener('vmc-setting-change', (e) => {
 - `id` は重複しないようにしてください。
 - `category` は見出しなので、タブを作りたい場合は `registerTab` も合わせて使ってください。
 - `tab` を省略した場合は、既定で UserScript タブへ配置されます。
-- 設定値は VoxMate 側で保持されるため、再起動後も値を引き継ぐことがあります。
+- 設定値は VoxMate 側で保持されるため、再起動後も値を引き継ぎます。
 - UI への反映は、設定変更イベントを受けてスクリプト側で行うのが基本です。
 
 ---

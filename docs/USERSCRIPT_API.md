@@ -23,6 +23,7 @@ UserScripts can participate in the menu through two APIs:
 - If you want a new left-sidebar tab, register it first with `registerTab`.
 - If `tab` is omitted, the setting is placed into the default UserScript tab.
 - Changes are received through the `vmc-setting-change` event.
+- For initial state on script startup, call `await window.vmc.getCustomSetting(id)` or handle the initial `vmc-setting-change` event after registration.
 - `id` values must be unique across all registered settings.
 - Custom tab IDs must be unique and must not reuse built-in VoxMate tab IDs.
 
@@ -34,7 +35,6 @@ The following tab IDs are reserved by VoxMate and should not be used for custom 
 | :--- | :--- |
 | `quickSetting` | Built-in Quick Settings tab |
 | `renderingSetting` | Built-in Rendering tab |
-| `skySetting` | Built-in Sky tab |
 | `crosshairSetting` | Built-in Crosshair tab |
 | `cssSetting` | Built-in CSS tab |
 | `swapperSetting` | Built-in Swapper tab |
@@ -73,11 +73,11 @@ The following IDs are already used by the built-in settings UI and should not be
 
 ### Conflict Avoidance Checklist
 
-Before publishing a Userscript, verify the following:
+Before publishing a UserScript, verify the following:
 
 - The tab ID is not one of the reserved VoxMate tab IDs.
 - The setting ID is not already used by another registered setting.
-- The category name does not duplicate built-in section names such as `Quick Settings`, `Rendering`, `Sky`, `Crosshair`, `CSS`, `Swapper`, `Ad Blocker`, `Info`, `UserScript`, or `Performance` unless you intentionally want that appearance.
+- The category name does not duplicate built-in section names such as `Quick Settings`, `Rendering`, `Crosshair`, `CSS`, `Swapper`, `Ad Blocker`, `Info`, `UserScript`, or `Performance` unless you intentionally want that appearance.
 - Use a prefix such as `my_mod_` or `my_script_` to avoid accidental collisions.
 
 ---
@@ -129,9 +129,9 @@ The simplest example adds a single checkbox.
 
 ---
 
-## 3. タブを作る例
+## 3. Creating a Custom Tab
 
-自分専用のタブを作り、その中に設定項目をまとめたい場合は次のように書きます。
+If you want to create a dedicated tab and group your settings inside it, write code like the following:
 
 ```javascript
 // ==UserScript==
@@ -190,9 +190,9 @@ The simplest example adds a single checkbox.
 
 ---
 
-## 4. カテゴリを使う例
+## 4. Using Categories
 
-`category` を指定すると、そのタブ内で見出しが作られます。
+Specifying `category` creates a section heading inside the tab.
 
 ```javascript
 window.vmc.registerSetting({
@@ -214,22 +214,23 @@ window.vmc.registerSetting({
 });
 ```
 
-> `category` は「見出し」を作るだけです。左サイドバーのタブ自体を作るには `registerTab` が必要です。
+> `category` only creates a section heading. To create a new tab in the left sidebar itself, `registerTab` is required.
 
 ---
 
-## 5. API リファレンス
+## 5. API Reference
 
 ### `window.vmc.registerTab(tabConfig)`
-左サイドバーに独自の設定タブを追加します。
 
-| プロパティ | 型 | 必須 | 説明 |
+Adds a custom settings tab to the left sidebar.
+
+| Property | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| `id` | `string` | 必須 | タブを識別する一意の ID |
-| `title` | `string` | 必須 | サイドバーに表示されるタイトル |
-| `icon` | `string` | オプション | Material Symbols のアイコン名。既定値は `tune` |
+| `id` | `string` | Yes | Unique ID identifying the tab |
+| `title` | `string` | Yes | Title displayed in the sidebar |
+| `icon` | `string` | Optional | Material Symbols icon name. Default is `tune` |
 
-#### 例
+#### Example
 
 ```javascript
 window.vmc.registerTab({
@@ -242,23 +243,24 @@ window.vmc.registerTab({
 ---
 
 ### `window.vmc.registerSetting(settingConfig)`
-メニューに新しい設定項目を登録します。
 
-| プロパティ | 型 | 必須 | 説明 |
+Registers a new setting entry in the menu.
+
+| Property | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| `id` | `string` | 必須 | 設定を識別する一意のキー。英数字とアンダースコア推奨 |
-| `label` | `string` | 必須 | メニュー上に表示される名前 |
-| `type` | `string` | 必須 | `checkbox`, `range`, `number`, `text`, `select`, `button` のいずれか |
-| `category` | `string` | オプション | 現在のタブ内で表示するカテゴリ見出し |
-| `tab` | `string` | オプション | 配置先タブ ID。省略時は `userscriptSetting` |
-| `default` | `any` | オプション | 初期値 |
-| `min` | `number` | オプション | `range`, `number` の最小値 |
-| `max` | `number` | オプション | `range`, `number` の最大値 |
-| `step` | `number` | オプション | `range`, `number` の刻み値 |
-| `options` | `Array<{label: string, value: any}>` | オプション | `select` 用の選択肢 |
-| `buttonText` | `string` | オプション | `button` の表示テキスト。既定値は `RUN` |
+| `id` | `string` | Yes | Unique key identifying the setting. Alphanumeric characters and underscores recommended |
+| `label` | `string` | Yes | Name displayed on the menu |
+| `type` | `string` | Yes | One of `checkbox`, `range`, `number`, `text`, `select`, or `button` |
+| `category` | `string` | Optional | Category header displayed within the current tab |
+| `tab` | `string` | Optional | Target tab ID. Placed in `userscriptSetting` if omitted |
+| `default` | `any` | Optional | Default / initial value |
+| `min` | `number` | Optional | Minimum value for `range` and `number` |
+| `max` | `number` | Optional | Maximum value for `range` and `number` |
+| `step` | `number` | Optional | Step increment for `range` and `number` |
+| `options` | `Array<{label: string, value: any}>` | Optional | Options for `select` |
+| `buttonText` | `string` | Optional | Display text for `button`. Default is `RUN` |
 
-#### 例
+#### Example
 
 ```javascript
 window.vmc.registerSetting({
@@ -277,7 +279,8 @@ window.vmc.registerSetting({
 ---
 
 ### `window.vmc.getCustomSetting(id)`
-指定した設定値を取得します。戻り値は `Promise` です。
+
+Retrieves the specified setting value. Returns a `Promise`.
 
 ```javascript
 const value = await window.vmc.getCustomSetting('mod_enabled');
@@ -286,7 +289,8 @@ const value = await window.vmc.getCustomSetting('mod_enabled');
 ---
 
 ### `window.vmc.setCustomSetting(id, value)`
-設定値をプログラム側から変更し、メニューの表示状態と保存値を更新します。
+
+Changes the setting value programmatically, updating the menu UI state and persisted value.
 
 ```javascript
 window.vmc.setCustomSetting('mod_speed', 7);
@@ -294,7 +298,7 @@ window.vmc.setCustomSetting('mod_speed', 7);
 
 ---
 
-## 6. 対応コントロール一覧
+## 6. Supported Controls
 
 ### 1) Checkbox
 
@@ -372,13 +376,13 @@ window.vmc.registerSetting({
 });
 ```
 
-ボタンを押した場合は、`vmc-setting-change` で `id` と `value: true` が渡されます。
+When the button is clicked, `vmc-setting-change` is fired with `id` and `value: true`.
 
 ---
 
-## 7. イベント `vmc-setting-change`
+## 7. Event `vmc-setting-change`
 
-ユーザーが設定項目を変更すると、`document` 上に `vmc-setting-change` というカスタムイベントが送られます。
+When a user changes a setting item, a custom event named `vmc-setting-change` is dispatched on `document`.
 
 ```javascript
 document.addEventListener('vmc-setting-change', (e) => {
@@ -387,7 +391,7 @@ document.addEventListener('vmc-setting-change', (e) => {
 });
 ```
 
-### 使い方の例
+### Usage Example
 
 ```javascript
 document.addEventListener('vmc-setting-change', (e) => {
@@ -403,9 +407,9 @@ document.addEventListener('vmc-setting-change', (e) => {
 
 ---
 
-## 8. 実務向けの完全サンプル
+## 8. Practical Full Example
 
-以下は、タブ・カテゴリ・複数設定・イベント処理をまとめた実例です。
+Below is a complete example combining tabs, categories, multiple settings, and event handling:
 
 ```javascript
 // ==UserScript==
@@ -489,17 +493,17 @@ document.addEventListener('vmc-setting-change', (e) => {
 
 ---
 
-## 9. 実装時の注意点
+## 9. Implementation Notes
 
-- `id` は重複しないようにしてください。
-- `category` は見出しなので、タブを作りたい場合は `registerTab` も合わせて使ってください。
-- `tab` を省略した場合は、既定で UserScript タブへ配置されます。
-- 設定値は VoxMate 側で保持されるため、再起動後も値を引き継ぐことがあります。
-- UI への反映は、設定変更イベントを受けてスクリプト側で行うのが基本です。
+- Ensure `id` values are unique across all registered settings.
+- `category` only creates section headings; use `registerTab` if you want a dedicated sidebar tab.
+- If `tab` is omitted, the setting is placed in the default UserScript tab.
+- Setting values are stored by VoxMate and persisted across application restarts.
+- UI changes in your script should generally be handled by listening to the setting change event.
 
 ---
 
-## 10. すぐ使えるテンプレート
+## 10. Ready-to-Use Template
 
 ```javascript
 // ==UserScript==
@@ -549,4 +553,3 @@ document.addEventListener('vmc-setting-change', (e) => {
     }
 })();
 ```
-

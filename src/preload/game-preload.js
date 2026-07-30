@@ -1,5 +1,4 @@
 const { contextBridge, ipcRenderer } = require('electron');
-const { injectSkyChanger } = require('./skyChanger');
 const { injectSimpleInfoGui } = require('./simpleInfoGui');
 const { validateTabRegistration, validateSettingRegistration, isReservedSettingId, DEFAULT_CATEGORY_NAME } = require('./customSettingsRegistry');
 
@@ -82,7 +81,6 @@ const switchSettingTab = async (tabId, persistLastOpen = false) => {
     const builtinTabs = new Set([
         'quickSetting',
         'renderingSetting',
-        'skySetting',
         'crosshairSetting',
         'cssSetting',
         'swapperSetting',
@@ -196,8 +194,8 @@ const renderCustomSettingsUI = async (targetTabId = 'userscriptSetting') => {
                 const max = item.max ?? 100;
                 const step = item.step ?? 1;
                 html += `<div id="rangeNumHolder">
-                    <input type="number" class="sizeInput" value="${val}" min="${min}" max="${max}" step="${step}" oninput="document.getElementById('${key}').value=this.value;window.vmc.saveSetting('${key}', parseFloat(this.value));">
-                    <input type="range" name="${key}" id="${key}" value="${val}" min="${min}" max="${max}" step="${step}" oninput="window.vmc.saveSetting(this.id, parseFloat(this.value));">
+                    <input type="number" id="${key}_number" class="sizeInput" value="${val}" min="${min}" max="${max}" step="${step}" oninput="document.getElementById('${key}').value=this.value;window.vmc.saveSetting('${key}', parseFloat(this.value));">
+                    <input type="range" name="${key}" id="${key}" value="${val}" min="${min}" max="${max}" step="${step}" oninput="document.getElementById('${key}_number').value=this.value;window.vmc.saveSetting(this.id, parseFloat(this.value));">
                 </div>`;
             } else if (type === 'number') {
                 const min = item.min ?? 0;
@@ -294,10 +292,6 @@ contextBridge.exposeInMainWorld('vmc', {
             document.dispatchEvent(new CustomEvent('vmc-setting-change', { detail: { id: customId, value } }));
         }
         ipcRenderer.send('saveSettingValue', name, value);
-    },
-
-    skyColorChange: async (id, value) => {
-        // SkyColor is disabled
     },
 
     infoGuiChange: async (id, value) => {
@@ -517,6 +511,7 @@ contextBridge.exposeInMainWorld('vmc', {
         registeredCustomSettings.set(settingId, configObj);
 
         const currentVal = await ipcRenderer.invoke('getSetting', key);
+        const initialValue = currentVal !== undefined ? currentVal : (configObj.default !== undefined ? configObj.default : undefined);
         if (currentVal === undefined && configObj.default !== undefined) {
             ipcRenderer.send('saveSettingValue', key, configObj.default);
         }
@@ -525,6 +520,10 @@ contextBridge.exposeInMainWorld('vmc', {
             renderCustomSidebarTabs();
         }
         await refreshCustomMenuUI();
+
+        if (initialValue !== undefined) {
+            document.dispatchEvent(new CustomEvent('vmc-setting-change', { detail: { id: settingId, value: initialValue } }));
+        }
     },
 
     getCustomSetting: async (id) => {
@@ -681,18 +680,14 @@ ipcRenderer.on('localPath', async (e, id, val, fileName) => {
         case 'skyboxPath':
             type = await ipcRenderer.invoke('getSetting', 'skyboxType');
             if (type === 'local') {
-                window.dispatchEvent(new CustomEvent('vmc-sky-update', { detail: { skyboxUrl: 'vmc://' + val } }));
+                const skyboxName = document.getElementById('skyboxName');
+                if (skyboxName && fileName) skyboxName.innerText = 'Current : ' + fileName;
             }
-            const skyboxName = document.getElementById('skyboxName');
-            if (skyboxName && fileName) skyboxName.innerText = 'Current : ' + fileName;
             break;
     }
 });
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // SkyColor is completely disabled even if enableSkyColor was saved as true
-    // injectSkyChanger() is bypassed.
-
     // SimpleInfoGUI setup
     injectSimpleInfoGui();
     const infoEnabled = await ipcRenderer.invoke('getSetting', 'enableSimpleInfo') ?? true;

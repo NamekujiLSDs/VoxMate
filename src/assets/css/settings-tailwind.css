@@ -175,8 +175,8 @@
 #settingWindow #quickSetting { color: var(--col-quick); }
 #settingWindow #quickSetting .menuItemIcon { background-color: rgba(45, 212, 191, 0.12); color: var(--col-quick); }
 
-#settingWindow #renderingSetting, #settingWindow #skySetting { color: var(--col-rendering); }
-#settingWindow #renderingSetting .menuItemIcon, #settingWindow #skySetting .menuItemIcon { background-color: rgba(168, 85, 247, 0.12); color: var(--col-rendering); }
+#settingWindow #renderingSetting { color: var(--col-rendering); }
+#settingWindow #renderingSetting .menuItemIcon { background-color: rgba(168, 85, 247, 0.12); color: var(--col-rendering); }
 
 #settingWindow #crosshairSetting { color: var(--col-crosshair); }
 #settingWindow #crosshairSetting .menuItemIcon { background-color: rgba(244, 63, 94, 0.12); color: var(--col-crosshair); }

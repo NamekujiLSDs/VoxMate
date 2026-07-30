@@ -30,7 +30,7 @@ class SettingsTemplate {
                             <div class="menuItemTitle">Quick</div>
                         </div>
                         <div class="menuSplitter"></div>
-                        <div id="renderingSetting" class="menuItem ${(lastOpen === 'renderingSetting' || lastOpen === 'skySetting') ? 'menuSelected' : ''}" onclick="window.vmc.showSetting(this.id);window.vmc.saveSetting('lastOpen',this.id)">
+                        <div id="renderingSetting" class="menuItem ${lastOpen === 'renderingSetting' ? 'menuSelected' : ''}" onclick="window.vmc.showSetting(this.id);window.vmc.saveSetting('lastOpen',this.id)">
                             <div class="menuItemIcon"><span class="material-symbols-outlined">palette</span></div>
                             <div class="menuItemTitle">Rendering</div>
                         </div>
@@ -125,7 +125,6 @@ class SettingsTemplate {
             case 'quickSetting':
                 return this.renderQuickSetting();
             case 'renderingSetting':
-            case 'skySetting':
                 return this.renderRenderingSetting();
             case 'crosshairSetting':
                 return this.renderCrosshairSetting();
@@ -147,8 +146,6 @@ class SettingsTemplate {
     }
 
     renderQuickSetting() {
-        const SHOW_SKY_COLOR_UI = false;
-
         return `<div class="tabContainer" style="--tab-accent: var(--col-quick);">
         <div id="menuBodyTitle">
             <span class="material-symbols-outlined">rocket_launch</span>
@@ -176,15 +173,6 @@ class SettingsTemplate {
                 <input type="text" name="serverHooker" id="serverHooker" value="" readonly>
             </div>
         </div>
-        ${SHOW_SKY_COLOR_UI ? `
-        <div class="horizonalLine"></div>
-        <div id="menuBodyItem">
-            Enable Custom Sky Color
-            <input type="checkbox" name="enableSkyColor" id="enableSkyColor"
-                oninput="window.vmc.saveSetting(this.id,this.checked);window.vmc.skyColorChange(this.id,this.checked)"
-                ${config.get('enableSkyColor', false) ? 'checked' : ''}>
-        </div>
-        ` : ''}
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
             Enable SimpleInfo HUD
@@ -261,64 +249,12 @@ class SettingsTemplate {
     }
 
     renderRenderingSetting() {
-        const SHOW_SKY_COLOR_UI = false;
-        const skyMode = config.get('skyMode', 'solid');
-        const skyColor = config.get('skyColor', '#ff0000');
-        const skyRgbSpeed = config.get('skyRgbSpeed', 2);
-
         return `<div class="tabContainer" style="--tab-accent: var(--col-rendering);">
         <div id="menuBodyTitle">
             <span class="material-symbols-outlined">palette</span>
             Rendering Settings
         </div>
         
-        ${SHOW_SKY_COLOR_UI ? `
-        <div class="settingSectionHeader">Sky & Fog Rendering</div>
-        <div class="horizonalLine"></div>
-        <div id="menuBodyItem">
-            Enable Custom Sky Color
-            <input type="checkbox" name="enableSkyColor" id="enableSkyColor"
-                oninput="window.vmc.saveSetting(this.id,this.checked);window.vmc.skyColorChange(this.id,this.checked)"
-                ${config.get('enableSkyColor', false) ? 'checked' : ''}>
-        </div>
-        <div class="horizonalLine"></div>
-        <div id="menuBodyItem">
-            Sky Mode
-            <select name="skyMode" id="skyMode"
-                oninput="window.vmc.saveSetting(this.id,this.value);window.vmc.skyColorChange(this.id,this.value);window.vmc.showSetting('renderingSetting');">
-                <option value="solid" ${skyMode === 'solid' ? 'selected' : ''}>Solid (Single Color)</option>
-                <option value="rgb" ${skyMode === 'rgb' ? 'selected' : ''}>RGB Cycle (Rainbow)</option>
-            </select>
-        </div>
-        <div class="horizonalLine"></div>
-        
-        ${skyMode === 'solid' ? `
-        <div id="menuBodyItem">
-            Sky Color Picker
-            <input type="color" name="skyColor" id="skyColor" style="cursor:pointer;height:30px;width:60px;border:none;background:none;"
-                oninput="window.vmc.saveSetting(this.id,this.value);window.vmc.skyColorChange(this.id,this.value)"
-                value="${skyColor}">
-        </div>
-        <div class="horizonalLine"></div>
-        ` : ''}
-
-        ${skyMode === 'rgb' ? `
-        <div id="menuBodyItem">
-            RGB Cycle Speed
-            <div id="rangeNumHolder">
-                <input type="number" class="sizeInput" name="skyRgbSpeedNum" id="skyRgbSpeedNum"
-                    oninput="window.vmc.skyColorChange('skyRgbSpeed',this.value)"
-                    value="${skyRgbSpeed}" min="1" max="10" step="1">
-                <input type="range" name="skyRgbSpeed" id="skyRgbSpeed"
-                    value="${skyRgbSpeed}"
-                    oninput="window.vmc.saveSetting(this.id,this.value);window.vmc.skyColorChange(this.id,this.value)"
-                    min="1" max="10" step="1">
-            </div>
-        </div>
-        <div class="horizonalLine"></div>
-        ` : ''}
-        ` : ''}
-
         <div class="settingSectionHeader">Crosshair Rendering</div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">

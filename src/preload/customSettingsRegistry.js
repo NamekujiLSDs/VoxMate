@@ -1,7 +1,6 @@
 const RESERVED_TAB_IDS = Object.freeze([
     'quickSetting',
     'renderingSetting',
-    'skySetting',
     'crosshairSetting',
     'cssSetting',
     'swapperSetting',
@@ -34,10 +33,6 @@ const RESERVED_SETTING_IDS = Object.freeze([
     'joinGame',
     'inviteGame',
     'serverHooker',
-    'enableSkyColor',
-    'skyMode',
-    'skyColor',
-    'skyRgbSpeed',
     'crosshairRenderType',
     'disableGpuVsync',
     'angleBackend',
