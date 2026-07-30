@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.1.5] - 2026-07-31
+
+### Fixed
+- **CI Build & Packaging Fixes:**
+  - Fixed an issue where `discord-rpc` missing error occurred on launch by ensuring it's bundled in dependencies with safe try-catch wrapper.
+  - Resolved `register-scheme` native build failures on GitHub Actions runners.
+  - Standardized output artifact filenames (`VoxMate-Windows-1.1.5.exe`, `VoxMate-macOS-1.1.5.dmg`, `VoxMate-Linux-1.1.5.AppImage`).
+  - Fixed Windows icon format (`icon.ico`) and Linux icon requirements.
+
+---
+
 ## [1.1.4] - 2026-07-31
 
 ### Added

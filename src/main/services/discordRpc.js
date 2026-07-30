@@ -1,4 +1,9 @@
-const RPC = require('discord-rpc');
+let RPC;
+try {
+    RPC = require('discord-rpc');
+} catch (e) {
+    RPC = null;
+}
 const { config } = require('../utils/config');
 
 class DiscordRpcService {
@@ -9,6 +14,7 @@ class DiscordRpcService {
     }
 
     init() {
+        if (!RPC) return;
         if (!config.get('discordRpc', true)) return;
 
         try {
