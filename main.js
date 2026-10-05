@@ -13,7 +13,7 @@ const DiscordRpcService = require('./src/main/services/discordRpc');
 // 3. UI & Window Managers
 const SettingsTemplate = require('./src/main/ui/settingsTemplate');
 const { createSplashWindow, destroySplashWindow } = require('./src/main/windows/splashWindow');
-const { createGameWindow, getGameWindow, getDummyWindow } = require('./src/main/windows/gameWindow');
+const { createGameWindow, showGameWindow, getGameWindow, getDummyWindow } = require('./src/main/windows/gameWindow');
 
 // 4. IPC Handlers
 const { registerAllIpcHandlers } = require('./src/main/ipc');
@@ -54,12 +54,25 @@ app.on('ready', () => {
         callback({});
     });
 
-    // Launch Splash Window -> transition to Game Window
+    // スプラッシュでアップデート確認をしている間に、ゲームを裏(非表示)で先に読み込む。
+    // 確認の完了とゲームの描画準備が両方そろったら、スプラッシュを閉じてゲームを表示する。
+    // (従来は確認完了後にゲームの読込を始めていたため、両方の待ち時間が足し算になっていた)
+    let updateCheckDone = false;
+    let gameReady = false;
+    const switchToGame = () => {
+        if (!updateCheckDone || !gameReady) return;
+        showGameWindow();
+        destroySplashWindow();
+    };
+
     createSplashWindow(__dirname, () => {
-        createGameWindow(__dirname, () => {
-            destroySplashWindow();
-        }, discordRpcService);
+        updateCheckDone = true;
+        switchToGame();
     });
+    createGameWindow(__dirname, () => {
+        gameReady = true;
+        switchToGame();
+    }, discordRpcService);
 });
 
 app.on('quit', () => {

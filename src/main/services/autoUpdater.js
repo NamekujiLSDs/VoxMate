@@ -1,5 +1,9 @@
 const { autoUpdater } = require('electron-updater');
 
+// スプラッシュが長く感じられないよう、ステータス表示後の待ちと応答なし判定を短くしている
+const SPLASH_STATUS_MS = 300;
+const UPDATE_CHECK_TIMEOUT_MS = 8000;
+
 const startAutoUpdateCheck = (splashWindow, onFinish) => {
     if (!splashWindow || splashWindow.isDestroyed()) return;
 
@@ -22,8 +26,8 @@ const startAutoUpdateCheck = (splashWindow, onFinish) => {
             if (!splashWindow.isDestroyed()) {
                 splashWindow.webContents.send('status', 'Update check error!');
             }
-            setTimeout(() => onComplete(), 1000);
-        }, 15000);
+            setTimeout(() => onComplete(), SPLASH_STATUS_MS);
+        }, UPDATE_CHECK_TIMEOUT_MS);
     });
 
     const isMac = process.platform === 'darwin';
@@ -49,7 +53,7 @@ const startAutoUpdateCheck = (splashWindow, onFinish) => {
         if (!splashWindow.isDestroyed()) {
             splashWindow.webContents.send('status', 'You are using the latest version!');
         }
-        setTimeout(() => onComplete(), 1000);
+        setTimeout(() => onComplete(), SPLASH_STATUS_MS);
     });
 
     autoUpdater.on('error', (e) => {
@@ -57,7 +61,7 @@ const startAutoUpdateCheck = (splashWindow, onFinish) => {
         if (!splashWindow.isDestroyed()) {
             splashWindow.webContents.send('status', 'Skip update check');
         }
-        setTimeout(() => onComplete(), 1000);
+        setTimeout(() => onComplete(), SPLASH_STATUS_MS);
     });
 
     autoUpdater.on('download-progress', () => {
@@ -86,12 +90,12 @@ const startAutoUpdateCheck = (splashWindow, onFinish) => {
                 if (!splashWindow.isDestroyed()) {
                     splashWindow.webContents.send('status', 'Bypassed update check');
                 }
-                setTimeout(() => onComplete(), 1000);
+                setTimeout(() => onComplete(), SPLASH_STATUS_MS);
             });
         }
     } catch (err) {
         console.log('AutoUpdater Exception bypassed:', err.message);
-        setTimeout(() => onComplete(), 1000);
+        setTimeout(() => onComplete(), SPLASH_STATUS_MS);
     }
 };
 

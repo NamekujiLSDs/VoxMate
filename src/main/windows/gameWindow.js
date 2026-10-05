@@ -20,7 +20,7 @@ const storeWindowPos = () => {
     config.set('maxsize', gameWindow.isMaximized());
 };
 
-const createGameWindow = (baseDir, onGameLoaded, discordRpcService) => {
+const createGameWindow = (baseDir, onGameReady, discordRpcService) => {
     gameWindow = new BrowserWindow({
         show: false,
         width: config.get('windowWidth', 1536),
@@ -47,16 +47,24 @@ const createGameWindow = (baseDir, onGameLoaded, discordRpcService) => {
     gameWindow.loadURL('https://voxiom.io/');
     Menu.setApplicationMenu(null);
 
+    // 初回描画の準備ができた時点で通知する (全リソース/広告の読込完了を待たない)。
+    // 表示は showGameWindow() で、アップデート確認の完了とそろってから行う。
+    gameWindow.once('ready-to-show', () => {
+        if (onGameReady) onGameReady();
+    });
+
+    // オフライン等でページが読めない場合も、スプラッシュに居座らず先へ進める (-3 はリダイレクト等の中断)
+    gameWindow.webContents.on('did-fail-load', (e, errorCode, desc, url, isMainFrame) => {
+        if (isMainFrame && errorCode !== -3 && onGameReady) onGameReady();
+    });
+
+    // did-finish-load はリロードの度に発火する (RPC は多重接続しないようガード済み)
     gameWindow.webContents.on('did-finish-load', () => {
-        if (onGameLoaded) onGameLoaded();
-        if (gameWindow && !gameWindow.isDestroyed()) {
-            gameWindow.show();
-            if (config.get('maxsize')) gameWindow.maximize();
-            if (config.get('discordRpc', true) && discordRpcService) {
-                discordRpcService.init();
-            }
-            loadUserScripts(gameWindow.webContents);
+        if (!gameWindow || gameWindow.isDestroyed()) return;
+        if (config.get('discordRpc', true) && discordRpcService) {
+            discordRpcService.init();
         }
+        loadUserScripts(gameWindow.webContents);
     });
 
     registerShortcuts(gameWindow, dummyWindow);
@@ -111,11 +119,18 @@ const createGameWindow = (baseDir, onGameLoaded, discordRpcService) => {
     return { gameWindow, dummyWindow };
 };
 
+const showGameWindow = () => {
+    if (!gameWindow || gameWindow.isDestroyed() || gameWindow.isVisible()) return;
+    gameWindow.show();
+    if (config.get('maxsize')) gameWindow.maximize();
+};
+
 const getGameWindow = () => gameWindow;
 const getDummyWindow = () => dummyWindow;
 
 module.exports = {
     createGameWindow,
+    showGameWindow,
     getGameWindow,
     getDummyWindow
 };
