@@ -17,27 +17,36 @@ ipcRenderer.invoke('getSetting', 'enableDesynchronized').then(val => {
     if (typeof val === 'boolean') isDesynchronizedEnabled = val;
 });
 
-const originalRequestPointerLock = Element.prototype.requestPointerLock;
-Element.prototype.requestPointerLock = function(options) {
-    if (isRawInputEnabled) {
-        const opts = Object.assign({}, options, { unadjustedMovement: true });
-        return originalRequestPointerLock.call(this, opts).catch(() => {
-            return originalRequestPointerLock.call(this, options);
-        });
-    }
-    return originalRequestPointerLock.call(this, options);
-};
+// ゲーム側 (main world) に注入するフック。contextIsolation: true のため、プリロード (isolated world) で
+// Element.prototype などを書き換えてもゲームには効かない (Electron 10.4.7 で確認済み)。
+// そのため関数ごと文字列化して、ファイル末尾で webFrame.executeJavaScript によりゲームより先に注入する。
+// 文字列化されるので、この関数の中からプリロードの変数は参照できない (設定は window.vmc 経由で読む)。
+// 参照: https://www.electronjs.org/docs/latest/tutorial/context-isolation
+const mainWorldHooks = () => {
+    const vmc = window.vmc;
 
-// WebGL Desynchronized & High Performance Hook
-const originalGetContext = HTMLCanvasElement.prototype.getContext;
-HTMLCanvasElement.prototype.getContext = function(type, attributes) {
-    if (isDesynchronizedEnabled && (type === 'webgl' || type === 'webgl2' || type === 'experimental-webgl')) {
-        attributes = Object.assign({}, attributes, {
-            desynchronized: true,
-            powerPreference: 'high-performance'
-        });
-    }
-    return originalGetContext.call(this, type, attributes);
+    // Raw Input: unadjustedMovement を付けると OS のカーソル処理を通さない生の移動量 (WM_INPUT) になる。
+    // 付けない場合、Chromium はカーソルを画面中央へ戻しながら差分を取るため、
+    // 高ポーリングレートのマウスで movementX/Y が飛ぶ (マウスジャンプ)。
+    // 非対応なら reject されるので通常のロックにフォールバックする。
+    // 参照: https://developer.mozilla.org/en-US/docs/Web/API/Element/requestPointerLock
+    const requestPointerLock = Element.prototype.requestPointerLock;
+    Element.prototype.requestPointerLock = function (options) {
+        if (!vmc.isRawInputEnabled()) return requestPointerLock.call(this, options);
+        const p = requestPointerLock.call(this, Object.assign({}, options, { unadjustedMovement: true }));
+        // PointerLockOptions 機能が無効 (flags.js) だと Promise ではなく undefined が返る
+        return p && p.catch(() => requestPointerLock.call(this, options));
+    };
+
+    // WebGL Desynchronized (低遅延キャンバス) & 高性能 GPU の要求
+    const getContext = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function (type, attributes) {
+        // 型チェックを先にして、'2d' などの呼び出しでは contextBridge 越しの設定読み取りを省く
+        if ((type === 'webgl' || type === 'webgl2' || type === 'experimental-webgl') && vmc.isDesynchronizedEnabled()) {
+            attributes = Object.assign({}, attributes, { desynchronized: true, powerPreference: 'high-performance' });
+        }
+        return getContext.call(this, type, attributes);
+    };
 };
 
 // Crosshair CSS Helper
@@ -632,6 +641,12 @@ contextBridge.exposeInMainWorld('vmc', {
         return false;
     },
 
+    // mainWorldHooks (ゲーム側) から現在の設定を読むため。設定変更が即座に反映される。
+    // Chromium 85 (Electron 10) の unadjustedMovement は Windows のみ対応で、他 OS では毎回
+    // いったんロック失敗 (pointerlockerror 発火) してから再試行になるため、Windows 以外では要求しない。
+    isRawInputEnabled: () => isRawInputEnabled && process.platform === 'win32',
+    isDesynchronizedEnabled: () => isDesynchronizedEnabled,
+
     showToast: (msg, duration) => showToast(msg, duration),
     registerKeybind: (config) => registerKeybind(config),
     listenKeybind: (settingId, buttonId) => listenKeybind(settingId, buttonId)
@@ -714,7 +729,7 @@ const BUILTIN_SETTING_IDS = new Set([
     'infoShowFPS', 'infoShowPing', 'infoShowPos', 'infoShowBlockPos', 'infoShowChunkPos',
     'infoShowVelocity', 'infoShowAngles', 'infoShowChunks', 'infoShowNetBps',
     'enableQuic', 'enablePointerLockOptions', 'enableHeavyAdIntervention', 'ignoreGpuBlocklist',
-    'enableV8Opt', 'enableParallelShader', 'enableAudioOpt'
+    'enableParallelShader', 'enableAudioOpt'
 ]);
 
 const registeredKeybinds = new Map();
@@ -1090,6 +1105,10 @@ window.addEventListener('DOMContentLoaded', () => {
     };`;
     document.head.appendChild(script);
 });
+
+// Raw Input / Desynchronized のフックを、ゲームのスクリプトより前に main world へ注入する (上の mainWorldHooks 参照)。
+// ユーザースクリプトより先に入れて、ユーザースクリプトからもフック済みの関数が見えるようにする。
+webFrame.executeJavaScript(`(${mainWorldHooks})()`).catch(err => console.error('[VoxMate] hook injection error:', err));
 
 // @run-at document-start のユーザースクリプトを、ページのスクリプトより前に main world へ注入する。
 // プリロードはページのスクリプトより先に実行されるため、ここで実行すれば Object.prototype / WebGL の

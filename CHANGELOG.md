@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.2.0] - 2026-10-05
+
+### Performance
+- **V8 JIT Aggressive Optimization:**
+  - Removed the "V8 JIT Aggressive Optimization" setting (enabled by default) and its flags, which should raise FPS on CPU-bound systems. The option passed `--always-opt` to V8, a test-only flag forcing optimization without type feedback that made JavaScript about 3x slower in an Electron 10.4.7 game-loop benchmark (median frame time 1.33ms vs 0.45ms without it), while `--max-opt-alot` and `--max-inlined-source-size` do not exist in this V8 and `--max-inlined-bytecode-size` had no measurable effect.
+
+### Fixed
+- **Raw Input Application:**
+  - Resolved an issue where Raw Input was never actually applied because the game window uses `contextIsolation`, causing the `requestPointerLock` hook in the preload script to run in an isolated world and never reach the game. The hook is now injected into the page's main world before the game's scripts run so pointer lock uses `unadjustedMovement` (raw OS mouse deltas), fixing mouse jumps (sudden spikes in movementX/Y) with high polling rate mice.
+- **Pointer Lock Options Switch:**
+  - Replaced the `enable-pointer-lock-options` switch with `enable-blink-features=PointerLockOptions`, as the previous switch had no effect in Electron 10 (Chromium 85) and left `unadjustedMovement` unavailable.
+- **WebGL Desynchronized and High-Performance GPU Options:**
+  - Resolved an issue where the WebGL Desynchronized (low-latency canvas) and high-performance GPU (`powerPreference: 'high-performance'`) options had the same isolation problem and were never applied; both options now work. If screen flickering occurs, turn off "Enable WebGL Desynchronized".
+
+### Changed
+- **Platform-Specific Raw Input Requests:**
+  - Restricted Raw Input requests to Windows only, because Chromium 85 supports `unadjustedMovement` only there; on macOS/Linux every pointer lock would otherwise fail once before falling back.
+- **Context Type Check in `getContext`:**
+  - Updated the `getContext` hook to check the context type before reading settings, so unrelated calls such as `getContext('2d')` add no overhead.
+
+---
+
 ## [1.1.10] - 2026-10-05
 
 ### Fixed

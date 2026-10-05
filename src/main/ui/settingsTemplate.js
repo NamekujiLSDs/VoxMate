@@ -711,12 +711,6 @@ class SettingsTemplate {
         </div>
         <div class="horizonalLine"></div>
         <div id="menuBodyItem">
-            Enable V8 JIT Aggressive Optimization
-            <input type="checkbox" name="enableV8Opt" id="enableV8Opt"
-                oninput="window.vmc.saveSetting(this.id,this.checked);" ${config.get('enableV8Opt', true) ? 'checked' : ''}>
-        </div>
-        <div class="horizonalLine"></div>
-        <div id="menuBodyItem">
             Enable Parallel Shader Compilation
             <input type="checkbox" name="enableParallelShader" id="enableParallelShader"
                 oninput="window.vmc.saveSetting(this.id,this.checked);" ${config.get('enableParallelShader', true) ? 'checked' : ''}>

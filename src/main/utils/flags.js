@@ -12,7 +12,11 @@ const applyChromiumFlags = () => {
         app.commandLine.appendSwitch('disable-gpu-vsync');
     }
     if (config.get('enableRawInput', true)) {
-        app.commandLine.appendSwitch('enable-pointer-lock-options');
+        // requestPointerLock({ unadjustedMovement: true }) (Raw Input) を有効にする。
+        // Electron 10 (Chromium 85) では 'enable-pointer-lock-options' スイッチは効かず、
+        // Blink の PointerLockOptions 機能を直接有効にする必要がある (Electron 10.4.7 で動作確認済み)。
+        // 参照: https://developer.mozilla.org/en-US/docs/Web/API/Element/requestPointerLock
+        app.commandLine.appendSwitch('enable-blink-features', 'PointerLockOptions');
         app.commandLine.appendSwitch('enable-raw-pointer-events');
         app.commandLine.appendSwitch('disable-ipc-flooding-protection');
         app.commandLine.appendSwitch('enable-high-resolution-time');
@@ -29,7 +33,8 @@ const applyChromiumFlags = () => {
         app.commandLine.appendSwitch('enable-gpu-rasterization');
     }
     if (config.get('enablePointerLockOptions', true)) {
-        app.commandLine.appendSwitch('enable-pointer-lock-options');
+        // 上の enableRawInput と同じ理由で、効かない 'enable-pointer-lock-options' ではなくこちらを使う
+        app.commandLine.appendSwitch('enable-blink-features', 'PointerLockOptions');
     }
     if (config.get('enableHeavyAdIntervention', true)) {
         app.commandLine.appendSwitch('enable-heavy-ad-intervention');
@@ -39,9 +44,6 @@ const applyChromiumFlags = () => {
     }
     if (config.get('enableZerocopy', true)) {
         app.commandLine.appendSwitch('enable-zero-copy');
-    }
-    if (config.get('enableV8Opt', true)) {
-        app.commandLine.appendSwitch('js-flags', '--max-opt-alot --always-opt --max-inlined-source-size=99999 --max-inlined-bytecode-size=99999');
     }
     if (config.get('enableParallelShader', true)) {
         app.commandLine.appendSwitch('enable-features', 'ParallelShaderCompile');
