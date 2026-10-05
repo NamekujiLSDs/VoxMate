@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.1.10] - 2026-10-05
+
+### Fixed
+- **Userscript Injection Timing:**
+  - Resolved an issue where userscripts ignored `@run-at document-start` and only executed after page load completed, causing scripts that hook `Object.prototype` or WebGL (such as Sky Color) to miss execution timing and fail to change the sky color.
+- **Settings Menu Tab Display Delay:**
+  - Resolved an issue where the game rendered before userscripts finished executing, causing custom tabs in the settings menu to appear noticeably late.
+
+### Added
+- **`@run-at document-start` Support:**
+  - Added full support for `@run-at document-start`, injecting userscripts before the page's own scripts are executed.
+- **Page Filtering with `@match`:**
+  - Added URL filtering support using `@match` to prevent injecting userscripts into irrelevant pages such as login screens.
+- **Startup Preloading for `@require`:**
+  - Added startup preloading for `@require` resources so they are immediately available at `document-start` after the initial launch.
+- **Default AdBlock Filter Updates:**
+  - Added `criteo.net` and `omnitagjs.com` to the default AdBlock list.
+
+---
+
 ## [1.1.9] - 2026-10-05
 
 ### Performance

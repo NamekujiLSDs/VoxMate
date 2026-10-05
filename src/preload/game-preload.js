@@ -1,4 +1,4 @@
-const { contextBridge, ipcRenderer } = require('electron');
+const { contextBridge, ipcRenderer, webFrame } = require('electron');
 const { injectSimpleInfoGui } = require('./simpleInfoGui');
 const { validateTabRegistration, validateSettingRegistration, isReservedSettingId, DEFAULT_CATEGORY_NAME } = require('./customSettingsRegistry');
 
@@ -1090,3 +1090,10 @@ window.addEventListener('DOMContentLoaded', () => {
     };`;
     document.head.appendChild(script);
 });
+
+// @run-at document-start のユーザースクリプトを、ページのスクリプトより前に main world へ注入する。
+// プリロードはページのスクリプトより先に実行されるため、ここで実行すれば Object.prototype / WebGL の
+// フックがゲームの初期化に間に合う。window.vmc は上の exposeInMainWorld で用意済み。
+for (const { file, code } of ipcRenderer.sendSync('getDocumentStartScripts', location.href)) {
+    webFrame.executeJavaScript(code).catch(err => console.error(`[VoxMate] userscript error (${file}):`, err));
+}

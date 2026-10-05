@@ -9,6 +9,7 @@ const { applyChromiumFlags } = require('./src/main/utils/flags');
 const AdBlocker = require('./src/main/services/adblocker');
 const ResourceSwapper = require('./src/main/services/swapper');
 const DiscordRpcService = require('./src/main/services/discordRpc');
+const { prefetchRequires } = require('./src/main/services/userscripts');
 
 // 3. UI & Window Managers
 const SettingsTemplate = require('./src/main/ui/settingsTemplate');
@@ -35,6 +36,7 @@ registerAllIpcHandlers(__dirname, settingsTemplate, getGameWindow);
 app.on('ready', () => {
     createSwapFolder();
     initFirstTimeAssets(__dirname);
+    prefetchRequires();
 
     // WebRequest Interceptor (AdBlock & ResourceSwapper)
     session.defaultSession.webRequest.onBeforeRequest((details, callback) => {

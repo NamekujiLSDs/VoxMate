@@ -533,6 +533,23 @@ Below is a complete example combining tabs, categories, multiple settings, and e
 
 ---
 
+## Userscript Header Support
+
+VoxMate reads these header fields:
+
+| Field | Behavior |
+| --- | --- |
+| `@name`, `@version`, `@description`, `@author` | Shown in the userscript settings tab. |
+| `@require` | External script fetched and cached under `vmc-swap/userscript/.cache`, prepended to the script. |
+| `@run-at` | `'document-start'` injects before the page's own scripts run (needed for hooking `Object.prototype`, WebGL, etc.); anything else runs after the page has finished loading. |
+| `@match` | URL pattern (`*` wildcard, e.g. `https://voxiom.io/*`). The script is only injected into matching pages; if omitted, it runs on every page. |
+
+### Notes
+- A `document-start` script that uses `@require` is injected at `document-start` only once its requires are cached (the first launch after adding it falls back to normal timing).
+- `window.vmc` is available from `document-start`.
+
+---
+
 ## 9. Implementation Notes
 
 - Ensure `id` values are unique across all registered settings.

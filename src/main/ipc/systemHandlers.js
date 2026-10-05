@@ -1,6 +1,7 @@
 const { ipcMain, dialog, session, app, shell } = require('electron');
 const { exec } = require('child_process');
 const { getSwapFolderPath } = require('../utils/config');
+const { getDocumentStartScripts } = require('../services/userscripts');
 
 const registerSystemHandlers = (getGameWindow) => {
     ipcMain.on('openExplorer', (e, subFolder) => {
@@ -11,6 +12,16 @@ const registerSystemHandlers = (getGameWindow) => {
         shell.openPath(targetFolder).catch(err => {
             console.error('Failed to open folder:', err);
         });
+    });
+
+    // プリロードがページ読込前に同期で呼ぶ。returnValue を必ず設定しないと呼び出し側が固まるため try/catch で包む
+    ipcMain.on('getDocumentStartScripts', (e, url) => {
+        try {
+            e.returnValue = getDocumentStartScripts(e.sender, url);
+        } catch (err) {
+            console.error('Failed to get document-start userscripts:', err);
+            e.returnValue = [];
+        }
     });
 
     ipcMain.handle('version', () => {
