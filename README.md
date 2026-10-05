@@ -25,11 +25,14 @@ This client does NOT collect any user data or other information.
 |`F12`|Open DevTool|
 
 ## Features
-
-- Unlimited FPS
-- Custom Crosshair
-- Custom CSS loader
-- AdBlocker
-- Discord RPC
-- Export/Import game settings
-- Better Console
+- **Unlimited FPS and low-latency raw input**
+- **SimpleInfo HUD** (FPS, ping, position, velocity, angles, chunks, network)
+- **Custom crosshair**
+- **Custom CSS loader**
+- **Resource Swapper**
+- **AdBlocker**
+- **Userscript support** with custom settings and keybinds (see [docs/USERSCRIPT_API.md](docs/USERSCRIPT_API.md))
+- **Discord Rich Presence**
+- **Export and import game settings**
+- **Cross-platform builds** (Windows, macOS, Linux AppImage)
+- **Automatic updates**

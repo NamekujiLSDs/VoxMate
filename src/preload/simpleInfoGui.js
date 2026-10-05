@@ -64,7 +64,10 @@ const injectSimpleInfoGui = () => {
                         }
                     }
 
-                    if (this.pVE) {
+                    // currentData は renderHUD でしか使わないため、毎フレームではなく
+                    // 描画間隔(750ms)ごと・HUD有効時のみ収集する (フレーム毎の toFixed/parseFloat を回避)
+                    if (isEnabled && this.pVE && performance.now() - lastRenderTime >= RENDER_INTERVAL_MS) {
+                        lastRenderTime = performance.now();
                         currentData.posX = this.pVE ? (Number.isInteger(this.pVE.pdd) ? this.pVE.pdd : parseFloat(this.pVE.pdd.toFixed(2))) : 0;
                         currentData.posY = this.pVE ? (Number.isInteger(this.pVE.pdp) ? this.pVE.pdp : parseFloat(this.pVE.pdp.toFixed(2))) : 0;
                         currentData.posZ = this.pVE ? (Number.isInteger(this.pVE.pdS) ? this.pVE.pdS : parseFloat(this.pVE.pdS.toFixed(2))) : 0;
@@ -91,13 +94,7 @@ const injectSimpleInfoGui = () => {
                         currentData.downloadBps = typeof this.pVP === 'number' ? parseFloat(this.pVP.toFixed(1)) : 0;
                         currentData.uploadBps = typeof this.pVI === 'number' ? parseFloat(this.pVI.toFixed(1)) : 0;
 
-                        if (isEnabled) {
-                            const now = performance.now();
-                            if (now - lastRenderTime >= RENDER_INTERVAL_MS) {
-                                lastRenderTime = now;
-                                renderHUD();
-                            }
-                        }
+                        renderHUD();
                     }
 
                     return fn.apply(this, arguments);

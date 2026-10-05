@@ -16,6 +16,8 @@ class DiscordRpcService {
     init() {
         if (!RPC) return;
         if (!config.get('discordRpc', true)) return;
+        // did-finish-load はリロードの度に発火するため、多重接続を防ぐ
+        if (this.rpc) return;
 
         try {
             this.rpc = new RPC.Client({ transport: 'ipc' });

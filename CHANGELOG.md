@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.1.8] - 2026-10-05
+
+### Performance
+- **In-Memory Settings Caching:**
+  - Cached `electron-store` settings in memory instead of synchronously reading from disk on every lookup, eliminating evaluation latency in AdBlock and Resource Swapper across all network requests.
+- **Throttled File Existence Checks:**
+  - Throttled `existsSync` calls to a 5-second interval when user block/swap lists do not exist, eliminating redundant disk checks on every request.
+- **HUD Formatting Optimization:**
+  - Restricted per-frame data formatting (`toFixed`/`parseFloat`) in SimpleInfo HUD to run only when the HUD is enabled and at its 750ms render interval.
+- **Parallel Startup IPC Initialization:**
+  - Parallelized configuration retrieval IPC calls with `Promise.all` on startup, reducing wait times before displaying the HUD, crosshair, and custom CSS.
+
+### Fixed
+- **Duplicate Game Window Prevention:**
+  - Fixed an issue where concurrent `error` events and `checkForUpdates` rejections during update checks caused duplicate game windows to be created.
+- **Discord RPC Multi-Connection on Reload:**
+  - Fixed an issue where duplicate Discord RPC connections were established on every page reload.
+- **UserScript `@require` Fetch Timeouts & Redirects:**
+  - Fixed an issue where missing timeouts when fetching `@require` scripts from unresponsive servers blocked all UserScripts from launching, and resolved relative path redirects.
+- **Settings Import Implementation:**
+  - Fixed an issue where settings import was unimplemented and only logged to the console, now properly loading and applying exported configuration files.
+- **Toast Notification Parameter Alignment:**
+  - Fixed an argument misalignment in `window.vmc.showToast` that prevented the `duration` parameter from being passed correctly.
+
+---
+
 ## [1.1.7] - 2026-07-31
 
 ### Changed

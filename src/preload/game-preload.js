@@ -632,7 +632,7 @@ contextBridge.exposeInMainWorld('vmc', {
         return false;
     },
 
-    showToast: (msg, type, duration) => showToast(msg, type, duration),
+    showToast: (msg, duration) => showToast(msg, duration),
     registerKeybind: (config) => registerKeybind(config),
     listenKeybind: (settingId, buttonId) => listenKeybind(settingId, buttonId)
 });
@@ -1004,19 +1004,17 @@ ipcRenderer.on('localPath', async (e, id, val, fileName) => {
 document.addEventListener('DOMContentLoaded', async () => {
     // SimpleInfoGUI setup
     injectSimpleInfoGui();
-    const infoEnabled = await ipcRenderer.invoke('getSetting', 'enableSimpleInfo') ?? true;
-    const infoPosition = await ipcRenderer.invoke('getSetting', 'infoPosition') || 'top-left';
-    const infoMarginTop = await ipcRenderer.invoke('getSetting', 'infoMarginTop') ?? 60;
-    const infoMarginLeft = await ipcRenderer.invoke('getSetting', 'infoMarginLeft') ?? 20;
-    const showFPS = await ipcRenderer.invoke('getSetting', 'infoShowFPS') ?? true;
-    const showPing = await ipcRenderer.invoke('getSetting', 'infoShowPing') ?? true;
-    const showPos = await ipcRenderer.invoke('getSetting', 'infoShowPos') ?? true;
-    const showBlockPos = await ipcRenderer.invoke('getSetting', 'infoShowBlockPos') ?? false;
-    const showChunkPos = await ipcRenderer.invoke('getSetting', 'infoShowChunkPos') ?? false;
-    const showVelocity = await ipcRenderer.invoke('getSetting', 'infoShowVelocity') ?? false;
-    const showAngles = await ipcRenderer.invoke('getSetting', 'infoShowAngles') ?? false;
-    const showChunks = await ipcRenderer.invoke('getSetting', 'infoShowChunks') ?? false;
-    const showNetBps = await ipcRenderer.invoke('getSetting', 'infoShowNetBps') ?? false;
+    // 起動時のIPCを直列に待つと遅いので Promise.all で一括取得する (未設定ならデフォルト値)
+    const get = (key, def) => ipcRenderer.invoke('getSetting', key).then(v => v ?? def);
+    const [
+        infoEnabled, infoPosition, infoMarginTop, infoMarginLeft,
+        showFPS, showPing, showPos, showBlockPos, showChunkPos,
+        showVelocity, showAngles, showChunks, showNetBps
+    ] = await Promise.all([
+        get('enableSimpleInfo', true), get('infoPosition', 'top-left'), get('infoMarginTop', 60), get('infoMarginLeft', 20),
+        get('infoShowFPS', true), get('infoShowPing', true), get('infoShowPos', true), get('infoShowBlockPos', false), get('infoShowChunkPos', false),
+        get('infoShowVelocity', false), get('infoShowAngles', false), get('infoShowChunks', false), get('infoShowNetBps', false)
+    ]);
 
     document.dispatchEvent(new CustomEvent('vmc-info-update', {
         detail: {
@@ -1028,30 +1026,39 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }));
 
-    const settingStyle = await ipcRenderer.invoke('loadSettingStylesheets');
+    const [settingStyle, crosshair, cssDom, ver] = await Promise.all([
+        ipcRenderer.invoke('loadSettingStylesheets'),
+        ipcRenderer.invoke('crosshairDom'),
+        ipcRenderer.invoke('cssDom'),
+        ipcRenderer.invoke('version')
+    ]);
     document.body.insertAdjacentHTML('afterbegin', settingStyle);
 
-    const crosshair = await ipcRenderer.invoke('crosshairDom');
     const appElem = document.getElementById('app');
     if (appElem) {
         appElem.insertAdjacentHTML('afterbegin', crosshair);
     }
     refreshCrosshairCss();
 
-    const cssDom = await ipcRenderer.invoke('cssDom');
     if (cssDom && cssDom[0]) {
         document.body.insertAdjacentHTML('afterbegin', cssDom[0]);
     }
 
-    const ver = await ipcRenderer.invoke('version');
     document.body.insertAdjacentHTML('afterbegin', `<div id="version" style="position:fixed;right:0;bottom:0;font-size:12px;color:white;text-shadow:0 0 2px black;z-index:1">VoxMate - ${ver}</div>`);
 
     // Dynamic auto-load of ALL stored keybinds (both built-in client settings and UserScript custom settings)
     await loadAllSavedKeybinds();
 });
 
+// exportSetting が保存した localStorage 'persist:root' (ゲーム側の設定) を書き戻して反映する
 ipcRenderer.on('importSettingValue', (e, val) => {
-    console.log('Import setting:', val);
+    try {
+        JSON.parse(val);
+        localStorage.setItem('persist:root', val);
+        location.reload();
+    } catch (err) {
+        showToast('Import failed: invalid settings file');
+    }
 });
 
 // Observe URL changes for invite URL updates cleanly

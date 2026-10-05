@@ -1,7 +1,16 @@
 const { autoUpdater } = require('electron-updater');
 
-const startAutoUpdateCheck = (splashWindow, onComplete) => {
+const startAutoUpdateCheck = (splashWindow, onFinish) => {
     if (!splashWindow || splashWindow.isDestroyed()) return;
+
+    // error イベント・タイムアウト・checkForUpdates の reject が重なっても
+    // ゲームウィンドウを二重に作らないよう、完了コールバックは1回だけ実行する
+    let finished = false;
+    const onComplete = () => {
+        if (finished) return;
+        finished = true;
+        onFinish();
+    };
 
     let updateCheckTimeout = null;
 

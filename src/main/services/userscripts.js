@@ -54,9 +54,11 @@ const fetchRequireScript = (url, cacheDir) => {
         }
 
         const client = url.startsWith('https') ? https : http;
-        client.get(url, (res) => {
+        const req = client.get(url, (res) => {
             if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-                return fetchRequireScript(res.headers.location, cacheDir).then(resolve);
+                res.resume();
+                // Location は相対パスの場合があるため元URL基準で解決する
+                return fetchRequireScript(new URL(res.headers.location, url).href, cacheDir).then(resolve);
             }
             let data = '';
             res.on('data', (chunk) => data += chunk);
@@ -68,7 +70,10 @@ const fetchRequireScript = (url, cacheDir) => {
                 }
                 resolve(data);
             });
-        }).on('error', (err) => {
+        });
+        // 応答しないサーバーで全ユーザースクリプトの起動が止まらないようタイムアウトを設ける
+        req.setTimeout(10000, () => req.destroy(new Error('timeout')));
+        req.on('error', (err) => {
             console.error(`Failed to fetch @require script (${url}):`, err);
             resolve('');
         });

@@ -325,12 +325,15 @@ window.vmc.registerKeybind({
 
 ---
 
-### `window.vmc.showToast(message, type, duration)`
+### `window.vmc.showToast(message, duration)`
 
-Displays a sleek toast notification overlay in the bottom-right corner of the screen.
+Shows a small toast notification at the bottom-right of the screen.
+
+- **`message`** (`string`): The message to display. HTML is allowed. If the text contains `OFF`, `CLOSED`, or `BLANK`, the notification receives a red accent; otherwise, it receives a green accent.
+- **`duration`** (`number`, optional): Display time in milliseconds. Defaults to `1600`.
 
 ```javascript
-window.vmc.showToast('Silent Aim: <span style="color:white">ON</span>');
+window.vmc.showToast('Silent Aim: <span style="color:white">ON</span>', 2000);
 ```
 
 ---

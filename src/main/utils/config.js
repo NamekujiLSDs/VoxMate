@@ -3,7 +3,23 @@ const { app } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
-const config = new Store();
+// conf (electron-store の実体) は get() の度に設定ファイルを同期読込+JSON.parse する
+// (node_modules/conf/dist/source/index.js の `get store()` 参照)。
+// onBeforeRequest など毎リクエスト呼ばれる経路で重いため、メモリにキャッシュする。
+// 書き込みは必ずこのプロセスの set store() 経由なので、キャッシュは常に最新。
+class CachedStore extends Store {
+    get store() {
+        if (!this._cache) this._cache = super.store;
+        return this._cache;
+    }
+
+    set store(value) {
+        super.store = value;
+        this._cache = value;
+    }
+}
+
+const config = new CachedStore();
 
 const getSwapFolderPath = () => {
     return path.join(app.getPath('documents'), './vmc-swap');

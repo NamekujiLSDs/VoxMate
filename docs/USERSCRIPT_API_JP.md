@@ -325,12 +325,16 @@ window.vmc.registerKeybind({
 
 ---
 
-### `window.vmc.showToast(message, type, duration)`
+### `window.vmc.showToast(message, duration)`
 
-画面右下にスマートなトースト通知を表示します。
+画面右下に小さなトースト通知を表示します。
+
+- **引数**
+  - `message` (`string`): 表示するメッセージ（HTML使用可）。テキストに `OFF`、`CLOSED`、`BLANK` のいずれかを含む場合は赤色、それ以外は緑色のアクセント色で表示されます。
+  - `duration` (`number`, 省略可): 表示時間（ミリ秒）。既定値は `1600`。
 
 ```javascript
-window.vmc.showToast('Silent Aim: <span style="color:white">ON</span>');
+window.vmc.showToast('Silent Aim: <span style="color:white">ON</span>', 2000);
 ```
 
 ---

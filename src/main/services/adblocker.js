@@ -8,6 +8,7 @@ class AdBlocker {
         this.baseDir = baseDir;
         this.defaultBlockList = [];
         this.userBlockList = null;
+        this.lastUserLoad = 0;
         this.loadDefaultList();
         this.loadUserList();
     }
@@ -25,6 +26,7 @@ class AdBlocker {
     }
 
     loadUserList() {
+        this.lastUserLoad = Date.now();
         try {
             const userFile = path.join(getSwapFolderPath(), 'adblock-user.json');
             if (fs.existsSync(userFile)) {
@@ -40,7 +42,8 @@ class AdBlocker {
     }
 
     getUserBlockList() {
-        if (this.userBlockList === null) this.loadUserList();
+        // ファイル未作成時に毎リクエスト existsSync しないよう、再確認は5秒間隔に制限
+        if (this.userBlockList === null && Date.now() - this.lastUserLoad > 5000) this.loadUserList();
         return this.userBlockList;
     }
 
