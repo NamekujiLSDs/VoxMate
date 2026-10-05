@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.1.9] - 2026-10-05
+
+### Performance
+- **Splash Screen Optimization:**
+  - Preloaded the game window in the background while checking for updates, transitioning as soon as both the check finishes and rendering is ready (eliminating previous sequential wait times).
+  - Dismissed the splash screen on the `ready-to-show` event instead of waiting for all resources (including ads) to complete loading.
+  - Shortened the post-status display delay from 1.0s to 0.3s and reduced the unresponsive timeout threshold from 15s to 8s.
+
+### Fixed
+- **Splash Screen Freeze on Load Failure:**
+  - Fixed an issue where the client remained stuck on the splash screen if loading the game page failed (e.g., when offline).
+
+---
+
 ## [1.1.8] - 2026-10-05
 
 ### Performance
